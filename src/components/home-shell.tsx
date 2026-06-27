@@ -192,6 +192,13 @@ export function HomeShell() {
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3 rounded-md bg-black/20 px-3 py-2">
+                  <dt className="text-slate-400">Identità</dt>
+                  <dd className="font-semibold text-white">
+                    {profile?.actor.type === "user" ? "registrato" : "ospite"}
+                    {profile?.actor.id ? ` · ${profile.actor.id.slice(0, 8)}` : ""}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3 rounded-md bg-black/20 px-3 py-2">
                   <dt className="text-slate-400">Subscription</dt>
                   <dd className="font-semibold text-white">
                     {profile?.subscriptionStatus ?? "none"}

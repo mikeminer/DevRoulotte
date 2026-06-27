@@ -1,4 +1,4 @@
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import {
@@ -40,7 +40,25 @@ type QueueRow = {
   role: "caller" | "callee" | null;
   peer_actor_type: ActorType | null;
   peer_actor_id: string | null;
+  last_seen_at: string;
 };
+
+function hashId(id: string) {
+  return createHash("sha256").update(id).digest("hex").slice(0, 10);
+}
+
+function logMatchmaking(
+  event: string,
+  data: Record<string, string | number | boolean | null>,
+) {
+  console.info(
+    JSON.stringify({
+      scope: "matchmaking",
+      event,
+      ...data,
+    }),
+  );
+}
 
 async function isPremium(actor: Actor) {
   const supabase = getSupabaseAdmin();
@@ -205,6 +223,16 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseAdmin();
     const premium = await isPremium(actor);
     const dailyUsed = await getDailyUsage(actor);
+    const staleCutoff = new Date(
+      Date.now() - MATCH_QUEUE_STALE_SECONDS * 1000,
+    ).toISOString();
+
+    logMatchmaking("join_start", {
+      actorType: actor.type,
+      actorHash: hashId(actor.id),
+      premium,
+      dailyUsed,
+    });
 
     if (!premium && dailyUsed >= FREE_DAILY_MATCH_LIMIT) {
       return NextResponse.json(
@@ -224,25 +252,56 @@ export async function POST(request: NextRequest) {
       .maybeSingle<QueueRow>();
 
     if (ownQueue?.status === "matched" && ownQueue.match_id) {
-      return NextResponse.json({
-        status: "matched",
-        match: buildMatchPayload(
-          ownQueue.match_id,
-          ownQueue.channel_name ?? "",
-          ownQueue.role ?? "callee",
-          {
-            type: ownQueue.peer_actor_type ?? "guest",
-            id: ownQueue.peer_actor_id ?? "",
-          },
-          premium,
-          dailyUsed,
-        ),
-      });
-    }
+      if (ownQueue.last_seen_at < staleCutoff) {
+        await supabase
+          .from("match_queue")
+          .delete()
+          .eq("actor_type", actor.type)
+          .eq("actor_id", actor.id);
 
-    const staleCutoff = new Date(
-      Date.now() - MATCH_QUEUE_STALE_SECONDS * 1000,
-    ).toISOString();
+        await supabase
+          .from("match_logs")
+          .update({
+            status: "ended",
+            ended_at: new Date().toISOString(),
+            ended_reason: "stale_queue_rejoin",
+          })
+          .eq("id", ownQueue.match_id)
+          .eq("status", "active");
+
+        logMatchmaking("stale_matched_queue_removed", {
+          actorType: actor.type,
+          actorHash: hashId(actor.id),
+        });
+      } else {
+        await supabase
+          .from("match_queue")
+          .update({ last_seen_at: new Date().toISOString() })
+          .eq("actor_type", actor.type)
+          .eq("actor_id", actor.id);
+
+        logMatchmaking("own_queue_matched", {
+          actorType: actor.type,
+          actorHash: hashId(actor.id),
+          role: ownQueue.role ?? "callee",
+        });
+
+        return NextResponse.json({
+          status: "matched",
+          match: buildMatchPayload(
+            ownQueue.match_id,
+            ownQueue.channel_name ?? "",
+            ownQueue.role ?? "callee",
+            {
+              type: ownQueue.peer_actor_type ?? "guest",
+              id: ownQueue.peer_actor_id ?? "",
+            },
+            premium,
+            dailyUsed,
+          ),
+        });
+      }
+    }
 
     await supabase
       .from("match_queue")
@@ -261,6 +320,12 @@ export async function POST(request: NextRequest) {
       .order("queued_at", { ascending: true })
       .limit(20)
       .returns<QueueRow[]>();
+
+    logMatchmaking("candidate_scan", {
+      actorType: actor.type,
+      actorHash: hashId(actor.id),
+      candidates: candidates?.length ?? 0,
+    });
 
     const filteredCandidates = (candidates ?? []).filter((candidate) => {
       const peerKey = `${candidate.actor_type}:${candidate.actor_id}`;
@@ -302,6 +367,14 @@ export async function POST(request: NextRequest) {
         ? availablePool[Math.floor(Math.random() * availablePool.length)]
         : null;
 
+    logMatchmaking("candidate_filter", {
+      actorType: actor.type,
+      actorHash: hashId(actor.id),
+      filteredCandidates: filteredCandidates.length,
+      availablePool: availablePool.length,
+      hasPeer: Boolean(peer),
+    });
+
     if (!peer) {
       await supabase.from("match_queue").upsert(
         {
@@ -324,6 +397,11 @@ export async function POST(request: NextRequest) {
         },
         { onConflict: "actor_type,actor_id" },
       );
+
+      logMatchmaking("waiting", {
+        actorType: actor.type,
+        actorHash: hashId(actor.id),
+      });
 
       return NextResponse.json({
         status: "waiting",
@@ -353,26 +431,83 @@ export async function POST(request: NextRequest) {
       throw new Error(matchError?.message ?? "Creazione match fallita");
     }
 
-    await Promise.all([
-      supabase
-        .from("match_queue")
-        .delete()
-        .eq("actor_type", actor.type)
-        .eq("actor_id", actor.id),
-      supabase
-        .from("match_queue")
+    const peerClaim = await supabase
+      .from("match_queue")
+      .update({
+        status: "matched",
+        match_id: match.id,
+        channel_name: channelName,
+        role: "callee",
+        peer_actor_type: actor.type,
+        peer_actor_id: actor.id,
+        last_seen_at: new Date().toISOString(),
+      })
+      .eq("actor_type", peer.actor_type)
+      .eq("actor_id", peer.actor_id)
+      .eq("status", "waiting")
+      .gte("last_seen_at", staleCutoff)
+      .select("actor_type,actor_id")
+      .maybeSingle();
+
+    if (peerClaim.error || !peerClaim.data) {
+      await supabase
+        .from("match_logs")
         .update({
-          status: "matched",
-          match_id: match.id,
-          channel_name: channelName,
-          role: "callee",
-          peer_actor_type: actor.type,
-          peer_actor_id: actor.id,
-          last_seen_at: new Date().toISOString(),
+          status: "ended",
+          ended_at: new Date().toISOString(),
+          ended_reason: "peer_claim_failed",
         })
-        .eq("actor_type", peer.actor_type)
-        .eq("actor_id", peer.actor_id),
-    ]);
+        .eq("id", match.id);
+
+      logMatchmaking("peer_claim_failed", {
+        actorType: actor.type,
+        actorHash: hashId(actor.id),
+        peerType: peer.actor_type,
+        peerHash: hashId(peer.actor_id),
+      });
+
+      await supabase.from("match_queue").upsert(
+        {
+          actor_type: actor.type,
+          actor_id: actor.id,
+          display_name: actor.displayName,
+          is_premium: premium,
+          language: body.language,
+          country: body.country,
+          preferred_language: premium ? body.preferredLanguage : "any",
+          preferred_country: premium ? body.preferredCountry : "any",
+          status: "waiting",
+          match_id: null,
+          channel_name: null,
+          role: null,
+          peer_actor_type: null,
+          peer_actor_id: null,
+          queued_at: new Date().toISOString(),
+          last_seen_at: new Date().toISOString(),
+        },
+        { onConflict: "actor_type,actor_id" },
+      );
+
+      return NextResponse.json({
+        status: "waiting",
+        retryAfterMs: 900,
+        message: "Sto cercando una persona disponibile.",
+      });
+    }
+
+    await supabase
+      .from("match_queue")
+      .delete()
+      .eq("actor_type", actor.type)
+      .eq("actor_id", actor.id);
+
+    logMatchmaking("matched", {
+      actorType: actor.type,
+      actorHash: hashId(actor.id),
+      peerType: peer.actor_type,
+      peerHash: hashId(peer.actor_id),
+      role: "caller",
+    });
 
     return NextResponse.json({
       status: "matched",
