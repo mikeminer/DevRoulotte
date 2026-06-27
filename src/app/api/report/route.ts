@@ -42,6 +42,32 @@ export async function POST(request: NextRequest) {
 
     const body = reportSchema.parse(await request.json());
     const supabase = getSupabaseAdmin();
+    const { data: match, error: matchError } = await supabase
+      .from("match_logs")
+      .select("actor_a_type,actor_a_id,actor_b_type,actor_b_id")
+      .eq("id", body.matchId)
+      .maybeSingle();
+
+    if (matchError || !match) {
+      throw new Error("Match non trovato");
+    }
+
+    const reporterIsA =
+      match.actor_a_type === actor.type && match.actor_a_id === actor.id;
+    const reporterIsB =
+      match.actor_b_type === actor.type && match.actor_b_id === actor.id;
+    const reportedIsPeerOfA =
+      reporterIsA &&
+      match.actor_b_type === body.reportedActorType &&
+      match.actor_b_id === body.reportedActorId;
+    const reportedIsPeerOfB =
+      reporterIsB &&
+      match.actor_a_type === body.reportedActorType &&
+      match.actor_a_id === body.reportedActorId;
+
+    if (!reportedIsPeerOfA && !reportedIsPeerOfB) {
+      throw new Error("Report non valido per questo match");
+    }
 
     await supabase.from("reports").insert({
       reporter_actor_type: actor.type,
