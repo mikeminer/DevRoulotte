@@ -92,7 +92,7 @@ Il campo `is_admin` e' protetto da trigger: un utente autenticato non puo' impos
 
 I template HTML DevRoulotte sono versionati in [supabase/templates](./supabase/templates) e collegati in [supabase/config.toml](./supabase/config.toml). Coprono conferma account, reset password, magic link, invito, cambio email, reauth e notifiche sicurezza base.
 
-Il template di reset password usa `/auth/confirm?token_hash=...&type=recovery&next=/reset-password`: l'utente conferma il link e viene portato alla pagina di cambio password. L'app ha anche un redirect globale per i link Supabase classici che atterrano sulla Site URL con evento `PASSWORD_RECOVERY`.
+Il template di reset password usa `{{ .ConfirmationURL }}`, cioe' il link ufficiale firmato da Supabase. La chiamata `resetPasswordForEmail` imposta `redirectTo=/reset-password`, quindi dopo la verifica l'utente arriva direttamente alla pagina di cambio password. L'app mantiene anche un redirect globale per eventuali link recovery classici che emettono l'evento `PASSWORD_RECOVERY`.
 
 Per applicarli al progetto Supabase hosted via Management API:
 
