@@ -4,7 +4,7 @@ import { LandingPage } from "@/components/landing-page";
 export const metadata: Metadata = {
   title: "DevRoulotte.chat | Il networking, senza appuntamenti",
   description:
-    "Video roulette per developer, builder e maker italiani: 5 minuti, un builder alla volta.",
+    "Videochat peer-to-peer per conoscere developer, builder e maker italiani: entri nella roulotte, parli 5 minuti, trovi chi sta costruendo davvero.",
 };
 
 export default function Home() {
