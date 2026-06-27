@@ -39,7 +39,7 @@ Senza credenziali reali l'app renderizza la UI, ma matchmaking, auth, admin, Pay
 4. Copia Project URL e publishable/anon key in `.env.local`.
 5. Copia la service role/secret key in `SUPABASE_SERVICE_ROLE_KEY`.
 6. Abilita Realtime nel progetto. L'MVP usa Broadcast client-side, non replica tabelle.
-7. In Authentication > URL Configuration aggiungi gli URL di redirect per il reset password: `https://devroulotte.chat/reset-password`, `https://www.devroulotte.chat/reset-password`, `http://localhost:3000/reset-password` e `http://127.0.0.1:3000/reset-password`.
+7. In Authentication > URL Configuration aggiungi gli URL di redirect per auth e reset password: `https://devroulotte.chat/auth/confirm`, `https://devroulotte.chat/reset-password`, `https://www.devroulotte.chat/auth/confirm`, `https://www.devroulotte.chat/reset-password`, `http://localhost:3000/auth/confirm`, `http://localhost:3000/reset-password`, `http://127.0.0.1:3000/auth/confirm` e `http://127.0.0.1:3000/reset-password`.
 
 Nota: per Supabase hosted questi redirect vanno salvati nel dashboard del progetto. `supabase/config.toml` mantiene l'equivalente configurazione locale/versionata.
 
@@ -91,6 +91,8 @@ Il campo `is_admin` e' protetto da trigger: un utente autenticato non puo' impos
 ### Email Supabase brandizzate
 
 I template HTML DevRoulotte sono versionati in [supabase/templates](./supabase/templates) e collegati in [supabase/config.toml](./supabase/config.toml). Coprono conferma account, reset password, magic link, invito, cambio email, reauth e notifiche sicurezza base.
+
+Il template di reset password usa `/auth/confirm?token_hash=...&type=recovery&next=/reset-password`: l'utente conferma il link e viene portato alla pagina di cambio password. L'app ha anche un redirect globale per i link Supabase classici che atterrano sulla Site URL con evento `PASSWORD_RECOVERY`.
 
 Per applicarli al progetto Supabase hosted via Management API:
 
