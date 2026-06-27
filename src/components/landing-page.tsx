@@ -59,15 +59,15 @@ export function LandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,#080b10_0%,rgba(8,11,16,0.94)_42%,rgba(8,11,16,0.62)_100%)]" />
 
         <div className="relative mx-auto grid max-w-7xl gap-12">
-          <header className="flex items-center justify-between gap-4">
-            <Link href="/" className="inline-flex items-center gap-3">
+          <header className="flex flex-wrap items-center justify-between gap-3">
+            <Link href="/" className="inline-flex min-w-0 items-center gap-3">
               <Image
                 src="/devroulotte-wordmark.png"
                 alt="DevRoulotte"
                 width={1200}
                 height={294}
                 priority
-                className="h-auto w-44 sm:w-56"
+                className="h-auto w-40 max-w-[54vw] sm:w-56"
               />
             </Link>
             <nav className="flex items-center gap-2 text-xs font-semibold sm:text-sm">
@@ -87,24 +87,26 @@ export function LandingPage() {
             </nav>
           </header>
 
-          <div className="grid max-w-4xl gap-8 pt-8 sm:pt-14 lg:pt-20">
+          <div className="grid w-full min-w-0 max-w-4xl gap-8 pt-8 sm:pt-14 lg:pt-20">
             <div className="inline-flex w-fit items-center gap-2 rounded-md border border-teal-300/25 bg-teal-300/10 px-3 py-2 text-xs font-bold uppercase text-teal-100">
               <Code2 className="h-4 w-4" />
               Il networking, senza appuntamenti.
             </div>
 
             <div className="grid gap-5">
-              <h1 className="max-w-4xl break-words text-4xl font-black leading-[0.95] tracking-normal text-white sm:text-6xl lg:text-7xl">
+              <h1 className="max-w-full break-words text-4xl font-black leading-[0.95] tracking-normal text-white [overflow-wrap:anywhere] sm:text-6xl lg:text-7xl">
                 DevRoulotte.chat
               </h1>
-              <div className="grid gap-2 text-lg font-bold leading-tight text-slate-100 sm:text-2xl">
+              <div className="grid min-w-0 gap-2 text-lg font-bold leading-tight text-slate-100 sm:text-2xl">
                 {painLines.map((line) => (
-                  <p key={line}>{line}</p>
+                  <p key={line} className="max-w-full">
+                    {line}
+                  </p>
                 ))}
               </div>
             </div>
 
-            <div className="grid max-w-3xl gap-5 text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
+            <div className="grid min-w-0 max-w-3xl gap-5 text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
               <p>
                 DevRoulotte.chat è una video roulette per developer, builder e
                 maker italiani: entri, vieni matchato con un altro builder e
