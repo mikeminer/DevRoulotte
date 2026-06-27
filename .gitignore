@@ -38,6 +38,7 @@ yarn-error.log*
 !.env.local.example
 .supabase-access-token.txt
 .supabase-db-password.txt
+supabase/emailtemplates.txt
 .paypal-credentials.local.json
 .cloudflare-turn.local.json
 
