@@ -89,10 +89,17 @@ export function HomeShell() {
               className="h-12 w-12 rounded-md object-cover"
               priority
             />
-            <div>
-              <h1 className="text-xl font-black tracking-normal text-white sm:text-2xl">
-                DevRoulotte
-              </h1>
+            <div className="min-w-0">
+              <h1 className="sr-only">DevRoulotte</h1>
+              <Image
+                src="/devroulotte-wordmark.png"
+                alt=""
+                aria-hidden="true"
+                width={1057}
+                height={266}
+                className="h-auto w-48 max-w-[58vw] sm:w-64 md:w-72"
+                priority
+              />
               <p className="text-xs text-slate-400">
                 Il networking, senza appuntamenti.
               </p>
