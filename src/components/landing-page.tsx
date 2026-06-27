@@ -94,10 +94,10 @@ export function LandingPage() {
             </div>
 
             <div className="grid gap-5">
-              <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-normal text-white sm:text-6xl lg:text-7xl">
+              <h1 className="max-w-4xl break-words text-4xl font-black leading-[0.95] tracking-normal text-white sm:text-6xl lg:text-7xl">
                 DevRoulotte.chat
               </h1>
-              <div className="grid gap-2 text-xl font-bold leading-tight text-slate-100 sm:text-2xl">
+              <div className="grid gap-2 text-lg font-bold leading-tight text-slate-100 sm:text-2xl">
                 {painLines.map((line) => (
                   <p key={line}>{line}</p>
                 ))}

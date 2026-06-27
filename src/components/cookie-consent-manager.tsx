@@ -153,7 +153,7 @@ export function CookieConsentManager() {
         <section
           aria-label="Informativa breve cookie"
           aria-live="polite"
-          className="fixed inset-x-3 top-3 z-40 max-h-[calc(100svh-1.5rem)] overflow-y-auto rounded-lg border border-white/10 bg-[#0d121a]/95 p-3 text-white shadow-2xl shadow-black/40 backdrop-blur sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-auto sm:w-[420px] sm:p-4"
+          className="fixed inset-x-3 bottom-3 z-40 max-h-[calc(100svh-1.5rem)] overflow-y-auto rounded-lg border border-white/10 bg-[#0d121a]/95 p-3 text-white shadow-2xl shadow-black/40 backdrop-blur sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-[420px] sm:p-4"
         >
           <div className="grid gap-3">
             <div className="grid gap-2">
