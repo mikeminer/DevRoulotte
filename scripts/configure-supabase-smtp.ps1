@@ -72,7 +72,7 @@ $payload = [ordered]@{
   smtp_admin_email = [string]$smtp.senderEmail
   smtp_sender_name = [string]$smtp.senderName
   smtp_host = [string]$smtp.host
-  smtp_port = [int]$smtp.port
+  smtp_port = [string]$smtp.port
   smtp_user = [string]$smtp.user
   smtp_pass = [string]$smtp.password
 }

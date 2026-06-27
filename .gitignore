@@ -40,6 +40,7 @@ yarn-error.log*
 .supabase-db-password.txt
 .supabase-smtp.local.json
 supabase/emailtemplates.txt
+resendapi.txt
 .paypal-credentials.local.json
 .cloudflare-turn.local.json
 
