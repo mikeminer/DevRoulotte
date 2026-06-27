@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, KeyRound, Loader2, ShieldCheck } from "lucide-react";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type ConfirmState = "idle" | "confirming" | "success" | "error";
@@ -72,7 +73,12 @@ export function AuthConfirmPanel() {
 
     if (error) {
       setState("error");
-      setMessage(error.message);
+      setMessage(
+        getAuthErrorMessage(
+          error,
+          "Link non valido o scaduto. Richiedi una nuova email.",
+        ),
+      );
       return;
     }
 

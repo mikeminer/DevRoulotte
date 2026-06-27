@@ -1,8 +1,9 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { KeyRound, LogIn, LogOut, Mail, UserPlus } from "lucide-react";
+import { KeyRound, Loader2, LogIn, LogOut, Mail, UserPlus } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function AuthPanel() {
@@ -11,6 +12,7 @@ export function AuthPanel() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -41,7 +43,12 @@ export function AuthPanel() {
     const { error } = await action;
 
     if (error) {
-      setMessage(error.message);
+      setMessage(
+        getAuthErrorMessage(
+          error,
+          "Autenticazione non riuscita. Controlla email e password.",
+        ),
+      );
     } else {
       setMessage(mode === "up" ? "Controlla la tua email." : "Accesso fatto.");
       setPassword("");
@@ -60,15 +67,24 @@ export function AuthPanel() {
       return;
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      normalizedEmail,
-      {
+    setIsSendingReset(true);
+    setMessage("Invio link di reset in corso.");
+
+    const { error } = await supabase.auth
+      .resetPasswordForEmail(normalizedEmail, {
         redirectTo: `${window.location.origin}/reset-password`,
-      },
-    );
+      })
+      .catch((caughtError: unknown) => ({ error: caughtError }));
+
+    setIsSendingReset(false);
 
     if (error) {
-      setMessage(error.message);
+      setMessage(
+        getAuthErrorMessage(
+          error,
+          "Non sono riuscito a inviare l'email di reset. Verifica SMTP/Resend e riprova.",
+        ),
+      );
     } else {
       setMessage("Link di reset inviato. Controlla la tua email.");
     }
@@ -149,10 +165,15 @@ export function AuthPanel() {
           <button
             type="button"
             onClick={requestPasswordReset}
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white"
+            disabled={isSendingReset}
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <KeyRound className="h-4 w-4" />
-            Password dimenticata?
+            {isSendingReset ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <KeyRound className="h-4 w-4" />
+            )}
+            {isSendingReset ? "Invio reset" : "Password dimenticata?"}
           </button>
         </form>
       ) : (

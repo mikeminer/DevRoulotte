@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, KeyRound, Loader2 } from "lucide-react";
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type SaveState = "idle" | "saving" | "success";
@@ -75,7 +76,12 @@ export function ResetPasswordPanel() {
 
     if (error) {
       setSaveState("idle");
-      setMessage(error.message);
+      setMessage(
+        getAuthErrorMessage(
+          error,
+          "Non sono riuscito ad aggiornare la password. Richiedi un nuovo link.",
+        ),
+      );
       return;
     }
 
