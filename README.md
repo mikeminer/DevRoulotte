@@ -109,6 +109,20 @@ Lo script legge il project ref da `supabase/.temp/project-ref` se presente. Per 
 
 Nota importante: questi template brandizzano soggetto e corpo email. Per avere anche il mittente brandizzato, ad esempio `DevRoulotte <no-reply@devroulotte.chat>`, configura Authentication > Emails > SMTP Settings con un provider SMTP e dominio verificato. Evita email tracking sui link di auth, perche' puo' rompere i link Supabase.
 
+Su Supabase Free la modifica dei template richiede un provider SMTP custom. Esempio gratuito con Resend:
+
+1. Crea un account Resend e verifica `devroulotte.chat`.
+2. Aggiungi nel DNS del dominio i record richiesti da Resend.
+3. Crea una API key Resend.
+4. Copia `.supabase-smtp.local.example.json` in `.supabase-smtp.local.json` e inserisci la API key nel campo `password`.
+5. Applica SMTP e template:
+
+```powershell
+./scripts/configure-supabase-smtp.ps1
+```
+
+Per Resend i valori SMTP sono: host `smtp.resend.com`, porta `587`, utente `resend`, password uguale alla API key Resend. Il file `.supabase-smtp.local.json` e' ignorato da Git.
+
 ## Cloudflare STUN/TURN
 
 STUN funziona subito con:

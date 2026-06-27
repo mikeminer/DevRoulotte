@@ -1,0 +1,8 @@
+{
+  "senderEmail": "no-reply@devroulotte.chat",
+  "senderName": "DevRoulotte",
+  "host": "smtp.resend.com",
+  "port": 587,
+  "user": "resend",
+  "password": "re_YOUR_RESEND_API_KEY"
+}
