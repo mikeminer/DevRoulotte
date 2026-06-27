@@ -162,7 +162,7 @@ export function AdminDashboard() {
       <div className="mx-auto grid max-w-7xl gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
-            href="/"
+            href="/chat"
             className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200 hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4" />

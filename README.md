@@ -197,7 +197,8 @@ npm run build
 
 ## Funzionalità incluse
 
-- Homepage mobile-first scura con logo DevRoulotte
+- Landing page italiana su `/` con pitch DevRoulotte.chat e CTA verso `/chat`
+- Esperienza videochat mobile-first scura su `/chat` con logo DevRoulotte
 - Accesso guest o registrato via Supabase Auth
 - Conferma obbligatoria 18+ e regole community
 - Piano Free: match casuale, 5 minuti, limite giornaliero, rate limit Next

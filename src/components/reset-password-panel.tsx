@@ -96,7 +96,7 @@ export function ResetPasswordPanel() {
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-6 text-white sm:px-6 lg:px-8">
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-lg content-center gap-4">
         <Link
-          href="/"
+          href="/chat"
           className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -124,7 +124,7 @@ export function ResetPasswordPanel() {
 
           {saveState === "success" ? (
             <Link
-              href="/"
+              href="/chat"
               className="inline-flex h-10 w-full items-center justify-center rounded-md bg-teal-300 px-3 text-sm font-semibold text-slate-950 hover:bg-teal-200"
             >
               Vai al login

@@ -22,7 +22,7 @@ export function LegalPage({
     <main className="min-h-screen bg-[#080b10] px-4 py-5 text-white sm:px-6">
       <div className="mx-auto max-w-3xl">
         <Link
-          href="/"
+          href="/chat"
           className="inline-flex w-fit items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200 hover:bg-white/10"
         >
           <ArrowLeft className="h-4 w-4" />
