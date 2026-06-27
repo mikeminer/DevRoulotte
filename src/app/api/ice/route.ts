@@ -13,6 +13,14 @@ export async function GET() {
   const apiToken = process.env.CLOUDFLARE_TURN_API_TOKEN;
 
   if (!keyId || !apiToken) {
+    console.info(
+      JSON.stringify({
+        scope: "ice",
+        mode: "stun-only",
+        reason: "missing_cloudflare_turn_env",
+      }),
+    );
+
     return NextResponse.json({
       mode: "stun-only",
       iceServers: fallbackIceServers,
@@ -40,14 +48,31 @@ export async function GET() {
     const data = (await response.json()) as {
       iceServers?: RTCIceServer[];
     };
+    const hasTurn = Boolean(data.iceServers?.length);
+
+    console.info(
+      JSON.stringify({
+        scope: "ice",
+        mode: hasTurn ? "turn" : "stun-only",
+        reason: hasTurn ? "cloudflare_turn" : "empty_cloudflare_response",
+      }),
+    );
 
     return NextResponse.json({
-      mode: "turn",
-      iceServers: data.iceServers?.length
+      mode: hasTurn ? "turn" : "stun-only",
+      iceServers: hasTurn
         ? data.iceServers
         : fallbackIceServers,
     });
   } catch (error) {
+    console.info(
+      JSON.stringify({
+        scope: "ice",
+        mode: "stun-only",
+        reason: error instanceof Error ? error.message : "turn_error",
+      }),
+    );
+
     return NextResponse.json(
       {
         mode: "stun-only",

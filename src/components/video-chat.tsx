@@ -94,6 +94,7 @@ export function VideoChat({
   const searchingRef = useRef(false);
   const clientIdRef = useRef("");
   const offerRetryTimersRef = useRef<number[]>([]);
+  const connectionWatchdogTimersRef = useRef<number[]>([]);
 
   const [ageConfirmed, setAgeConfirmed] = useState(
     () =>
@@ -150,10 +151,46 @@ export function VideoChat({
     offerRetryTimersRef.current = [];
   }, []);
 
+  const clearConnectionWatchdogs = useCallback(() => {
+    connectionWatchdogTimersRef.current.forEach((timer) =>
+      window.clearTimeout(timer),
+    );
+    connectionWatchdogTimersRef.current = [];
+  }, []);
+
+  const logWebRtcEvent = useCallback(
+    (
+      event: string,
+      details: Record<string, string | null | undefined> = {},
+    ) => {
+      const currentMatch = matchRef.current;
+
+      if (!currentMatch) {
+        return;
+      }
+
+      void (async () => {
+        const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
+        await fetch("/api/webrtc/log", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            matchId: currentMatch.id,
+            role: currentMatch.role,
+            event,
+            ...details,
+          }),
+        }).catch(() => null);
+      })();
+    },
+    [supabase],
+  );
+
   const cleanupConnection = useCallback(async (keepCamera: boolean) => {
     const currentMatch = matchRef.current;
 
     clearOfferRetries();
+    clearConnectionWatchdogs();
 
     if (channelRef.current) {
       await channelRef.current.send({
@@ -193,7 +230,7 @@ export function VideoChat({
     matchRef.current = null;
     setMatch(null);
     setElapsed(0);
-  }, [clearOfferRetries, supabase]);
+  }, [clearConnectionWatchdogs, clearOfferRetries, supabase]);
 
   useEffect(() => {
     return () => {
@@ -283,16 +320,31 @@ export function VideoChat({
 
     try {
       if (message.kind === "offer") {
+        logWebRtcEvent("offer_received", {
+          connectionState: pc.connectionState,
+          iceConnectionState: pc.iceConnectionState,
+          signalingState: pc.signalingState,
+        });
         await pc.setRemoteDescription(message.description);
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         await sendSignal({ kind: "answer", description: answer });
+        logWebRtcEvent("answer_sent", {
+          connectionState: pc.connectionState,
+          iceConnectionState: pc.iceConnectionState,
+          signalingState: pc.signalingState,
+        });
       }
 
       if (
         message.kind === "answer" &&
         pc.signalingState === "have-local-offer"
       ) {
+        logWebRtcEvent("answer_received", {
+          connectionState: pc.connectionState,
+          iceConnectionState: pc.iceConnectionState,
+          signalingState: pc.signalingState,
+        });
         await pc.setRemoteDescription(message.description);
         clearOfferRetries();
       }
@@ -301,6 +353,11 @@ export function VideoChat({
         await pc.addIceCandidate(message.candidate).catch(() => null);
       }
     } catch {
+      logWebRtcEvent("signal_error", {
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        signalingState: pc.signalingState,
+      });
       setStatus("failed");
       setMessage("Signaling WebRTC non riuscito. Puoi premere Next.");
     }
@@ -321,6 +378,11 @@ export function VideoChat({
     setMatch(nextMatch);
     setStatus("connecting");
     setMessage("Connessione peer-to-peer in corso.");
+    logWebRtcEvent("connect_start", {
+      connectionState: pc.connectionState,
+      iceConnectionState: pc.iceConnectionState,
+      signalingState: pc.signalingState,
+    });
 
     for (const track of stream.getTracks()) {
       pc.addTrack(track, stream);
@@ -335,6 +397,11 @@ export function VideoChat({
       event.streams[0]?.getTracks().forEach((track) => {
         remoteStream.addTrack(track);
       });
+      logWebRtcEvent("remote_track", {
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        signalingState: pc.signalingState,
+      });
     };
 
     pc.onicecandidate = (event) => {
@@ -347,8 +414,15 @@ export function VideoChat({
     };
 
     pc.onconnectionstatechange = () => {
+      logWebRtcEvent("connection_state", {
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        signalingState: pc.signalingState,
+      });
+
       if (pc.connectionState === "connected") {
         clearOfferRetries();
+        clearConnectionWatchdogs();
         setStatus("connected");
         setMessage("Connesso.");
       }
@@ -362,17 +436,45 @@ export function VideoChat({
       }
     };
 
-    async function sendOffer() {
+    pc.oniceconnectionstatechange = () => {
+      logWebRtcEvent("ice_connection_state", {
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        signalingState: pc.signalingState,
+      });
+    };
+
+    pc.onicegatheringstatechange = () => {
+      logWebRtcEvent("ice_gathering_state", {
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        iceGatheringState: pc.iceGatheringState,
+        signalingState: pc.signalingState,
+      });
+    };
+
+    pc.onsignalingstatechange = () => {
+      logWebRtcEvent("signaling_state", {
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        signalingState: pc.signalingState,
+      });
+    };
+
+    async function sendOffer(iceRestart = false) {
       if (nextMatch.role !== "caller" || pc.connectionState === "closed") {
         return;
       }
 
-      if (pc.remoteDescription?.type === "answer") {
+      if (pc.remoteDescription?.type === "answer" && !iceRestart) {
         clearOfferRetries();
         return;
       }
 
-      if (!pc.localDescription || pc.localDescription.type !== "offer") {
+      if (iceRestart && pc.signalingState === "stable") {
+        const offer = await pc.createOffer({ iceRestart: true });
+        await pc.setLocalDescription(offer);
+      } else if (!pc.localDescription || pc.localDescription.type !== "offer") {
         if (pc.signalingState !== "stable") {
           return;
         }
@@ -391,11 +493,16 @@ export function VideoChat({
         kind: "offer",
         description: localDescription,
       });
+      logWebRtcEvent(iceRestart ? "ice_restart_offer_sent" : "offer_sent", {
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        signalingState: pc.signalingState,
+      });
     }
 
     function scheduleOfferRetries() {
       clearOfferRetries();
-      offerRetryTimersRef.current = [250, 1000, 2200, 4000, 6500].map(
+      offerRetryTimersRef.current = [250, 1000, 2200, 4000, 6500, 9000, 12000].map(
         (delay) =>
           window.setTimeout(() => {
             void sendOffer();
@@ -403,12 +510,59 @@ export function VideoChat({
       );
     }
 
-    const channel = supabase
-      .channel(nextMatch.channelName, {
+    function scheduleConnectionWatchdogs() {
+      clearConnectionWatchdogs();
+      connectionWatchdogTimersRef.current = [
+        window.setTimeout(() => {
+          if (pc.connectionState === "connected" || pc.connectionState === "closed") {
+            return;
+          }
+
+          logWebRtcEvent("connection_retry", {
+            connectionState: pc.connectionState,
+            iceConnectionState: pc.iceConnectionState,
+            signalingState: pc.signalingState,
+          });
+
+          if (nextMatch.role === "caller") {
+            setMessage("Peer trovato. Ritento il collegamento WebRTC.");
+            void sendOffer(Boolean(pc.remoteDescription));
+          } else {
+            setMessage("Peer trovato. Attendo ancora l'offerta WebRTC.");
+          }
+        }, 10000),
+        window.setTimeout(() => {
+          if (pc.connectionState === "connected" || pc.connectionState === "closed") {
+            return;
+          }
+
+          logWebRtcEvent("connection_timeout", {
+            connectionState: pc.connectionState,
+            iceConnectionState: pc.iceConnectionState,
+            signalingState: pc.signalingState,
+            detail: pc.remoteDescription
+              ? "ice_or_media_not_connected"
+              : "no_remote_description",
+          });
+          setStatus("failed");
+          setMessage(
+            pc.remoteDescription
+              ? "WebRTC non si e' stabilito su questa rete. Premi Next."
+              : "Il signaling non si e' completato. Premi Next.",
+          );
+        }, 22000),
+      ];
+    }
+
+    const channel = supabase.channel(nextMatch.channelName, {
         config: {
           broadcast: { self: false },
         },
-      })
+      });
+
+    channelRef.current = channel;
+
+    channel
       .on("broadcast", { event: "signal" }, ({ payload }) => {
         void handleSignal(payload as SignalMessage);
       })
@@ -431,6 +585,13 @@ export function VideoChat({
         }
       })
       .subscribe(async (subscriptionStatus) => {
+        logWebRtcEvent("channel_status", {
+          channelStatus: subscriptionStatus,
+          connectionState: pc.connectionState,
+          iceConnectionState: pc.iceConnectionState,
+          signalingState: pc.signalingState,
+        });
+
         if (subscriptionStatus === "SUBSCRIBED") {
           await channel.send({
             type: "broadcast",
@@ -444,10 +605,19 @@ export function VideoChat({
           } else {
             setMessage("Peer trovato. Attendo l'offerta WebRTC.");
           }
+
+          scheduleConnectionWatchdogs();
+        }
+
+        if (
+          subscriptionStatus === "CHANNEL_ERROR" ||
+          subscriptionStatus === "TIMED_OUT" ||
+          subscriptionStatus === "CLOSED"
+        ) {
+          setStatus("failed");
+          setMessage("Canale signaling non disponibile. Premi Next.");
         }
       });
-
-    channelRef.current = channel;
   }
 
   async function pollForMatch() {
