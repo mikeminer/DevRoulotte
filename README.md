@@ -88,6 +88,25 @@ where id = (
 
 Il campo `is_admin` e' protetto da trigger: un utente autenticato non puo' impostarlo dal client.
 
+### Email Supabase brandizzate
+
+I template HTML DevRoulotte sono versionati in [supabase/templates](./supabase/templates) e collegati in [supabase/config.toml](./supabase/config.toml). Coprono conferma account, reset password, magic link, invito, cambio email, reauth e notifiche sicurezza base.
+
+Per applicarli al progetto Supabase hosted via Management API:
+
+```powershell
+$env:SUPABASE_ACCESS_TOKEN="sbp_..." # crea un Personal Access Token dal dashboard Supabase
+./scripts/configure-supabase-email-templates.ps1
+```
+
+Lo script legge il project ref da `supabase/.temp/project-ref` se presente. Per provare senza modificare Supabase:
+
+```powershell
+./scripts/configure-supabase-email-templates.ps1 -DryRun
+```
+
+Nota importante: questi template brandizzano soggetto e corpo email. Per avere anche il mittente brandizzato, ad esempio `DevRoulotte <no-reply@devroulotte.chat>`, configura Authentication > Emails > SMTP Settings con un provider SMTP e dominio verificato. Evita email tracking sui link di auth, perche' puo' rompere i link Supabase.
+
 ## Cloudflare STUN/TURN
 
 STUN funziona subito con:
@@ -207,6 +226,8 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_PROJECT_REF` setup only
+- `SUPABASE_ACCESS_TOKEN` setup only
 - `CLOUDFLARE_ACCOUNT_ID` setup only
 - `CLOUDFLARE_API_TOKEN` setup only
 - `CLOUDFLARE_TURN_KEY_ID`

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Email DevRoulotte aggiornata</title>
+  </head>
+  <body style="margin:0;background:#080b10;color:#f7fbff;font-family:Inter,Arial,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b10;margin:0;padding:28px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#0d121a;border:1px solid #243044;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td align="center" style="padding:28px 28px 16px;">
+                <img src="https://devroulotte.chat/devroulotte-email-logo.png" width="96" height="96" alt="DevRoulotte" style="display:block;border-radius:18px;">
+                <h1 style="margin:18px 0 8px;color:#ffffff;font-size:26px;line-height:1.2;font-weight:800;">Email aggiornata</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 28px 28px;">
+                <p style="margin:0 0 18px;color:#dbe7f3;font-size:15px;line-height:1.7;">L'email del tuo account DevRoulotte e' stata modificata da <strong>{{ .OldEmail }}</strong> a <strong>{{ .Email }}</strong>.</p>
+                <p style="margin:0;color:#9aa7b7;font-size:13px;line-height:1.7;">Se non riconosci questa modifica, controlla subito la sicurezza del tuo account.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
