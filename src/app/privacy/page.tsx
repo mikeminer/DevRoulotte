@@ -34,6 +34,13 @@ export default function PrivacyPage() {
           ],
         },
         {
+          title: "Cookie e strumenti simili",
+          body: [
+            "Usiamo strumenti tecnici necessari nel browser per login, ID ospite, conferma 18+, accettazione regole, limiti Free, sicurezza e preferenze cookie.",
+            "Le categorie opzionali Preferenze, Statistiche e Marketing sono disattivate di default e modificabili dal centro preferenze. Al momento non sono attivi cookie analytics o marketing.",
+          ],
+        },
+        {
           title: "Fornitori",
           body: [
             "Usiamo Vercel per hosting e API, Supabase per Auth/database/realtime, Cloudflare per STUN/TURN e PayPal per abbonamenti.",

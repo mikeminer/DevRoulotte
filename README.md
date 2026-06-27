@@ -223,6 +223,10 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 
 DevRoulotte è progettata solo per utenti 18+. Non registra chiamate, non salva stream audio/video e include regole esplicite contro nudità, spam, minacce e contenuti illegali.
 
+## Cookie e consenso
+
+L'app include un banner cookie con rifiuto opzionali, accetta tutto e personalizzazione granulare. Le categorie opzionali sono disattivate di default. Gli strumenti tecnici necessari coprono login, ID ospite, conferma 18+, regole, limiti Free, sicurezza e salvataggio della scelta. La pagina `/cookies` descrive gli strumenti attuali e dal pulsante Cookie l'utente puo' modificare o revocare le scelte.
+
 ## Revisione legale
 
 Prima di un lancio pubblico usa [docs/legal-review-pack.md](./docs/legal-review-pack.md) come pacchetto di revisione per avvocato/privacy consultant. Le pagine legali incluse sono bozze operative e non sostituiscono un parere professionale.

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { AuthPanel } from "@/components/auth-panel";
+import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { VideoChat } from "@/components/video-chat";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
@@ -224,6 +225,14 @@ export function HomeShell() {
               <FileText className="h-3.5 w-3.5" />
               Privacy
             </Link>
+            <Link
+              href="/cookies"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Cookie policy
+            </Link>
+            <CookiePreferencesButton className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white" />
             <Link
               href="/community-rules"
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"

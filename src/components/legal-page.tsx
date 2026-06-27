@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 
 type LegalSection = {
   title: string;
@@ -51,6 +52,10 @@ export function LegalPage({
             </section>
           ))}
         </div>
+
+        <footer className="border-t border-white/10 py-5 text-xs text-slate-400">
+          <CookiePreferencesButton className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white" />
+        </footer>
       </div>
     </main>
   );
