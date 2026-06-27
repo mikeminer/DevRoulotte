@@ -92,11 +92,12 @@ export function HomeShell() {
             <div className="min-w-0">
               <h1 className="sr-only">DevRoulotte</h1>
               <Image
-                src="/devroulotte-wordmark.png"
+                src="/devroulotte-banner.gif"
                 alt=""
                 aria-hidden="true"
-                width={1057}
-                height={266}
+                width={640}
+                height={162}
+                unoptimized
                 className="h-auto w-48 max-w-[58vw] sm:w-64 md:w-72"
                 priority
               />
