@@ -9,6 +9,7 @@ import {
   getSupabaseAdmin,
   hasSupabaseServerConfig,
 } from "@/lib/supabase/server";
+import type { Actor } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -42,7 +43,16 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const actor = await getRequestActor(request);
+    let actor: Actor;
+
+    try {
+      actor = await getRequestActor(request);
+    } catch {
+      return NextResponse.json(
+        { ok: false, message: "Accedi per gestire Premium." },
+        { status: 401 },
+      );
+    }
 
     if (actor.type !== "user") {
       return NextResponse.json(
