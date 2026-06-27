@@ -273,6 +273,21 @@ export function HomeShell() {
               <Scale className="h-3.5 w-3.5" />
               License
             </a>
+            <a
+              href="https://shipordie.club/ship/devroulotte"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="DevRoulotte su Ship or Die"
+              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-2 py-1 transition hover:bg-slate-100"
+            >
+              <Image
+                src="https://shipordie.club/logo.webp"
+                alt="Ship or Die"
+                width={400}
+                height={225}
+                className="h-7 w-auto object-contain"
+              />
+            </a>
           </div>
         </footer>
       </div>
