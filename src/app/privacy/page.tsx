@@ -30,6 +30,7 @@ export default function PrivacyPage() {
           title: "Dati operativi",
           body: [
             "Salviamo log minimi dei match, report, ban, stato coda, stato premium e webhook PayPal necessari al funzionamento del servizio.",
+            "Per stabilire WebRTC trattiamo temporaneamente offer/answer/ICE candidate di signaling. Questi dati non sono audio/video e vengono usati solo per collegare i due browser.",
             "PayPal gestisce i dati di pagamento. DevRoulotte riceve solo identificativi e stati subscription utili ad abilitare Premium.",
           ],
         },
@@ -44,7 +45,7 @@ export default function PrivacyPage() {
         {
           title: "Fornitori",
           body: [
-            "Usiamo Vercel per hosting e API, Supabase per Auth/database/realtime, Cloudflare per STUN/TURN, PayPal per abbonamenti e, se accettato in Statistiche, Google Analytics 4 per metriche aggregate.",
+            "Usiamo Vercel per hosting e API, Supabase per Auth/database/signaling temporaneo, Cloudflare per STUN/TURN, PayPal per abbonamenti e, se accettato in Statistiche, Google Analytics 4 per metriche aggregate.",
             "Questi fornitori possono trattare dati tecnici secondo le rispettive policy e impostazioni account.",
           ],
         },

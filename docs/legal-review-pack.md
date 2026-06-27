@@ -23,7 +23,7 @@ Blocchi principali prima del pubblico:
 - Registrazione audio/video: non prevista e non implementata.
 - Piani: Free e Premium PayPal a 3,99 EUR/mese con prova gratuita di 5 giorni.
 - Hosting/API: Vercel.
-- Database/Auth/Realtime: Supabase.
+- Database/Auth/signaling temporaneo: Supabase.
 - STUN/TURN: Cloudflare Realtime TURN.
 - Pagamenti: PayPal Subscriptions.
 - Codice: AGPL-3.0-only.
@@ -49,6 +49,7 @@ Le pagine sono bozze operative. Prima del lancio pubblico devono essere revision
 | Profili | display name, lingua, Paese, flag 18+/regole, admin/shadowban | app/Supabase | profilo, filtri, moderazione | finche' account attivo |
 | Guest | UUID locale browser | localStorage + API | limiti Free, match, report, ban | scadenza/rotazione da decidere |
 | Match logs | actor id/type, canale signaling, stato, timestamp | API matchmaking | limiti, anti-rematch, audit minimo | periodo breve da definire |
+| WebRTC signaling | offer/answer/ICE candidate temporanei | browser + API/Supabase | stabilire la connessione WebRTC | retention tecnica breve |
 | Reports | reporter, reported, match id, reason, dettagli opzionali | utente via app | moderazione e sicurezza | periodo da definire |
 | Bans | actor id/type, motivo, shadow, scadenza | admin/auto-shadowban | sicurezza e anti-abuso | durata ban + audit limitato |
 | Subscription | PayPal subscription id, plan id, status, raw webhook | PayPal + webhook | abilitare Premium, contabilita' | obblighi fiscali/contrattuali |
@@ -58,7 +59,7 @@ Le pagine sono bozze operative. Prima del lancio pubblico devono essere revision
 ## Fornitori e ruoli privacy da validare
 
 - Vercel: hosting, serverless functions, logging tecnico.
-- Supabase: Auth, Postgres, Realtime.
+- Supabase: Auth, Postgres e signaling temporaneo.
 - Cloudflare: STUN/TURN e rete.
 - PayPal: subscription e pagamenti.
 - Google Analytics 4: metriche aggregate solo dopo consenso Statistiche.

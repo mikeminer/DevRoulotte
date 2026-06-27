@@ -47,8 +47,9 @@ async function cleanup(request: NextRequest) {
       now.getTime() -
         (PREMIUM_CALL_LIMIT_SECONDS + MATCH_QUEUE_STALE_SECONDS) * 1000,
     ).toISOString();
+    const signalCutoff = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
 
-    const [queueCleanup, matchCleanup] = await Promise.all([
+    const [queueCleanup, matchCleanup, signalCleanup] = await Promise.all([
       supabase
         .from("match_queue")
         .delete({ count: "exact" })
@@ -65,6 +66,10 @@ async function cleanup(request: NextRequest) {
         )
         .eq("status", "active")
         .lt("started_at", activeMatchCutoff),
+      supabase
+        .from("webrtc_signals")
+        .delete({ count: "exact" })
+        .lt("created_at", signalCutoff),
     ]);
 
     if (queueCleanup.error) {
@@ -75,12 +80,18 @@ async function cleanup(request: NextRequest) {
       throw new Error(matchCleanup.error.message);
     }
 
+    if (signalCleanup.error) {
+      throw new Error(signalCleanup.error.message);
+    }
+
     return NextResponse.json({
       ok: true,
       deletedQueueRows: queueCleanup.count ?? 0,
       endedMatchLogs: matchCleanup.count ?? 0,
+      deletedWebrtcSignals: signalCleanup.count ?? 0,
       queueCutoff,
       activeMatchCutoff,
+      signalCutoff,
     });
   } catch (error) {
     return NextResponse.json(

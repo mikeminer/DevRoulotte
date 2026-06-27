@@ -107,6 +107,23 @@ create table if not exists public.match_queue (
 create index if not exists match_queue_waiting_idx
   on public.match_queue (status, is_premium desc, queued_at, last_seen_at);
 
+create table if not exists public.webrtc_signals (
+  id bigserial primary key,
+  match_id uuid not null references public.match_logs(id) on delete cascade,
+  sender_actor_type text not null check (sender_actor_type in ('guest', 'user')),
+  sender_actor_id uuid not null,
+  sender_client_id text not null,
+  kind text not null check (kind in ('offer', 'answer', 'candidate', 'control')),
+  payload jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists webrtc_signals_match_idx
+  on public.webrtc_signals (match_id, id);
+
+create index if not exists webrtc_signals_created_idx
+  on public.webrtc_signals (created_at);
+
 create table if not exists public.reports (
   id uuid primary key default gen_random_uuid(),
   reporter_actor_type text not null check (reporter_actor_type in ('guest', 'user')),
@@ -246,6 +263,7 @@ alter table public.subscriptions enable row level security;
 alter table public.bans enable row level security;
 alter table public.match_logs enable row level security;
 alter table public.match_queue enable row level security;
+alter table public.webrtc_signals enable row level security;
 alter table public.reports enable row level security;
 
 drop policy if exists "Profiles are readable by owner" on public.profiles;

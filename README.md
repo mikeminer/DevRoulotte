@@ -8,16 +8,16 @@ Il networking, senza appuntamenti. MVP 18+ con webcam 1:1, WebRTC peer-to-peer, 
 
 - Next.js 16 App Router, TypeScript, React 19, Tailwind CSS 4
 - Vercel per frontend e API routes
-- Supabase free tier per Auth, database, Realtime Broadcast, moderazione e subscription state
+- Supabase free tier per Auth, database, signaling temporaneo, moderazione e subscription state
 - WebRTC P2P per audio/video, senza registrazione audio/video
 - Cloudflare STUN gratuito e Cloudflare Realtime TURN come fallback
 - PayPal Subscriptions per Premium
 
 ## Nota importante su WebSocket e Vercel
 
-Le API route serverless di Vercel non sono pensate per mantenere WebSocket persistenti. Per restare compatibili con Vercel e non aggiungere un server a pagamento, l'MVP usa Supabase Realtime Broadcast come signaling WebSocket gestito. Il matchmaking resta in API route Next.js, mentre offer/answer/ICE candidate passano su canali Supabase Realtime con nome casuale e non indovinabile.
+Le API route serverless di Vercel non sono pensate per mantenere WebSocket persistenti. Per restare compatibili con Vercel e non aggiungere un server a pagamento, l'MVP usa API routes + Supabase DB come signaling temporaneo: offer/answer/ICE candidate vengono scritti in `webrtc_signals` e letti via polling breve dai due peer.
 
-Fallback gratuito: se in futuro vuoi evitare Supabase Realtime per signaling, puoi usare un server WebSocket separato su un free tier compatibile o un provider realtime gratuito, ma non dentro una normale API route Vercel.
+Questo fallback e' meno istantaneo di un WebSocket dedicato, ma resta gratuito, compatibile con Vercel e piu' prevedibile su reti dove Supabase Realtime/WebSocket e' lento o bloccato. I segnali WebRTC sono temporanei e non contengono audio/video.
 
 ## Avvio locale
 
@@ -38,8 +38,7 @@ Senza credenziali reali l'app renderizza la UI, ma matchmaking, auth, admin, Pay
 3. In Authentication abilita Email/Password.
 4. Copia Project URL e publishable/anon key in `.env.local`.
 5. Copia la service role/secret key in `SUPABASE_SERVICE_ROLE_KEY`.
-6. Abilita Realtime nel progetto. L'MVP usa Broadcast client-side, non replica tabelle.
-7. In Authentication > URL Configuration aggiungi gli URL di redirect per auth e reset password: `https://devroulotte.chat/auth/confirm`, `https://devroulotte.chat/reset-password`, `https://www.devroulotte.chat/auth/confirm`, `https://www.devroulotte.chat/reset-password`, `http://localhost:3000/auth/confirm`, `http://localhost:3000/reset-password`, `http://127.0.0.1:3000/auth/confirm` e `http://127.0.0.1:3000/reset-password`.
+6. In Authentication > URL Configuration aggiungi gli URL di redirect per auth e reset password: `https://devroulotte.chat/auth/confirm`, `https://devroulotte.chat/reset-password`, `https://www.devroulotte.chat/auth/confirm`, `https://www.devroulotte.chat/reset-password`, `http://localhost:3000/auth/confirm`, `http://localhost:3000/reset-password`, `http://127.0.0.1:3000/auth/confirm` e `http://127.0.0.1:3000/reset-password`.
 
 Nota: per Supabase hosted questi redirect vanno salvati nel dashboard del progetto. `supabase/config.toml` mantiene l'equivalente configurazione locale/versionata.
 
@@ -55,6 +54,8 @@ $env:SUPABASE_DB_URL="postgresql://postgres.your-project:password@aws-0-eu-centr
 
 `SUPABASE_DB_URL` serve solo per applicare lo schema via `psql`. Se non hai `psql`, esegui manualmente `supabase/schema.sql` nel SQL Editor e poi lancia lo script con `-SkipSchema`.
 
+Se il progetto Supabase e' gia' configurato e devi solo aggiungere il signaling DB, esegui nel SQL Editor [supabase/migrations/20260627_webrtc_signals.sql](./supabase/migrations/20260627_webrtc_signals.sql).
+
 Tabelle principali:
 
 - `auth.users`: utenti registrati Supabase
@@ -64,8 +65,9 @@ Tabelle principali:
 - `bans`: ban manuali e shadowban
 - `match_logs`: log essenziali dei match
 - `match_queue`: coda matchmaking
+- `webrtc_signals`: offer/answer/ICE candidate temporanei per stabilire la chiamata WebRTC
 
-Le chiamate audio/video non vengono salvate. I log contengono solo actor id, stato, timestamp e canale di signaling.
+Le chiamate audio/video non vengono salvate. I log contengono solo actor id, stato, timestamp, canale di signaling e diagnostica tecnica redatta.
 
 ### Admin
 
@@ -199,7 +201,7 @@ npm run build
 
 Per provare un match tra due computer, usa due identità diverse: due account diversi, oppure un computer loggato e l'altro come ospite/incognito. Se usi lo stesso account Supabase su entrambi i dispositivi, DevRoulotte li tratta come lo stesso attore e non li mette in match tra loro.
 
-Il matching passa da Supabase `match_queue`, quindi funziona anche su Vercel senza memoria condivisa tra funzioni. Il signaling WebRTC usa Supabase Realtime Broadcast: ogni peer invia un messaggio `ready` e il caller ritenta l'offer per qualche secondo, così l'offer non viene perso se l'altro browser entra nel canale leggermente dopo.
+Il matching passa da Supabase `match_queue`, quindi funziona anche su Vercel senza memoria condivisa tra funzioni. Il signaling WebRTC usa API routes e `webrtc_signals`: il caller ritenta l'offer per qualche secondo e l'altro browser legge i segnali via polling breve.
 
 Durante il test tieni entrambe le pagine `/chat` aperte e attive dopo aver concesso webcam/microfono. Per evitare match fantasma, il backend crea match solo con peer visti negli ultimi `MATCH_QUEUE_ACTIVE_SECONDS` secondi, mentre `MATCH_QUEUE_STALE_SECONDS` resta la finestra piu' lunga usata per pulire la coda.
 
@@ -212,7 +214,7 @@ Durante il test tieni entrambe le pagine `/chat` aperte e attive dopo aver conce
 - Piano Free: match casuale, 5 minuti, limite giornaliero, rate limit Next
 - Piano Premium: match illimitati, durata più alta, filtri lingua/Paese, priorità in coda, badge
 - WebRTC audio/video P2P
-- Supabase Realtime Broadcast per signaling
+- API signaling via Supabase `webrtc_signals`
 - Pulsanti Start, Next, Stop, Report, Upgrade
 - Report e auto-shadowban dopo troppi report
 - Dashboard admin con report, ban/sban, subscription e match logs

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
   AlertTriangle,
   BadgeAlert,
@@ -31,6 +30,11 @@ type SignalMessage =
       sender: string;
       kind: "candidate";
       candidate: RTCIceCandidateInit;
+    }
+  | {
+      sender: string;
+      kind: "control";
+      control: "leave";
     };
 
 type OutgoingSignalMessage =
@@ -41,7 +45,20 @@ type OutgoingSignalMessage =
   | {
       kind: "candidate";
       candidate: RTCIceCandidateInit;
+    }
+  | {
+      kind: "control";
+      control: "leave";
     };
+
+type SignalPollResponse = {
+  ok: boolean;
+  message?: string;
+  signals?: Array<{
+    id: number;
+    message: SignalMessage;
+  }>;
+};
 
 const languages = [
   { value: "any", label: "Qualsiasi lingua" },
@@ -89,12 +106,13 @@ export function VideoChat({
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const channelRef = useRef<RealtimeChannel | null>(null);
   const matchRef = useRef<MatchPayload | null>(null);
   const searchingRef = useRef(false);
   const clientIdRef = useRef("");
   const offerRetryTimersRef = useRef<number[]>([]);
   const connectionWatchdogTimersRef = useRef<number[]>([]);
+  const signalPollingTokenRef = useRef(0);
+  const lastSignalIdRef = useRef(0);
 
   const [ageConfirmed, setAgeConfirmed] = useState(
     () =>
@@ -158,6 +176,10 @@ export function VideoChat({
     connectionWatchdogTimersRef.current = [];
   }, []);
 
+  const stopSignalPolling = useCallback(() => {
+    signalPollingTokenRef.current += 1;
+  }, []);
+
   const logWebRtcEvent = useCallback(
     (
       event: string,
@@ -186,22 +208,46 @@ export function VideoChat({
     [supabase],
   );
 
+  const sendSignal = useCallback(
+    async (message: OutgoingSignalMessage) => {
+      const currentMatch = matchRef.current;
+
+      if (!currentMatch) {
+        return;
+      }
+
+      const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
+      const response = await fetch("/api/webrtc/signal/send", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          matchId: currentMatch.id,
+          senderClientId: clientIdRef.current,
+          message: {
+            ...message,
+            sender: clientIdRef.current,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+        throw new Error(data?.message ?? "Invio signaling fallito");
+      }
+    },
+    [supabase],
+  );
+
   const cleanupConnection = useCallback(async (keepCamera: boolean) => {
     const currentMatch = matchRef.current;
 
     clearOfferRetries();
     clearConnectionWatchdogs();
+    stopSignalPolling();
 
-    if (channelRef.current) {
-      await channelRef.current.send({
-        type: "broadcast",
-        event: "control",
-        payload: { sender: clientIdRef.current, kind: "leave" },
-      });
-      supabase?.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-
+    await sendSignal({ kind: "control", control: "leave" }).catch(() => null);
     peerConnectionRef.current?.close();
     peerConnectionRef.current = null;
 
@@ -230,7 +276,13 @@ export function VideoChat({
     matchRef.current = null;
     setMatch(null);
     setElapsed(0);
-  }, [clearConnectionWatchdogs, clearOfferRetries, supabase]);
+  }, [
+    clearConnectionWatchdogs,
+    clearOfferRetries,
+    sendSignal,
+    stopSignalPolling,
+    supabase,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -296,17 +348,6 @@ export function VideoChat({
     return stream;
   }
 
-  async function sendSignal(message: OutgoingSignalMessage) {
-    await channelRef.current?.send({
-      type: "broadcast",
-      event: "signal",
-      payload: {
-        ...message,
-        sender: clientIdRef.current,
-      },
-    });
-  }
-
   async function handleSignal(message: SignalMessage) {
     if (message.sender === clientIdRef.current) {
       return;
@@ -319,6 +360,12 @@ export function VideoChat({
     }
 
     try {
+      if (message.kind === "control" && message.control === "leave") {
+        setStatus("failed");
+        setMessage("L'altra persona ha lasciato la chiamata.");
+        return;
+      }
+
       if (message.kind === "offer") {
         logWebRtcEvent("offer_received", {
           connectionState: pc.connectionState,
@@ -363,16 +410,69 @@ export function VideoChat({
     }
   }
 
-  async function connectToMatch(nextMatch: MatchPayload) {
-    if (!supabase) {
-      throw new Error("Supabase Realtime non configurato.");
-    }
+  async function pollSignals(pc: RTCPeerConnection, token: number) {
+    let failures = 0;
 
+    while (
+      signalPollingTokenRef.current === token &&
+      matchRef.current &&
+      pc.connectionState !== "closed"
+    ) {
+      try {
+        const currentMatch = matchRef.current;
+        const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
+        const response = await fetch("/api/webrtc/signal/poll", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            matchId: currentMatch.id,
+            receiverClientId: clientIdRef.current,
+            afterId: lastSignalIdRef.current,
+          }),
+        });
+
+        const data = (await response.json()) as SignalPollResponse;
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.message ?? "Polling signaling fallito");
+        }
+
+        failures = 0;
+
+        for (const signal of data.signals ?? []) {
+          lastSignalIdRef.current = Math.max(
+            lastSignalIdRef.current,
+            signal.id,
+          );
+          await handleSignal(signal.message);
+        }
+      } catch (error) {
+        failures += 1;
+        logWebRtcEvent("signal_poll_error", {
+          connectionState: pc.connectionState,
+          iceConnectionState: pc.iceConnectionState,
+          signalingState: pc.signalingState,
+          detail: error instanceof Error ? error.message : "poll_error",
+        });
+
+        if (failures >= 4) {
+          setStatus("failed");
+          setMessage("Signaling non disponibile. Premi Next.");
+          return;
+        }
+      }
+
+      await new Promise((resolve) => window.setTimeout(resolve, 650));
+    }
+  }
+
+  async function connectToMatch(nextMatch: MatchPayload) {
     const stream = await ensureMedia();
     const iceServers = await getIceServers();
     const pc = new RTCPeerConnection({ iceServers });
     const remoteStream = new MediaStream();
 
+    lastSignalIdRef.current = 0;
     peerConnectionRef.current = pc;
     matchRef.current = nextMatch;
     setMatch(nextMatch);
@@ -554,70 +654,24 @@ export function VideoChat({
       ];
     }
 
-    const channel = supabase.channel(nextMatch.channelName, {
-        config: {
-          broadcast: { self: false },
-        },
-      });
+    const signalPollingToken = signalPollingTokenRef.current + 1;
+    signalPollingTokenRef.current = signalPollingToken;
+    void pollSignals(pc, signalPollingToken);
+    logWebRtcEvent("signal_poll_start", {
+      connectionState: pc.connectionState,
+      iceConnectionState: pc.iceConnectionState,
+      signalingState: pc.signalingState,
+    });
 
-    channelRef.current = channel;
+    if (nextMatch.role === "caller") {
+      setMessage("Peer trovato. Invio offer WebRTC.");
+      scheduleOfferRetries();
+      void sendOffer();
+    } else {
+      setMessage("Peer trovato. Attendo l'offerta WebRTC.");
+    }
 
-    channel
-      .on("broadcast", { event: "signal" }, ({ payload }) => {
-        void handleSignal(payload as SignalMessage);
-      })
-      .on("broadcast", { event: "control" }, ({ payload }) => {
-        const control = payload as { sender?: string; kind?: string };
-
-        if (control.sender === clientIdRef.current) {
-          return;
-        }
-
-        if (control.kind === "ready") {
-          if (nextMatch.role === "caller") {
-            void sendOffer();
-          }
-        }
-
-        if (control.kind === "leave") {
-          setStatus("failed");
-          setMessage("L'altra persona ha lasciato la chiamata.");
-        }
-      })
-      .subscribe(async (subscriptionStatus) => {
-        logWebRtcEvent("channel_status", {
-          channelStatus: subscriptionStatus,
-          connectionState: pc.connectionState,
-          iceConnectionState: pc.iceConnectionState,
-          signalingState: pc.signalingState,
-        });
-
-        if (subscriptionStatus === "SUBSCRIBED") {
-          await channel.send({
-            type: "broadcast",
-            event: "control",
-            payload: { sender: clientIdRef.current, kind: "ready" },
-          });
-
-          if (nextMatch.role === "caller") {
-            setMessage("Peer trovato. Attendo il canale dell'altra persona.");
-            scheduleOfferRetries();
-          } else {
-            setMessage("Peer trovato. Attendo l'offerta WebRTC.");
-          }
-
-          scheduleConnectionWatchdogs();
-        }
-
-        if (
-          subscriptionStatus === "CHANNEL_ERROR" ||
-          subscriptionStatus === "TIMED_OUT" ||
-          subscriptionStatus === "CLOSED"
-        ) {
-          setStatus("failed");
-          setMessage("Canale signaling non disponibile. Premi Next.");
-        }
-      });
+    scheduleConnectionWatchdogs();
   }
 
   async function pollForMatch() {
