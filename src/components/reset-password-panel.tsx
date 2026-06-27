@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, KeyRound, Loader2 } from "lucide-react";
@@ -102,6 +103,18 @@ export function ResetPasswordPanel() {
           <ArrowLeft className="h-4 w-4" />
           Torna a DevRoulotte
         </Link>
+
+        <div className="flex justify-center">
+          <Image
+            src="/devroulotte-banner.gif"
+            alt="DevRoulotte"
+            width={640}
+            height={162}
+            unoptimized
+            priority
+            className="h-auto w-64 max-w-full sm:w-80"
+          />
+        </div>
 
         <section className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
           <div className="mb-5 flex items-center gap-3">
