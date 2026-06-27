@@ -67,7 +67,7 @@ export function CookieConsentManager() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   useEffect(() => {
-    Promise.resolve().then(() => {
+    const timer = window.setTimeout(() => {
       const stored = parseCookieConsent(
         window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY),
       );
@@ -75,8 +75,12 @@ export function CookieConsentManager() {
       setConsent(stored);
       setDraft(choicesFromConsent(stored));
       setIsReady(true);
-    });
+    }, 0);
 
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     function openPreferences() {
       setDraft(choicesFromConsent(consent));
       setIsPanelOpen(true);
@@ -88,6 +92,22 @@ export function CookieConsentManager() {
       window.removeEventListener(COOKIE_CONSENT_OPEN_EVENT, openPreferences);
     };
   }, [consent]);
+
+  useEffect(() => {
+    if (!isPanelOpen) {
+      return;
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsPanelOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isPanelOpen]);
 
   function saveChoices(choices: CookieConsentChoices) {
     const nextConsent = buildCookieConsent(choices);
@@ -132,19 +152,19 @@ export function CookieConsentManager() {
       {shouldShowBanner ? (
         <section
           aria-label="Informativa breve cookie"
-          className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-5xl rounded-lg border border-white/10 bg-[#0d121a]/95 p-4 text-white shadow-2xl shadow-black/40 backdrop-blur sm:bottom-5 sm:p-5"
+          aria-live="polite"
+          className="fixed inset-x-3 top-3 z-40 max-h-[calc(100svh-1.5rem)] overflow-y-auto rounded-lg border border-white/10 bg-[#0d121a]/95 p-3 text-white shadow-2xl shadow-black/40 backdrop-blur sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-auto sm:w-[420px] sm:p-4"
         >
-          <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-3">
             <div className="grid gap-2">
               <div className="flex items-center gap-2 text-sm font-bold">
                 <Cookie className="h-4 w-4 text-teal-200" />
                 Privacy e cookie
               </div>
-              <p className="max-w-3xl text-sm leading-6 text-slate-300">
+              <p className="text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
                 Usiamo strumenti tecnici necessari per sicurezza, login,
-                preferenze 18+, limiti Free e consenso cookie. Analytics,
-                preferenze facoltative e marketing restano disattivati finche&apos;
-                non li accetti. Puoi cambiare scelta in ogni momento.
+                preferenze 18+, limiti Free e consenso cookie. Analytics e
+                marketing restano disattivati finche&apos; non li accetti.
               </p>
               <Link
                 href="/cookies"
@@ -153,18 +173,18 @@ export function CookieConsentManager() {
                 Leggi la cookie policy
               </Link>
             </div>
-            <div className="grid gap-2 sm:grid-cols-3 lg:w-[520px]">
+            <div className="grid gap-2 sm:grid-cols-3">
               <button
                 type="button"
                 onClick={rejectOptional}
-                className="inline-flex h-10 items-center justify-center rounded-md border border-white/15 px-3 text-sm font-semibold text-slate-100 hover:bg-white/10"
+                className="inline-flex h-9 items-center justify-center rounded-md border border-white/15 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
               >
-                Rifiuta opzionali
+                Solo necessari
               </button>
               <button
                 type="button"
                 onClick={() => setIsPanelOpen(true)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-3 text-sm font-semibold text-slate-100 hover:bg-white/10"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-white/15 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
               >
                 <Settings2 className="h-4 w-4" />
                 Personalizza
@@ -172,7 +192,7 @@ export function CookieConsentManager() {
               <button
                 type="button"
                 onClick={acceptAll}
-                className="inline-flex h-10 items-center justify-center rounded-md border border-white/15 px-3 text-sm font-semibold text-slate-100 hover:bg-white/10"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-teal-300 px-3 text-xs font-bold text-slate-950 hover:bg-teal-200"
               >
                 Accetta tutto
               </button>
@@ -197,10 +217,17 @@ export function CookieConsentManager() {
       ) : null}
 
       {isPanelOpen ? (
-        <div className="fixed inset-0 z-50 grid place-items-end bg-black/60 p-3 backdrop-blur-sm sm:place-items-center sm:p-6">
+        <div
+          className="fixed inset-0 z-50 grid items-start overflow-y-auto bg-black/60 p-3 backdrop-blur-sm sm:place-items-center sm:p-6"
+          role="presentation"
+          onClick={() => setIsPanelOpen(false)}
+        >
           <section
             aria-label="Centro preferenze cookie"
-            className="max-h-[calc(100vh-1.5rem)] w-full max-w-2xl overflow-auto rounded-lg border border-white/10 bg-[#0d121a] p-4 text-white shadow-2xl shadow-black/50 sm:max-h-[min(760px,calc(100vh-3rem))] sm:p-5"
+            aria-modal="true"
+            role="dialog"
+            className="my-auto max-h-[calc(100svh-1.5rem)] w-full max-w-2xl overflow-auto rounded-lg border border-white/10 bg-[#0d121a] p-4 text-white shadow-2xl shadow-black/50 sm:max-h-[min(760px,calc(100svh-3rem))] sm:p-5"
+            onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
