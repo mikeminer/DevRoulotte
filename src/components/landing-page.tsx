@@ -45,8 +45,8 @@ const outcomes = [
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#080b10] text-white">
-      <section className="relative min-h-[88svh] px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen w-full max-w-full overflow-hidden bg-[#080b10] text-white">
+      <section className="relative min-h-[88svh] overflow-hidden px-5 pb-12 pt-4 sm:px-6 lg:px-8">
         <Image
           src="/devroulotte-logo.png"
           alt=""
@@ -58,7 +58,7 @@ export function LandingPage() {
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,#080b10_0%,rgba(8,11,16,0.94)_42%,rgba(8,11,16,0.62)_100%)]" />
 
-        <div className="relative mx-auto grid max-w-7xl gap-12">
+        <div className="relative mx-auto grid w-full min-w-0 max-w-7xl gap-12">
           <header className="flex flex-wrap items-center justify-between gap-3">
             <Link href="/" className="inline-flex min-w-0 items-center gap-3">
               <Image
@@ -93,20 +93,20 @@ export function LandingPage() {
               Il networking, senza appuntamenti.
             </div>
 
-            <div className="grid gap-5">
+            <div className="grid min-w-0 max-w-full gap-5">
               <h1 className="max-w-full break-words text-4xl font-black leading-[0.95] tracking-normal text-white [overflow-wrap:anywhere] sm:text-6xl lg:text-7xl">
                 DevRoulotte.chat
               </h1>
-              <div className="grid min-w-0 gap-2 text-lg font-bold leading-tight text-slate-100 sm:text-2xl">
+              <div className="grid min-w-0 max-w-[42rem] gap-2 text-lg font-bold leading-tight text-slate-100 sm:text-2xl">
                 {painLines.map((line) => (
-                  <p key={line} className="max-w-full">
+                  <p key={line} className="max-w-full break-words">
                     {line}
                   </p>
                 ))}
               </div>
             </div>
 
-            <div className="grid min-w-0 max-w-3xl gap-5 text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
+            <div className="grid min-w-0 max-w-3xl gap-5 text-base leading-7 text-slate-300 [overflow-wrap:anywhere] sm:text-lg sm:leading-8">
               <p>
                 DevRoulotte.chat è una video roulette per developer, builder e
                 maker italiani: entri, vieni matchato con un altro builder e
@@ -122,7 +122,7 @@ export function LandingPage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex min-w-0 max-w-full flex-col gap-3 sm:flex-row">
               <Link
                 href="/chat"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-300 px-5 text-sm font-black text-slate-950 hover:bg-teal-200"
