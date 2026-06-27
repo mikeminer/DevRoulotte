@@ -1,4 +1,6 @@
 export const APP_NAME = "DevRoulotte";
+export const SOURCE_CODE_URL = "https://github.com/mikeminer/DevRoulotte";
+export const LICENSE_NAME = "AGPL-3.0-only";
 
 export const FREE_DAILY_MATCH_LIMIT = Number(
   process.env.FREE_DAILY_MATCH_LIMIT ?? 20,

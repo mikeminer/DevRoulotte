@@ -3,11 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Crown, ShieldCheck, Sparkles, UsersRound } from "lucide-react";
+import {
+  Code2,
+  Crown,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+  UsersRound,
+} from "lucide-react";
 import { AuthPanel } from "@/components/auth-panel";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { VideoChat } from "@/components/video-chat";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
+import { LICENSE_NAME, SOURCE_CODE_URL } from "@/lib/app-config";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ProfileStatus } from "@/lib/types";
 
@@ -173,6 +181,32 @@ export function HomeShell() {
             {!isPremium ? <PremiumUpgrade /> : null}
           </aside>
         </section>
+
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 py-4 text-xs text-slate-500">
+          <span>
+            Codice {LICENSE_NAME}. Marchio e logo DevRoulotte riservati.
+          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href={SOURCE_CODE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <Code2 className="h-3.5 w-3.5" />
+              Source
+            </a>
+            <a
+              href={`${SOURCE_CODE_URL}/blob/main/LICENSE`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <Scale className="h-3.5 w-3.5" />
+              License
+            </a>
+          </div>
+        </footer>
       </div>
     </main>
   );
