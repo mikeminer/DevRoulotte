@@ -118,7 +118,7 @@ $ApiToken = Use-ConfigValue -Config $config -Property "apiToken" -CurrentValue $
 $TurnKeyId = Use-ConfigValue -Config $config -Property "turnKeyId" -CurrentValue $TurnKeyId
 $TurnApiToken = Use-ConfigValue -Config $config -Property "turnApiToken" -CurrentValue $TurnApiToken
 
-if (Is-Placeholder -Value $TurnKeyId -or Is-Placeholder -Value $TurnApiToken) {
+if ((Is-Placeholder -Value $TurnKeyId) -or (Is-Placeholder -Value $TurnApiToken)) {
   Assert-Value -Name "CLOUDFLARE_ACCOUNT_ID" -Value $AccountId
   Assert-Value -Name "CLOUDFLARE_API_TOKEN" -Value $ApiToken
 

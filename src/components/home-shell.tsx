@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Code2,
   Crown,
+  FileText,
   Scale,
   ShieldCheck,
   Sparkles,
@@ -209,6 +210,34 @@ export function HomeShell() {
             Codice {LICENSE_NAME}. Marchio e logo DevRoulotte riservati.
           </span>
           <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/terms"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Privacy
+            </Link>
+            <Link
+              href="/community-rules"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Regole
+            </Link>
+            <Link
+              href="/safety"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Safety
+            </Link>
             <a
               href={SOURCE_CODE_URL}
               target="_blank"

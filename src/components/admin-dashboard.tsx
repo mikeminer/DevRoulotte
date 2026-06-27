@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, Ban, Loader2, RefreshCw, Shield } from "lucide-react";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type AdminData = {
   profiles: Array<Record<string, unknown>>;
@@ -73,6 +74,7 @@ function DataTable({
 }
 
 export function AdminDashboard() {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [token, setToken] = useState("");
   const [data, setData] = useState<AdminData | null>(null);
   const [message, setMessage] = useState("");
@@ -81,13 +83,35 @@ export function AdminDashboard() {
   const [banActorId, setBanActorId] = useState("");
   const [banReason, setBanReason] = useState("Ban manuale admin");
 
+  async function buildAdminHeaders(includeJson = false) {
+    const headers: Record<string, string> = {};
+
+    if (includeJson) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    if (token) {
+      headers["x-admin-token"] = token;
+    }
+
+    const session = supabase
+      ? (await supabase.auth.getSession()).data.session
+      : null;
+
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+
+    return headers;
+  }
+
   async function loadAdmin() {
     setLoading(true);
     setMessage("");
 
     try {
       const response = await fetch("/api/admin/users", {
-        headers: { "x-admin-token": token },
+        headers: await buildAdminHeaders(),
       });
       const payload = await response.json();
 
@@ -110,10 +134,7 @@ export function AdminDashboard() {
     try {
       const response = await fetch("/api/admin/ban", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-token": token,
-        },
+        headers: await buildAdminHeaders(true),
         body: JSON.stringify({
           actorType: banActorType,
           actorId: banActorId,
@@ -155,7 +176,7 @@ export function AdminDashboard() {
 
         <section className="grid gap-3 rounded-lg border border-white/10 bg-white/[0.04] p-4 md:grid-cols-[1fr_auto]">
           <label className="grid gap-1 text-xs text-slate-300">
-            Admin token
+            Admin token fallback
             <input
               className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none"
               value={token}
@@ -163,6 +184,9 @@ export function AdminDashboard() {
               type="password"
               placeholder="ADMIN_ACCESS_TOKEN"
             />
+            <span className="text-slate-500">
+              Login Supabase admin supportato.
+            </span>
           </label>
           <button
             type="button"
@@ -224,7 +248,14 @@ export function AdminDashboard() {
             <DataTable
               title="Utenti registrati"
               rows={data.profiles}
-              columns={["id", "display_name", "language", "country", "created_at"]}
+              columns={[
+                "id",
+                "display_name",
+                "language",
+                "country",
+                "is_admin",
+                "created_at",
+              ]}
             />
             <DataTable
               title="Report"

@@ -87,6 +87,30 @@ export async function createPayPalSubscription(actorKey: string) {
   };
 }
 
+export async function cancelPayPalSubscription(
+  subscriptionId: string,
+  reason: string,
+) {
+  const accessToken = await getPayPalAccessToken();
+  const response = await fetch(
+    `${getPayPalBaseUrl()}/v1/billing/subscriptions/${subscriptionId}/cancel`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "PayPal-Request-Id": crypto.randomUUID(),
+      },
+      body: JSON.stringify({ reason }),
+    },
+  );
+
+  if (!response.ok && response.status !== 204) {
+    const detail = await response.text();
+    throw new Error(`PayPal cancellation failed: ${response.status} ${detail}`);
+  }
+}
+
 export async function verifyPayPalWebhook(
   headers: Headers,
   webhookEvent: unknown,

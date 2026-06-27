@@ -11,9 +11,13 @@ create table if not exists public.profiles (
   age_confirmed_at timestamptz,
   rules_accepted_at timestamptz,
   is_shadow_banned boolean not null default false,
+  is_admin boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  add column if not exists is_admin boolean not null default false;
 
 create table if not exists public.subscriptions (
   id uuid primary key default gen_random_uuid(),
@@ -133,6 +137,25 @@ drop trigger if exists profiles_touch_updated_at on public.profiles;
 create trigger profiles_touch_updated_at
 before update on public.profiles
 for each row execute function public.touch_updated_at();
+
+create or replace function public.protect_profile_admin_fields()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.is_admin is distinct from old.is_admin
+    and coalesce(auth.role(), '') <> 'service_role' then
+    raise exception 'is_admin cannot be changed by client';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_admin_fields on public.profiles;
+create trigger profiles_protect_admin_fields
+before update on public.profiles
+for each row execute function public.protect_profile_admin_fields();
 
 drop trigger if exists subscriptions_touch_updated_at on public.subscriptions;
 create trigger subscriptions_touch_updated_at

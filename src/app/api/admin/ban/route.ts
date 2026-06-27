@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { assertAdmin } from "@/lib/admin-auth";
 import {
   getSupabaseAdmin,
   hasSupabaseServerConfig,
@@ -14,15 +15,6 @@ const banSchema = z.object({
   action: z.enum(["ban", "unban"]).default("ban"),
 });
 
-function assertAdmin(request: NextRequest) {
-  const expected = process.env.ADMIN_ACCESS_TOKEN;
-  const provided = request.headers.get("x-admin-token");
-
-  if (!expected || provided !== expected) {
-    throw new Error("Admin non autorizzato");
-  }
-}
-
 export async function POST(request: NextRequest) {
   if (!hasSupabaseServerConfig()) {
     return NextResponse.json(
@@ -32,7 +24,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    assertAdmin(request);
+    const admin = await assertAdmin(request);
     const body = banSchema.parse(await request.json());
     const supabase = getSupabaseAdmin();
 
@@ -55,6 +47,7 @@ export async function POST(request: NextRequest) {
       reason: body.reason,
       shadow: false,
       active: true,
+      created_by: admin.type === "user" ? admin.userId : null,
     });
 
     return NextResponse.json({ ok: true });

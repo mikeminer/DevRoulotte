@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertAdmin } from "@/lib/admin-auth";
 import {
   getSupabaseAdmin,
   hasSupabaseServerConfig,
 } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
-
-function assertAdmin(request: NextRequest) {
-  const expected = process.env.ADMIN_ACCESS_TOKEN;
-  const provided = request.headers.get("x-admin-token");
-
-  if (!expected || provided !== expected) {
-    throw new Error("Admin non autorizzato");
-  }
-}
 
 export async function GET(request: NextRequest) {
   if (!hasSupabaseServerConfig()) {
@@ -24,7 +16,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    assertAdmin(request);
+    await assertAdmin(request);
     const supabase = getSupabaseAdmin();
 
     const [profiles, subscriptions, reports, bans, matches] = await Promise.all([

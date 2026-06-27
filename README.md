@@ -55,7 +55,7 @@ $env:SUPABASE_DB_URL="postgresql://postgres.your-project:password@aws-0-eu-centr
 Tabelle principali:
 
 - `auth.users`: utenti registrati Supabase
-- `profiles`: profili registrati
+- `profiles`: profili registrati e ruolo admin
 - `subscriptions`: stato PayPal Premium
 - `reports`: segnalazioni
 - `bans`: ban manuali e shadowban
@@ -63,6 +63,27 @@ Tabelle principali:
 - `match_queue`: coda matchmaking
 
 Le chiamate audio/video non vengono salvate. I log contengono solo actor id, stato, timestamp e canale di signaling.
+
+### Admin
+
+La dashboard `/admin` accetta due modalita':
+
+- `ADMIN_ACCESS_TOKEN` come fallback operativo.
+- Login Supabase con `profiles.is_admin = true`.
+
+Per promuovere un utente registrato ad admin, esegui nel SQL Editor Supabase:
+
+```sql
+update public.profiles
+set is_admin = true
+where id = (
+  select id
+  from auth.users
+  where email = 'admin@example.com'
+);
+```
+
+Il campo `is_admin` e' protetto da trigger: un utente autenticato non puo' impostarlo dal client.
 
 ## Cloudflare STUN/TURN
 
@@ -104,6 +125,8 @@ Lo script crea Product, Plan Premium `3.99 EUR` mensile con trial gratuito di 5 
 Se hai gia' creato piano o webhook nel dashboard PayPal, puoi valorizzare `planId` e `webhookId` nel file `.paypal-credentials.local.json` e lo script li riusera'.
 
 L'upgrade chiama `/api/paypal/create-subscription`, crea la subscription server-side e reindirizza alla approval URL PayPal. Il webhook verifica la firma con PayPal prima di aggiornare Supabase.
+
+La cancellazione Premium e' disponibile dal profilo e chiama `/api/paypal/cancel-subscription`, che annulla la subscription PayPal server-side e aggiorna Supabase. L'utente puo' sempre cancellare anche dal proprio account PayPal.
 
 Riferimenti: [PayPal Subscriptions](https://developer.paypal.com/docs/subscriptions/integrate/) e [PayPal Webhooks](https://developer.paypal.com/api/rest/webhooks/).
 
@@ -148,6 +171,9 @@ npm run build
 - Dashboard admin con report, ban/sban, subscription e match logs
 - PayPal webhook verificato server-side
 - Cloudflare TURN con credenziali temporanee
+- Pagine Terms, Privacy, Regole community, Safety e Rimborsi
+- Cancellazione Premium dal profilo
+- Cleanup endpoint protetto per coda e match log stale
 
 ## Sicurezza e limiti MVP
 
@@ -156,6 +182,22 @@ npm run build
 - Il rate limit in memoria è sufficiente per MVP/dev, ma su Vercel multi-instance va spostato su DB/Redis/Upstash se il traffico cresce.
 - Il matchmaking API non è una transazione serializzata perfetta: per produzione conviene spostare la selezione match in una funzione Postgres `rpc` con lock.
 - La moderazione anti-nudità è policy/report-based. Per produzione serve un sistema di trust & safety più forte, sempre senza registrare audio/video.
+
+## Cleanup coda
+
+L'endpoint `/api/cron/cleanup` elimina righe stale da `match_queue` e chiude match log attivi troppo vecchi. Proteggilo con:
+
+```txt
+CRON_SECRET=una-stringa-lunga-casuale
+```
+
+Chiamata:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" https://devroulotte.chat/api/cron/cleanup
+```
+
+In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni manuali. Se vuoi automatizzarlo, configura un Vercel Cron o un monitor esterno gratuito che chiami questo endpoint.
 
 ## TODO credenziali reali
 
@@ -172,6 +214,7 @@ npm run build
 - `PAYPAL_PLAN_ID`
 - `PAYPAL_WEBHOOK_ID`
 - `ADMIN_ACCESS_TOKEN`
+- `CRON_SECRET`
 
 ## Policy prodotto
 

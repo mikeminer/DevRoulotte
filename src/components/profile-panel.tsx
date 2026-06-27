@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Crown, RefreshCw, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  Crown,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
@@ -14,6 +21,8 @@ export function ProfilePanel() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<ProfileStatus | null>(null);
   const [message, setMessage] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -57,6 +66,53 @@ export function ProfilePanel() {
   }, [loadProfile]);
 
   const isAuthenticated = Boolean(session);
+  const canCancelPremium =
+    isAuthenticated &&
+    Boolean(profile?.subscriptionStatus) &&
+    !["none", "cancelled", "expired"].includes(
+      profile?.subscriptionStatus ?? "none",
+    );
+
+  async function cancelPremium() {
+    if (
+      !window.confirm(
+        "Vuoi annullare Premium? La subscription PayPal verra' cancellata.",
+      )
+    ) {
+      return;
+    }
+
+    setCancelLoading(true);
+    setActionMessage("");
+
+    try {
+      const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
+      const response = await fetch("/api/paypal/cancel-subscription", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          reason: "Cancelled by user from DevRoulotte profile",
+        }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        message?: string;
+      };
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.message ?? "Cancellazione non riuscita");
+      }
+
+      setActionMessage("Premium cancellato. Lo stato e' stato aggiornato.");
+      await loadProfile();
+    } catch (error) {
+      setActionMessage(
+        error instanceof Error ? error.message : "Cancellazione non riuscita",
+      );
+    } finally {
+      setCancelLoading(false);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#080b10] px-4 py-5 text-white sm:px-6">
@@ -133,6 +189,38 @@ export function ProfilePanel() {
         </section>
 
         {!profile?.isPremium && isAuthenticated ? <PremiumUpgrade /> : null}
+
+        {canCancelPremium ? (
+          <section className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-bold">Gestisci Premium</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Puoi annullare la subscription dal profilo o dal dashboard
+                  PayPal.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void cancelPremium()}
+                disabled={cancelLoading}
+                className="inline-flex h-10 items-center gap-2 rounded-md border border-rose-300/30 px-3 text-sm font-semibold text-rose-100 hover:bg-rose-300/10 disabled:opacity-60"
+              >
+                {cancelLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <XCircle className="h-4 w-4" />
+                )}
+                Annulla Premium
+              </button>
+            </div>
+            {actionMessage ? (
+              <p className="mt-4 rounded-md border border-amber-300/20 bg-amber-300/10 p-3 text-sm text-amber-100">
+                {actionMessage}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
       </div>
     </main>
   );
