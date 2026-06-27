@@ -39,6 +39,9 @@ Senza credenziali reali l'app renderizza la UI, ma matchmaking, auth, admin, Pay
 4. Copia Project URL e publishable/anon key in `.env.local`.
 5. Copia la service role/secret key in `SUPABASE_SERVICE_ROLE_KEY`.
 6. Abilita Realtime nel progetto. L'MVP usa Broadcast client-side, non replica tabelle.
+7. In Authentication > URL Configuration aggiungi gli URL di redirect per il reset password: `https://devroulotte.chat/reset-password`, `https://www.devroulotte.chat/reset-password`, `http://localhost:3000/reset-password` e `http://127.0.0.1:3000/reset-password`.
+
+Nota: per Supabase hosted questi redirect vanno salvati nel dashboard del progetto. `supabase/config.toml` mantiene l'equivalente configurazione locale/versionata.
 
 Configurazione rapida da terminale, dopo aver recuperato le chiavi dal dashboard Supabase:
 

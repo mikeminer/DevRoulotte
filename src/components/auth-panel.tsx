@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { LogIn, LogOut, Mail, UserPlus } from "lucide-react";
+import { KeyRound, LogIn, LogOut, Mail, UserPlus } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -48,6 +48,32 @@ export function AuthPanel() {
     }
   }
 
+  async function requestPasswordReset() {
+    if (!supabase) {
+      setMessage("Configura Supabase per abilitare il reset password.");
+      return;
+    }
+
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      setMessage("Inserisci la tua email per ricevere il link di reset.");
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      normalizedEmail,
+      {
+        redirectTo: `${window.location.origin}/reset-password`,
+      },
+    );
+
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage("Link di reset inviato. Controlla la tua email.");
+    }
+  }
+
   async function handleAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await authenticate("in");
@@ -88,6 +114,7 @@ export function AuthPanel() {
               onChange={(event) => setEmail(event.target.value)}
               type="email"
               placeholder="tu@email.it"
+              autoComplete="username"
             />
           </label>
           <label className="grid gap-1 text-xs text-slate-300">
@@ -99,6 +126,7 @@ export function AuthPanel() {
               type="password"
               minLength={6}
               placeholder="minimo 6 caratteri"
+              autoComplete="current-password"
             />
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -118,6 +146,14 @@ export function AuthPanel() {
               Registrati
             </button>
           </div>
+          <button
+            type="button"
+            onClick={requestPasswordReset}
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white"
+          >
+            <KeyRound className="h-4 w-4" />
+            Password dimenticata?
+          </button>
         </form>
       ) : (
         <div className="flex items-center gap-2 rounded-md border border-teal-300/20 bg-teal-300/10 px-3 py-2 text-sm text-teal-100">
