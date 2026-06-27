@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Crown, RefreshCw, ShieldCheck } from "lucide-react";
+import type { Session } from "@supabase/supabase-js";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -10,6 +11,7 @@ import type { ProfileStatus } from "@/lib/types";
 
 export function ProfilePanel() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<ProfileStatus | null>(null);
   const [message, setMessage] = useState("");
 
@@ -31,12 +33,30 @@ export function ProfilePanel() {
   }, [supabase]);
 
   useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      void loadProfile();
+    });
+
+    return () => subscription.unsubscribe();
+  }, [loadProfile, supabase]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
       void loadProfile();
     }, 0);
 
     return () => window.clearTimeout(timer);
   }, [loadProfile]);
+
+  const isAuthenticated = Boolean(session);
 
   return (
     <main className="min-h-screen bg-[#080b10] px-4 py-5 text-white sm:px-6">
@@ -112,7 +132,7 @@ export function ProfilePanel() {
           </dl>
         </section>
 
-        {!profile?.isPremium ? <PremiumUpgrade /> : null}
+        {!profile?.isPremium && isAuthenticated ? <PremiumUpgrade /> : null}
       </div>
     </main>
   );

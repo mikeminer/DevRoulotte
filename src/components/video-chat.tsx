@@ -17,6 +17,7 @@ import type { MatchJoinResponse, MatchPayload } from "@/lib/types";
 
 type VideoChatProps = {
   isPremium: boolean;
+  isAuthenticated: boolean;
   onProfileRefresh: () => void;
 };
 
@@ -78,7 +79,11 @@ async function getIceServers() {
     : [{ urls: "stun:stun.cloudflare.com:3478" }];
 }
 
-export function VideoChat({ isPremium, onProfileRefresh }: VideoChatProps) {
+export function VideoChat({
+  isPremium,
+  isAuthenticated,
+  onProfileRefresh,
+}: VideoChatProps) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -540,38 +545,40 @@ export function VideoChat({ isPremium, onProfileRefresh }: VideoChatProps) {
             </label>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <label className="grid gap-1 text-xs text-slate-300">
-              Lingua
-              <select
-                className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
-                value={preferredLanguage}
-                onChange={(event) => setPreferredLanguage(event.target.value)}
-                disabled={!isPremium}
-              >
-                {languages.map((language) => (
-                  <option key={language.value} value={language.value}>
-                    {language.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-1 text-xs text-slate-300">
-              Paese
-              <select
-                className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
-                value={preferredCountry}
-                onChange={(event) => setPreferredCountry(event.target.value)}
-                disabled={!isPremium}
-              >
-                {countries.map((country) => (
-                  <option key={country.value} value={country.value}>
-                    {country.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          {isAuthenticated ? (
+            <div className="grid grid-cols-2 gap-2">
+              <label className="grid gap-1 text-xs text-slate-300">
+                Lingua
+                <select
+                  className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
+                  value={preferredLanguage}
+                  onChange={(event) => setPreferredLanguage(event.target.value)}
+                  disabled={!isPremium}
+                >
+                  {languages.map((language) => (
+                    <option key={language.value} value={language.value}>
+                      {language.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs text-slate-300">
+                Paese
+                <select
+                  className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
+                  value={preferredCountry}
+                  onChange={(event) => setPreferredCountry(event.target.value)}
+                  disabled={!isPremium}
+                >
+                  {countries.map((country) => (
+                    <option key={country.value} value={country.value}>
+                      {country.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-3 gap-2">
             <button

@@ -1,16 +1,38 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Crown, Loader2 } from "lucide-react";
+import type { Session } from "@supabase/supabase-js";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
   async function startUpgrade() {
+    if (!session) {
+      setMessage("Accedi o registrati per attivare Premium.");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -55,11 +77,11 @@ export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
       <button
         type="button"
         onClick={startUpgrade}
-        disabled={loading}
+        disabled={loading || !session}
         className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-amber-300 px-4 text-sm font-bold text-slate-950 hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-        Upgrade Premium
+        {session ? "Upgrade Premium" : "Accedi per Premium"}
       </button>
       {message ? <p className="text-xs text-amber-100">{message}</p> : null}
     </div>

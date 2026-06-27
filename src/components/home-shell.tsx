@@ -11,6 +11,7 @@ import {
   Sparkles,
   UsersRound,
 } from "lucide-react";
+import type { Session } from "@supabase/supabase-js";
 import { AuthPanel } from "@/components/auth-panel";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { VideoChat } from "@/components/video-chat";
@@ -21,6 +22,7 @@ import type { ProfileStatus } from "@/lib/types";
 
 export function HomeShell() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<ProfileStatus | null>(null);
   const [profileMessage, setProfileMessage] = useState("");
 
@@ -46,6 +48,22 @@ export function HomeShell() {
   }, [supabase]);
 
   useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      void refreshProfile();
+    });
+
+    return () => subscription.unsubscribe();
+  }, [refreshProfile, supabase]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
       void refreshProfile();
     }, 0);
@@ -54,6 +72,7 @@ export function HomeShell() {
   }, [refreshProfile]);
 
   const isPremium = Boolean(profile?.isPremium);
+  const isAuthenticated = Boolean(session);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-4 text-white sm:px-6 lg:px-8">
@@ -83,9 +102,9 @@ export function HomeShell() {
                 <Crown className="h-4 w-4" />
                 Premium
               </span>
-            ) : (
+            ) : isAuthenticated ? (
               <PremiumUpgrade compact />
-            )}
+            ) : null}
             <Link
               href="/profile"
               className="inline-flex h-9 items-center rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-200 hover:bg-white/10"
@@ -105,6 +124,7 @@ export function HomeShell() {
           <div className="grid gap-4">
             <VideoChat
               isPremium={isPremium}
+              isAuthenticated={isAuthenticated}
               onProfileRefresh={() => void refreshProfile()}
             />
 
@@ -125,16 +145,18 @@ export function HomeShell() {
                     : profile?.freeDailyRemaining ?? "-"}
                 </p>
               </div>
-              <div className="rounded-lg border border-amber-300/20 bg-amber-300/10 p-4">
-                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-100">
-                  <Sparkles className="h-4 w-4" />
-                  Premium
+              {isAuthenticated ? (
+                <div className="rounded-lg border border-amber-300/20 bg-amber-300/10 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-100">
+                    <Sparkles className="h-4 w-4" />
+                    Premium
+                  </div>
+                  <p className="text-xs leading-5 text-amber-100/75">
+                    3,99 €/mese, prova gratuita 5 giorni, match illimitati,
+                    filtri lingua/Paese e priorità in coda.
+                  </p>
                 </div>
-                <p className="text-xs leading-5 text-amber-100/75">
-                  3,99 €/mese, prova gratuita 5 giorni, match illimitati,
-                  filtri lingua/Paese e priorità in coda.
-                </p>
-              </div>
+              ) : null}
               <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <ShieldCheck className="h-4 w-4 text-teal-200" />
@@ -178,7 +200,7 @@ export function HomeShell() {
                 </p>
               ) : null}
             </section>
-            {!isPremium ? <PremiumUpgrade /> : null}
+            {!isPremium && isAuthenticated ? <PremiumUpgrade /> : null}
           </aside>
         </section>
 

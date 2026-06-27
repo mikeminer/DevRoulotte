@@ -28,6 +28,17 @@ export async function POST(request: NextRequest) {
 
   try {
     const actor = await getRequestActor(request);
+
+    if (actor.type !== "user") {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Accedi o registrati per attivare Premium.",
+        },
+        { status: 401 },
+      );
+    }
+
     const subscription = await createPayPalSubscription(actor.key);
     const approvalUrl = subscription.links?.find(
       (link) => link.rel === "approve",
