@@ -1,9 +1,9 @@
-export const COOKIE_CONSENT_STORAGE_KEY = "devroulotte_cookie_consent_v1";
+export const COOKIE_CONSENT_STORAGE_KEY = "devroulotte_cookie_consent_v2";
 export const COOKIE_CONSENT_OPEN_EVENT = "devroulotte:open-cookie-preferences";
 export const COOKIE_CONSENT_UPDATED_EVENT = "devroulotte:cookie-consent-updated";
 
 export type CookieConsent = {
-  version: 1;
+  version: 2;
   necessary: true;
   preferences: boolean;
   analytics: boolean;
@@ -26,7 +26,7 @@ export function buildCookieConsent(
   choices: CookieConsentChoices,
 ): CookieConsent {
   return {
-    version: 1,
+    version: 2,
     necessary: true,
     ...choices,
     updatedAt: new Date().toISOString(),
@@ -41,12 +41,12 @@ export function parseCookieConsent(value: string | null): CookieConsent | null {
   try {
     const parsed = JSON.parse(value) as Partial<CookieConsent>;
 
-    if (parsed.version !== 1 || parsed.necessary !== true) {
+    if (parsed.version !== 2 || parsed.necessary !== true) {
       return null;
     }
 
     return {
-      version: 1,
+      version: 2,
       necessary: true,
       preferences: Boolean(parsed.preferences),
       analytics: Boolean(parsed.analytics),

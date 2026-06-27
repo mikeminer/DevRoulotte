@@ -61,6 +61,7 @@ Le pagine sono bozze operative. Prima del lancio pubblico devono essere revision
 - Supabase: Auth, Postgres, Realtime.
 - Cloudflare: STUN/TURN e rete.
 - PayPal: subscription e pagamenti.
+- Google Analytics 4: metriche aggregate solo dopo consenso Statistiche.
 - GitHub: repository pubblico AGPL.
 
 Da validare:
@@ -83,7 +84,8 @@ Da validare:
 - Definire procedura data breach.
 - Valutare DPIA per videochat 18+, moderazione, report, ban e potenziali dati sensibili emersi nei dettagli report.
 - Valutare minimizzazione dei dettagli report e filtri lato UI.
-- Valutare cookie/localStorage notice per guest id e Supabase session.
+- Valutare cookie/localStorage notice per guest id, Supabase session e Google Analytics 4 opzionale.
+- Confermare configurazione Consent Mode, blocco preventivo GA, retention cookie/statistiche e trasferimenti dati Google.
 
 ## DSA/moderazione checklist
 
@@ -138,7 +140,7 @@ DevRoulotte permette comunicazione tra utenti e segnalazioni di contenuti/compor
 8. Quali testi obbligatori servono per trial gratuito, rinnovo automatico, cancellazione e rimborsi?
 9. Quali dati societari e contatti devono comparire in Terms/Privacy/Refunds?
 10. Quale giurisdizione/foro/legge applicabile e' corretta per il titolare reale?
-11. I fornitori Vercel/Supabase/Cloudflare/PayPal sono configurati correttamente come processor/controller e con trasferimenti dati validi?
+11. I fornitori Vercel/Supabase/Cloudflare/PayPal/Google Analytics sono configurati correttamente come processor/controller e con trasferimenti dati validi?
 12. Come gestire segnalazioni di contenuti illegali, minori o minacce?
 
 ## Azioni consigliate prima del pubblico

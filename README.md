@@ -255,6 +255,7 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `PAYPAL_WEBHOOK_ID`
 - `ADMIN_ACCESS_TOKEN`
 - `CRON_SECRET`
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID` opzionale, solo se vuoi Google Analytics 4
 
 ## Policy prodotto
 
@@ -263,6 +264,13 @@ DevRoulotte è progettata solo per utenti 18+. Non registra chiamate, non salva 
 ## Cookie e consenso
 
 L'app include un banner cookie con rifiuto opzionali, accetta tutto e personalizzazione granulare. Le categorie opzionali sono disattivate di default. Gli strumenti tecnici necessari coprono login, ID ospite, conferma 18+, regole, limiti Free, sicurezza e salvataggio della scelta. La pagina `/cookies` descrive gli strumenti attuali e dal pulsante Cookie l'utente puo' modificare o revocare le scelte.
+
+Google Analytics 4 e' opzionale e viene caricato solo se:
+
+1. `NEXT_PUBLIC_GA_MEASUREMENT_ID` contiene un Measurement ID GA4, ad esempio `G-XXXXXXXXXX`.
+2. L'utente accetta la categoria Statistiche nel centro preferenze cookie.
+
+Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, il tag GA non viene caricato e l'app prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
 
 ## Revisione legale
 

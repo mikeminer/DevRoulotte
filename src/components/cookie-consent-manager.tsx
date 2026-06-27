@@ -37,7 +37,7 @@ const optionalCategories: Category[] = [
   {
     id: "analytics",
     title: "Statistiche",
-    body: "Servirebbero per misurare l'uso del servizio. Al momento non sono attivi cookie analytics o pixel statistici.",
+    body: "Abilitano Google Analytics 4 per misurare visite, pagine viste ed eventi tecnici aggregati. Restano spenti fino al tuo consenso.",
   },
   {
     id: "marketing",
@@ -163,8 +163,9 @@ export function CookieConsentManager() {
               </div>
               <p className="text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
                 Usiamo strumenti tecnici necessari per sicurezza, login,
-                preferenze 18+, limiti Free e consenso cookie. Analytics e
-                marketing restano disattivati finche&apos; non li accetti.
+                preferenze 18+, limiti Free e consenso cookie. Le statistiche
+                con Google Analytics e il marketing restano disattivati
+                finche&apos; non li accetti.
               </p>
               <Link
                 href="/cookies"
