@@ -195,6 +195,12 @@ npm run typecheck
 npm run build
 ```
 
+## Test matchmaking su due dispositivi
+
+Per provare un match tra due computer, usa due identità diverse: due account diversi, oppure un computer loggato e l'altro come ospite/incognito. Se usi lo stesso account Supabase su entrambi i dispositivi, DevRoulotte li tratta come lo stesso attore e non li mette in match tra loro.
+
+Il matching passa da Supabase `match_queue`, quindi funziona anche su Vercel senza memoria condivisa tra funzioni. Il signaling WebRTC usa Supabase Realtime Broadcast: ogni peer invia un messaggio `ready` e il caller ritenta l'offer per qualche secondo, così l'offer non viene perso se l'altro browser entra nel canale leggermente dopo.
+
 ## Funzionalità incluse
 
 - Landing page italiana su `/` con pitch DevRoulotte.chat e CTA verso `/chat`

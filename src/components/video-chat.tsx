@@ -93,6 +93,7 @@ export function VideoChat({
   const matchRef = useRef<MatchPayload | null>(null);
   const searchingRef = useRef(false);
   const clientIdRef = useRef("");
+  const offerRetryTimersRef = useRef<number[]>([]);
 
   const [ageConfirmed, setAgeConfirmed] = useState(
     () =>
@@ -144,8 +145,15 @@ export function VideoChat({
     return () => window.clearInterval(interval);
   }, [nextLockedUntil]);
 
+  const clearOfferRetries = useCallback(() => {
+    offerRetryTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    offerRetryTimersRef.current = [];
+  }, []);
+
   const cleanupConnection = useCallback(async (keepCamera: boolean) => {
     const currentMatch = matchRef.current;
+
+    clearOfferRetries();
 
     if (channelRef.current) {
       await channelRef.current.send({
@@ -185,7 +193,7 @@ export function VideoChat({
     matchRef.current = null;
     setMatch(null);
     setElapsed(0);
-  }, [supabase]);
+  }, [clearOfferRetries, supabase]);
 
   useEffect(() => {
     return () => {
@@ -273,19 +281,28 @@ export function VideoChat({
       return;
     }
 
-    if (message.kind === "offer") {
-      await pc.setRemoteDescription(message.description);
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      await sendSignal({ kind: "answer", description: answer });
-    }
+    try {
+      if (message.kind === "offer") {
+        await pc.setRemoteDescription(message.description);
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await sendSignal({ kind: "answer", description: answer });
+      }
 
-    if (message.kind === "answer") {
-      await pc.setRemoteDescription(message.description);
-    }
+      if (
+        message.kind === "answer" &&
+        pc.signalingState === "have-local-offer"
+      ) {
+        await pc.setRemoteDescription(message.description);
+        clearOfferRetries();
+      }
 
-    if (message.kind === "candidate") {
-      await pc.addIceCandidate(message.candidate).catch(() => null);
+      if (message.kind === "candidate") {
+        await pc.addIceCandidate(message.candidate).catch(() => null);
+      }
+    } catch {
+      setStatus("failed");
+      setMessage("Signaling WebRTC non riuscito. Puoi premere Next.");
     }
   }
 
@@ -331,6 +348,7 @@ export function VideoChat({
 
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === "connected") {
+        clearOfferRetries();
         setStatus("connected");
         setMessage("Connesso.");
       }
@@ -344,6 +362,47 @@ export function VideoChat({
       }
     };
 
+    async function sendOffer() {
+      if (nextMatch.role !== "caller" || pc.connectionState === "closed") {
+        return;
+      }
+
+      if (pc.remoteDescription?.type === "answer") {
+        clearOfferRetries();
+        return;
+      }
+
+      if (!pc.localDescription || pc.localDescription.type !== "offer") {
+        if (pc.signalingState !== "stable") {
+          return;
+        }
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+      }
+
+      const localDescription = pc.localDescription;
+
+      if (!localDescription) {
+        return;
+      }
+
+      await sendSignal({
+        kind: "offer",
+        description: localDescription,
+      });
+    }
+
+    function scheduleOfferRetries() {
+      clearOfferRetries();
+      offerRetryTimersRef.current = [250, 1000, 2200, 4000, 6500].map(
+        (delay) =>
+          window.setTimeout(() => {
+            void sendOffer();
+          }, delay),
+      );
+    }
+
     const channel = supabase
       .channel(nextMatch.channelName, {
         config: {
@@ -356,16 +415,35 @@ export function VideoChat({
       .on("broadcast", { event: "control" }, ({ payload }) => {
         const control = payload as { sender?: string; kind?: string };
 
-        if (control.sender !== clientIdRef.current && control.kind === "leave") {
+        if (control.sender === clientIdRef.current) {
+          return;
+        }
+
+        if (control.kind === "ready") {
+          if (nextMatch.role === "caller") {
+            void sendOffer();
+          }
+        }
+
+        if (control.kind === "leave") {
           setStatus("failed");
           setMessage("L'altra persona ha lasciato la chiamata.");
         }
       })
       .subscribe(async (subscriptionStatus) => {
-        if (subscriptionStatus === "SUBSCRIBED" && nextMatch.role === "caller") {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          await sendSignal({ kind: "offer", description: offer });
+        if (subscriptionStatus === "SUBSCRIBED") {
+          await channel.send({
+            type: "broadcast",
+            event: "control",
+            payload: { sender: clientIdRef.current, kind: "ready" },
+          });
+
+          if (nextMatch.role === "caller") {
+            setMessage("Peer trovato. Attendo il canale dell'altra persona.");
+            scheduleOfferRetries();
+          } else {
+            setMessage("Peer trovato. Attendo l'offerta WebRTC.");
+          }
         }
       });
 
