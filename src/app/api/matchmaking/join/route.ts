@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   FREE_CALL_LIMIT_SECONDS,
   FREE_DAILY_MATCH_LIMIT,
+  MATCH_QUEUE_ACTIVE_SECONDS,
   MATCH_QUEUE_STALE_SECONDS,
   NEXT_COOLDOWN_SECONDS,
   PREMIUM_CALL_LIMIT_SECONDS,
@@ -223,6 +224,9 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseAdmin();
     const premium = await isPremium(actor);
     const dailyUsed = await getDailyUsage(actor);
+    const activeCutoff = new Date(
+      Date.now() - MATCH_QUEUE_ACTIVE_SECONDS * 1000,
+    ).toISOString();
     const staleCutoff = new Date(
       Date.now() - MATCH_QUEUE_STALE_SECONDS * 1000,
     ).toISOString();
@@ -315,7 +319,7 @@ export async function POST(request: NextRequest) {
       .select("*")
       .eq("status", "waiting")
       .neq("actor_id", actor.id)
-      .gte("last_seen_at", staleCutoff)
+      .gte("last_seen_at", activeCutoff)
       .order("is_premium", { ascending: false })
       .order("queued_at", { ascending: true })
       .limit(20)
@@ -325,6 +329,7 @@ export async function POST(request: NextRequest) {
       actorType: actor.type,
       actorHash: hashId(actor.id),
       candidates: candidates?.length ?? 0,
+      activeWindowSeconds: MATCH_QUEUE_ACTIVE_SECONDS,
     });
 
     const filteredCandidates = (candidates ?? []).filter((candidate) => {
@@ -445,7 +450,7 @@ export async function POST(request: NextRequest) {
       .eq("actor_type", peer.actor_type)
       .eq("actor_id", peer.actor_id)
       .eq("status", "waiting")
-      .gte("last_seen_at", staleCutoff)
+      .gte("last_seen_at", activeCutoff)
       .select("actor_type,actor_id")
       .maybeSingle();
 

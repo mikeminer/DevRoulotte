@@ -201,6 +201,8 @@ Per provare un match tra due computer, usa due identità diverse: due account di
 
 Il matching passa da Supabase `match_queue`, quindi funziona anche su Vercel senza memoria condivisa tra funzioni. Il signaling WebRTC usa Supabase Realtime Broadcast: ogni peer invia un messaggio `ready` e il caller ritenta l'offer per qualche secondo, così l'offer non viene perso se l'altro browser entra nel canale leggermente dopo.
 
+Durante il test tieni entrambe le pagine `/chat` aperte e attive dopo aver concesso webcam/microfono. Per evitare match fantasma, il backend crea match solo con peer visti negli ultimi `MATCH_QUEUE_ACTIVE_SECONDS` secondi, mentre `MATCH_QUEUE_STALE_SECONDS` resta la finestra piu' lunga usata per pulire la coda.
+
 ## Funzionalità incluse
 
 - Landing page italiana su `/` con pitch DevRoulotte.chat e CTA verso `/chat`

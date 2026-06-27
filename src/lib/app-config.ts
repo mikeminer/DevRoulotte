@@ -26,6 +26,10 @@ export const MATCH_QUEUE_STALE_SECONDS = Number(
   process.env.MATCH_QUEUE_STALE_SECONDS ?? 45,
 );
 
+export const MATCH_QUEUE_ACTIVE_SECONDS = Number(
+  process.env.MATCH_QUEUE_ACTIVE_SECONDS ?? 6,
+);
+
 export const REPORT_REASONS = [
   "nudity",
   "spam",

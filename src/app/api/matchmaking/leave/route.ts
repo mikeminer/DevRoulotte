@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getRequestActor } from "@/lib/session";
@@ -12,6 +13,20 @@ const leaveSchema = z.object({
   matchId: z.string().uuid().optional(),
   reason: z.string().max(80).optional().default("left"),
 });
+
+function hashId(id: string) {
+  return createHash("sha256").update(id).digest("hex").slice(0, 10);
+}
+
+function logLeave(event: string, data: Record<string, string | boolean | null>) {
+  console.info(
+    JSON.stringify({
+      scope: "matchmaking",
+      event,
+      ...data,
+    }),
+  );
+}
 
 async function readLeaveBody(request: NextRequest) {
   const rawBody = await request.text();
@@ -33,11 +48,20 @@ export async function POST(request: NextRequest) {
     const body = leaveSchema.parse(await readLeaveBody(request));
     const supabase = getSupabaseAdmin();
 
-    await supabase
+    const deletedQueue = await supabase
       .from("match_queue")
       .delete()
       .eq("actor_type", actor.type)
-      .eq("actor_id", actor.id);
+      .eq("actor_id", actor.id)
+      .select("actor_type");
+
+    logLeave("leave", {
+      actorType: actor.type,
+      actorHash: hashId(actor.id),
+      matchId: body.matchId ?? null,
+      reason: body.reason,
+      removedQueue: Boolean(deletedQueue.data?.length),
+    });
 
     if (body.matchId) {
       const { data: match } = await supabase
