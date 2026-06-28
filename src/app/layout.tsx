@@ -45,6 +45,7 @@ window.gtag('consent', 'default', {
   analytics_storage: 'denied',
   wait_for_update: 500
 });
+window.gtag('set', 'ads_data_redaction', true);
 window.gtag('js', new Date());
 window.gtag('config', ${gaMeasurementIdJson}, {
   send_page_view: false
@@ -68,11 +69,11 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {gaMeasurementId ? (
           <>
+            <script dangerouslySetInnerHTML={{ __html: googleTagScript }} />
             <script
               async
               src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
             />
-            <script dangerouslySetInnerHTML={{ __html: googleTagScript }} />
           </>
         ) : null}
       </head>
