@@ -18,6 +18,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { AuthPanel } from "@/components/auth-panel";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
+import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VideoChat } from "@/components/video-chat";
@@ -264,6 +265,7 @@ export function HomeShell() {
             Codice {LICENSE_NAME}. Marchio e logo DevRoulotte riservati.
           </span>
           <div className="flex flex-wrap items-center gap-3">
+            <GdprFooterBadge />
             <Link
               href="/terms"
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"

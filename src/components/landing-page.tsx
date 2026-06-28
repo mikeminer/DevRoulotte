@@ -12,6 +12,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
+import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   CONTACT_EMAIL,
@@ -375,6 +376,7 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <span>DevRoulotte.chat · solo utenti 18+ · niente registrazioni audio/video.</span>
           <div className="flex flex-wrap items-center gap-3">
+            <GdprFooterBadge />
             <Link href="/privacy" className="text-slate-300 hover:text-white">
               Privacy
             </Link>

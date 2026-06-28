@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Linkedin, Mail } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
+import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import {
   CONTACT_EMAIL,
   CONTACT_MAILTO,
@@ -59,6 +60,7 @@ export function LegalPage({
         </div>
 
         <footer className="flex flex-wrap items-center gap-3 border-t border-white/10 py-5 text-xs text-slate-400">
+          <GdprFooterBadge />
           <a
             href={CONTACT_MAILTO}
             className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
