@@ -341,14 +341,6 @@ export function LandingPage() {
 
       <section className="px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl justify-items-start gap-6">
-          <Image
-            src="/devroulotte-banner.gif"
-            alt="DevRoulotte"
-            width={640}
-            height={162}
-            unoptimized
-            className="brand-wordmark h-auto w-56 sm:w-72"
-          />
           <div className="grid gap-5 text-3xl font-black leading-tight tracking-normal text-white sm:text-5xl">
             <p>Benvenuto a bordo di DevRoulotte.</p>
             <p className="text-teal-200">
