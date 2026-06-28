@@ -21,12 +21,13 @@ import {
 const painLines = [
   "Niente “ci aggiorniamo”.",
   "Niente Calendly e call fissate tra 17 giorni.",
-  "Niente community dove tutti lurkano e nessuno parla.",
+  "Niente community dove molti sono in panchina e nessuno parla.",
 ];
 
 const heroParagraphs = [
   "DevRoulotte nasce per saltare tutto il teatro del networking moderno.",
   "Entri nella roulotte, accendi la webcam, vieni matchato con un altro builder italiano e hai pochi minuti per capire chi hai davanti.",
+  "Un approccio vivo 1:1: il networking speed-date per chi vuole conoscersi e costruire insieme.",
   "Magari un futuro co-founder, un dev con un repository mezzo rotto, un genio sottovalutato o qualcuno che ha deployato su Vercel alle 3 di notte e vuole raccontarlo a qualcuno.",
   "Qui c'è WebRTC, matching, signaling e una missione semplice: far parlare i builder italiani senza organizzare convegni, call o gruppi Telegram.",
 ];
@@ -213,7 +214,7 @@ export function LandingPage() {
           <div className="grid gap-5">
             <p className="inline-flex w-fit items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-xs font-bold uppercase text-slate-300">
               <MessageCircleOff className="h-4 w-4 text-teal-200" />
-              Non un&apos;altra community silenziosa
+              Approccio vivo 1:1
             </p>
             <h2 className="text-3xl font-black tracking-normal text-white sm:text-4xl">
               Un camper digitale nel caos dell&apos;internet italiano.
