@@ -34,6 +34,13 @@ try {
 
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 const gaMeasurementIdJson = JSON.stringify(gaMeasurementId);
+const googleTagSrcJson = JSON.stringify(
+  gaMeasurementId
+    ? `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(
+        gaMeasurementId,
+      )}`
+    : "",
+);
 const googleTagScript = gaMeasurementId
   ? `
 window.dataLayer = window.dataLayer || [];
@@ -50,6 +57,17 @@ window.gtag('js', new Date());
 window.gtag('config', ${gaMeasurementIdJson}, {
   send_page_view: false
 });
+(function(){
+  if (document.querySelector('script[data-devroulotte-google-tag="true"]')) {
+    return;
+  }
+
+  var script = document.createElement('script');
+  script.async = true;
+  script.src = ${googleTagSrcJson};
+  script.dataset.devroulotteGoogleTag = 'true';
+  document.head.appendChild(script);
+})();
 `
   : "";
 
@@ -68,13 +86,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {gaMeasurementId ? (
-          <>
-            <script dangerouslySetInnerHTML={{ __html: googleTagScript }} />
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
-            />
-          </>
+          <script dangerouslySetInnerHTML={{ __html: googleTagScript }} />
         ) : null}
       </head>
       <body className="min-h-full antialiased">
