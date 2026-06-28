@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, KeyRound, Loader2 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -94,28 +95,29 @@ export function ResetPasswordPanel() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-6 text-white sm:px-6 lg:px-8">
+    <main className="theme-page min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-6 text-white sm:px-6 lg:px-8">
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-lg content-center gap-4">
-        <Link
-          href="/chat"
-          className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Torna a DevRoulotte
-        </Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            href="/chat"
+            className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Torna a DevRoulotte
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <div className="flex justify-center">
-          <div className="brand-wordmark-plate rounded-lg px-3 py-2">
-            <Image
-              src="/devroulotte-banner.gif"
-              alt="DevRoulotte"
-              width={640}
-              height={162}
-              unoptimized
-              priority
-              className="h-auto w-64 max-w-full sm:w-80"
-            />
-          </div>
+          <Image
+            src="/devroulotte-banner.gif"
+            alt="DevRoulotte"
+            width={640}
+            height={162}
+            unoptimized
+            priority
+            className="brand-wordmark h-auto w-64 max-w-full sm:w-80"
+          />
         </div>
 
         <section className="rounded-lg border border-white/10 bg-white/[0.04] p-5">

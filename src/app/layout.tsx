@@ -21,6 +21,17 @@ export const metadata: Metadata = {
     "Il networking, senza appuntamenti. Piano Free e Premium.",
 };
 
+const themeScript = `
+try {
+  var mode = localStorage.getItem("devroulotte_theme") === "sun" ? "sun" : "moon";
+  document.documentElement.dataset.theme = mode;
+  document.documentElement.style.colorScheme = mode === "sun" ? "light" : "dark";
+} catch (_) {
+  document.documentElement.dataset.theme = "moon";
+  document.documentElement.style.colorScheme = "dark";
+}
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,7 +41,12 @@ export default function RootLayout({
     <html
       lang="it"
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
+      data-theme="moon"
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full antialiased">
         {children}
         <AuthRecoveryRedirect />

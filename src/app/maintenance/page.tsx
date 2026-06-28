@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { MAINTENANCE_MESSAGE } from "@/lib/maintenance";
 
 export const metadata: Metadata = {
@@ -9,28 +10,29 @@ export const metadata: Metadata = {
 
 export default function MaintenancePage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_54%,#080b10_100%)] px-4 py-8 text-white">
+    <main className="theme-page min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_54%,#080b10_100%)] px-4 py-8 text-white">
+      <div className="mx-auto flex max-w-3xl justify-end">
+        <ThemeToggle />
+      </div>
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col items-center justify-center gap-8 text-center">
         <Image
-          src="/devroulotte-logo.png"
-          alt="DevRoulotte"
-          width={320}
-          height={320}
+          src="/devroulotte-camper-only.png"
+          alt="DevRoulotte camper"
+          width={452}
+          height={312}
           priority
-          className="brand-mark-plate h-36 w-36 rounded-lg object-cover sm:h-44 sm:w-44"
+          className="h-auto w-56 object-contain sm:w-72"
         />
         <div className="grid gap-4">
-          <div className="brand-wordmark-plate mx-auto rounded-lg px-3 py-2">
-            <Image
-              src="/devroulotte-banner.gif"
-              alt="DevRoulotte"
-              width={640}
-              height={162}
-              unoptimized
-              priority
-              className="h-auto w-72 max-w-full sm:w-96"
-            />
-          </div>
+          <Image
+            src="/devroulotte-banner.gif"
+            alt="DevRoulotte"
+            width={640}
+            height={162}
+            unoptimized
+            priority
+            className="brand-wordmark mx-auto h-auto w-72 max-w-full sm:w-96"
+          />
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-200">
             Manutenzione in corso
           </p>

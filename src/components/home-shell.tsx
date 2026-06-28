@@ -16,6 +16,7 @@ import type { Session } from "@supabase/supabase-js";
 import { AuthPanel } from "@/components/auth-panel";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { VideoChat } from "@/components/video-chat";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import { LICENSE_NAME, SOURCE_CODE_URL } from "@/lib/app-config";
@@ -77,38 +78,37 @@ export function HomeShell() {
   const isAuthenticated = Boolean(session);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-4 text-white sm:px-6 lg:px-8">
+    <main className="theme-page min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-4 text-white sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-5">
         <header className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
           <div className="flex items-center gap-3">
             <Image
-              src="/devroulotte-logo.png"
+              src="/devroulotte-camper-only.png"
               alt="DevRoulotte"
-              width={64}
-              height={64}
-              className="brand-mark-plate h-12 w-12 rounded-md object-cover"
+              width={226}
+              height={156}
+              className="h-12 w-16 rounded-md object-contain"
               priority
             />
             <div className="min-w-0">
               <h1 className="sr-only">DevRoulotte</h1>
-              <div className="brand-wordmark-plate rounded-lg px-2 py-1">
-                <Image
-                  src="/devroulotte-banner.gif"
-                  alt=""
-                  aria-hidden="true"
-                  width={640}
-                  height={162}
-                  unoptimized
-                  className="h-auto w-48 max-w-[58vw] sm:w-64 md:w-72"
-                  priority
-                />
-              </div>
+              <Image
+                src="/devroulotte-banner.gif"
+                alt=""
+                aria-hidden="true"
+                width={640}
+                height={162}
+                unoptimized
+                className="brand-wordmark h-auto w-48 max-w-[58vw] sm:w-64 md:w-72"
+                priority
+              />
               <p className="text-xs text-slate-400">
                 Il networking, senza appuntamenti.
               </p>
             </div>
           </div>
           <nav className="flex items-center gap-2">
+            <ThemeToggle />
             {isPremium ? (
               <span className="inline-flex h-9 items-center gap-2 rounded-md border border-amber-300/30 bg-amber-300/10 px-3 text-xs font-bold text-amber-100">
                 <Crown className="h-4 w-4" />

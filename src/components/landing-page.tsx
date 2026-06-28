@@ -10,6 +10,7 @@ import {
   Video,
 } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const painLines = [
   "Niente “ci aggiorniamo”.",
@@ -52,7 +53,7 @@ const outcomes = [
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen w-full max-w-full overflow-hidden bg-[#080b10] text-white">
+    <main className="theme-page min-h-screen w-full max-w-full overflow-hidden bg-[#080b10] text-white">
       <section className="relative min-h-[88svh] overflow-hidden px-5 pb-12 pt-4 sm:px-6 lg:px-8">
         <Image
           src="/devroulotte-camper-only.png"
@@ -63,25 +64,23 @@ export function LandingPage() {
           priority
           className="pointer-events-none absolute hidden max-w-none saturate-125 md:bottom-auto md:right-[-190px] md:top-20 md:block md:w-[820px] md:opacity-90 lg:right-[-120px] xl:right-[-40px] xl:top-8 xl:w-[900px]"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,#080b10_0%,rgba(8,11,16,0.98)_48%,rgba(8,11,16,0.5)_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#080b10] to-transparent" />
+        <div className="theme-hero-overlay absolute inset-0 bg-[linear-gradient(90deg,#080b10_0%,rgba(8,11,16,0.98)_48%,rgba(8,11,16,0.5)_100%)]" />
+        <div className="theme-hero-fade absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#080b10] to-transparent" />
 
         <div className="relative mx-auto grid w-full min-w-0 max-w-7xl gap-12">
           <header className="flex flex-wrap items-center justify-between gap-3">
-            <Link
-              href="/"
-              className="brand-wordmark-plate inline-flex min-w-0 items-center gap-3 rounded-lg px-3 py-2"
-            >
+            <Link href="/" className="inline-flex min-w-0 items-center gap-3">
               <Image
                 src="/devroulotte-wordmark.png"
                 alt="DevRoulotte"
                 width={1200}
                 height={294}
                 priority
-                className="h-auto w-40 max-w-[54vw] sm:w-56"
+                className="brand-wordmark h-auto w-40 max-w-[54vw] sm:w-56"
               />
             </Link>
             <nav className="flex items-center gap-2 text-xs font-semibold sm:text-sm">
+              <ThemeToggle />
               <Link
                 href="/terms"
                 className="hidden rounded-md border border-white/10 px-3 py-2 text-slate-300 hover:bg-white/10 hover:text-white sm:inline-flex"
@@ -215,16 +214,14 @@ export function LandingPage() {
 
       <section className="px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl justify-items-start gap-6">
-          <div className="brand-wordmark-plate rounded-lg px-3 py-2">
-            <Image
-              src="/devroulotte-banner.gif"
-              alt="DevRoulotte"
-              width={640}
-              height={162}
-              unoptimized
-              className="h-auto w-56 sm:w-72"
-            />
-          </div>
+          <Image
+            src="/devroulotte-banner.gif"
+            alt="DevRoulotte"
+            width={640}
+            height={162}
+            unoptimized
+            className="brand-wordmark h-auto w-56 sm:w-72"
+          />
           <div className="grid gap-5 text-3xl font-black leading-tight tracking-normal text-white sm:text-5xl">
             <p>Benvenuto a bordo di DevRoulotte.</p>
             <p className="text-teal-200">
