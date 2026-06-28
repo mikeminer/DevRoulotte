@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { KeyRound, Loader2, LogIn, LogOut, Mail, UserPlus } from "lucide-react";
+import { KeyRound, Loader2, LogIn, LogOut, UserPlus } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -176,12 +176,7 @@ export function AuthPanel() {
             {isSendingReset ? "Invio reset" : "Password dimenticata?"}
           </button>
         </form>
-      ) : (
-        <div className="flex items-center gap-2 rounded-md border border-teal-300/20 bg-teal-300/10 px-3 py-2 text-sm text-teal-100">
-          <Mail className="h-4 w-4" />
-          Sessione registrata attiva
-        </div>
-      )}
+      ) : null}
 
       {message ? <p className="mt-2 text-xs text-amber-200">{message}</p> : null}
     </section>
