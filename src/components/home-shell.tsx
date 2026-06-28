@@ -91,6 +91,15 @@ export function HomeShell() {
         <header className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
           <Link href="/" className="inline-flex min-w-0 items-center gap-3">
             <Image
+              src="/devroulotte-roulotte-transparent.png"
+              alt=""
+              aria-hidden="true"
+              width={1040}
+              height={850}
+              priority
+              className="h-12 w-auto shrink-0 object-contain drop-shadow-[0_10px_24px_rgba(45,212,191,0.16)] sm:h-14"
+            />
+            <Image
               src="/devroulotte-wordmark.png"
               alt="DevRoulotte"
               width={1200}

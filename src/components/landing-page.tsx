@@ -95,11 +95,11 @@ export function LandingPage() {
     <main className="theme-page min-h-screen w-full max-w-full overflow-hidden bg-[#080b10] text-white">
       <section className="relative min-h-[88svh] overflow-hidden px-5 pb-12 pt-4 sm:px-6 lg:px-8">
         <Image
-          src="/devroulotte-camper-only.png"
+          src="/devroulotte-roulotte-transparent.png"
           alt=""
           aria-hidden="true"
-          width={1130}
-          height={780}
+          width={1040}
+          height={850}
           priority
           className="pointer-events-none absolute hidden max-w-none saturate-125 md:bottom-auto md:right-[-190px] md:top-20 md:block md:w-[820px] md:opacity-90 lg:right-[-120px] xl:right-[-40px] xl:top-8 xl:w-[900px]"
         />
@@ -138,10 +138,10 @@ export function LandingPage() {
 
           <div className="mx-auto w-full max-w-sm md:hidden">
             <Image
-              src="/devroulotte-camper-only.png"
+              src="/devroulotte-roulotte-transparent.png"
               alt="La roulotte digitale di DevRoulotte"
-              width={1130}
-              height={780}
+              width={1040}
+              height={850}
               priority
               className="h-auto w-full drop-shadow-[0_20px_60px_rgba(45,212,191,0.25)]"
             />

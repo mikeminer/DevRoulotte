@@ -16,10 +16,10 @@ export default function MaintenancePage() {
       </div>
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col items-center justify-center gap-8 text-center">
         <Image
-          src="/devroulotte-camper-only.png"
+          src="/devroulotte-roulotte-transparent.png"
           alt="DevRoulotte camper"
-          width={452}
-          height={312}
+          width={1040}
+          height={850}
           priority
           className="h-auto w-56 object-contain sm:w-72"
         />
