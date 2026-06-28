@@ -8,9 +8,11 @@ import {
   ShieldCheck,
   UsersRound,
   Video,
+  Wrench,
 } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { WORKSHOP_FEEDBACK_URL } from "@/lib/app-config";
 
 const painLines = [
   "Niente “ci aggiorniamo”.",
@@ -126,6 +128,14 @@ export function LandingPage() {
               >
                 Regole
               </Link>
+              <a
+                href={WORKSHOP_FEEDBACK_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="hidden rounded-md border border-white/10 px-3 py-2 text-slate-300 hover:bg-white/10 hover:text-white sm:inline-flex"
+              >
+                In officina
+              </a>
               <Link
                 href="/chat"
                 className="inline-flex items-center gap-2 rounded-md bg-teal-300 px-3 py-2 font-bold text-slate-950 hover:bg-teal-200 sm:px-4"
@@ -294,6 +304,36 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section
+        id="in-officina"
+        className="border-y border-white/10 bg-white/[0.035] px-4 py-12 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div className="grid gap-3">
+            <p className="inline-flex w-fit items-center gap-2 rounded-md border border-teal-300/25 bg-teal-300/10 px-3 py-2 text-xs font-bold uppercase text-teal-100">
+              <Wrench className="h-4 w-4" />
+              In officina
+            </p>
+            <h2 className="max-w-3xl text-3xl font-black tracking-normal text-white sm:text-4xl">
+              Segnala cosa va sistemato nella roulotte.
+            </h2>
+            <p className="max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
+              Bug, ottimizzazioni, idee sui tier o nuove funzionalità: il form
+              raccoglie tutto in modo ordinato mentre il prodotto prende forma.
+            </p>
+          </div>
+          <a
+            href={WORKSHOP_FEEDBACK_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-300 px-5 text-sm font-black text-slate-950 hover:bg-teal-200"
+          >
+            Apri il form
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+      </section>
+
       <section className="px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl justify-items-start gap-6">
           <Image
@@ -345,6 +385,14 @@ export function LandingPage() {
             <Link href="/terms" className="text-slate-300 hover:text-white">
               Terms
             </Link>
+            <a
+              href={WORKSHOP_FEEDBACK_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="text-slate-300 hover:text-white"
+            >
+              In officina
+            </a>
             <CookiePreferencesButton className="text-slate-300 hover:text-white" />
           </div>
         </div>

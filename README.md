@@ -222,6 +222,7 @@ Durante il test tieni entrambe le pagine `/chat` aperte e attive dopo aver conce
 - PayPal webhook verificato server-side
 - Cloudflare TURN con credenziali temporanee
 - Pagine Terms, Privacy, Regole community, Safety e Rimborsi
+- Link "In officina" al form feedback/proposte: https://docs.google.com/forms/d/e/1FAIpQLSdiwzk0AGdbaPPRtEWR6QhnBRbfcLK-rJFf7es3J_Pnn-Ow8w/viewform
 - Cancellazione Premium dal profilo
 - Cleanup endpoint protetto per coda e match log stale
 

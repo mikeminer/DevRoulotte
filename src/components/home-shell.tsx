@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
   UsersRound,
+  Wrench,
 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { AuthPanel } from "@/components/auth-panel";
@@ -19,7 +20,11 @@ import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VideoChat } from "@/components/video-chat";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
-import { LICENSE_NAME, SOURCE_CODE_URL } from "@/lib/app-config";
+import {
+  LICENSE_NAME,
+  SOURCE_CODE_URL,
+  WORKSHOP_FEEDBACK_URL,
+} from "@/lib/app-config";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ProfileStatus } from "@/lib/types";
 
@@ -281,6 +286,15 @@ export function HomeShell() {
               <ShieldCheck className="h-3.5 w-3.5" />
               Safety
             </Link>
+            <a
+              href={WORKSHOP_FEEDBACK_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <Wrench className="h-3.5 w-3.5" />
+              In officina
+            </a>
             <a
               href={SOURCE_CODE_URL}
               target="_blank"
