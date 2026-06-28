@@ -39,23 +39,17 @@ async function getFreeUsage(actorType: string, actorId: string) {
     countMatches("b", true),
   ]);
 
-  const connectedAtMissing = [asA.error, asB.error].some(
-    (error) =>
-      error?.code === "PGRST204" ||
-      error?.message.toLowerCase().includes("connected_at"),
-  );
-
-  if (connectedAtMissing) {
+  if (asA.error || asB.error) {
     const [fallbackAsA, fallbackAsB] = await Promise.all([
       countMatches("a", false),
       countMatches("b", false),
     ]);
 
-    return (fallbackAsA.count ?? 0) + (fallbackAsB.count ?? 0);
-  }
+    if (fallbackAsA.error || fallbackAsB.error) {
+      throw new Error(fallbackAsA.error?.message ?? fallbackAsB.error?.message);
+    }
 
-  if (asA.error || asB.error) {
-    throw new Error(asA.error?.message ?? asB.error?.message);
+    return (fallbackAsA.count ?? 0) + (fallbackAsB.count ?? 0);
   }
 
   return (asA.count ?? 0) + (asB.count ?? 0);
