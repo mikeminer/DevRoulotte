@@ -4,7 +4,7 @@ import { HomeShell } from "@/components/home-shell";
 export const metadata: Metadata = {
   title: "Chat | DevRoulotte",
   description:
-    "Entra nella video roulette DevRoulotte per parlare 5 minuti con un altro builder.",
+    "Entra nella roulotte DevRoulotte per conoscere un altro builder in videochat peer-to-peer.",
 };
 
 export default function ChatPage() {

@@ -20,7 +20,7 @@ const painLines = [
 
 const heroParagraphs = [
   "DevRoulotte nasce per saltare tutto il teatro del networking moderno.",
-  "Entri nella roulotte, accendi la webcam, vieni matchato con un altro builder italiano e hai 5 minuti per capire chi hai davanti.",
+  "Entri nella roulotte, accendi la webcam, vieni matchato con un altro builder italiano e hai pochi minuti per capire chi hai davanti.",
   "Magari un futuro co-founder, un dev con un repository mezzo rotto, un genio sottovalutato o qualcuno che ha deployato su Vercel alle 3 di notte e vuole raccontarlo a qualcuno.",
   "Qui c'è WebRTC, matching, signaling e una missione semplice: far parlare i builder italiani senza organizzare convegni, call o gruppi Telegram.",
 ];
@@ -28,7 +28,7 @@ const heroParagraphs = [
 const principles = [
   {
     icon: Clock3,
-    title: "5 minuti",
+    title: "Pochi minuti",
     body: "Il tempo giusto per capire se vale la pena continuare fuori dalla roulotte.",
   },
   {
@@ -49,6 +49,45 @@ const outcomes = [
   "un feedback tecnico",
   "un futuro co-founder",
   "una conversazione vera",
+];
+
+const tierRows = [
+  {
+    label: "Durata chiamata",
+    guest: "2 min",
+    registered: "5 min",
+    premium: "15 min",
+  },
+  {
+    label: "Match / giorno",
+    guest: "3",
+    registered: "15",
+    premium: "illimitati",
+  },
+  {
+    label: "Filtro lingua / stack / regione",
+    guest: "—",
+    registered: "solo lingua",
+    premium: "tutti",
+  },
+  {
+    label: "Coda prioritaria",
+    guest: "—",
+    registered: "—",
+    premium: "✓",
+  },
+  {
+    label: '"Riconnetti" all\'ultimo match',
+    guest: "—",
+    registered: "—",
+    premium: "✓",
+  },
+  {
+    label: "Pubblicità",
+    guest: "✓",
+    registered: "✓",
+    premium: "nessuna",
+  },
 ];
 
 export function LandingPage() {
@@ -167,7 +206,7 @@ export function LandingPage() {
             </h2>
             <div className="grid gap-4 text-sm leading-7 text-slate-300 sm:text-base">
               <p>
-                Ci sali sopra, trovi un altro dev, parli 5 minuti, scambi
+                Ci sali sopra, trovi un altro dev, parli pochi minuti, scambi
                 idee, ti fai due risate e magari trovi qualcuno con cui
                 costruire qualcosa.
               </p>
@@ -182,7 +221,7 @@ export function LandingPage() {
                 .
               </p>
               <p>
-                E se va male? Hai perso 5 minuti. Meno di quanto perdi ogni
+                E se va male? Hai perso pochi minuti. Meno di quanto perdi ogni
                 giorno leggendo thread motivazionali di gente che non ha mai
                 pushato nulla in produzione.
               </p>
@@ -212,6 +251,49 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="border-y border-white/10 bg-black/20 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-5xl gap-6">
+          <div className="grid gap-2">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-200">
+              Tier
+            </p>
+            <h2 className="text-3xl font-black tracking-normal text-white sm:text-4xl">
+              Parti gratis, sali di livello quando ti serve più spazio.
+            </h2>
+          </div>
+          <div className="overflow-x-auto rounded-lg border border-white/10">
+            <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+              <thead className="bg-white/[0.04] text-white">
+                <tr>
+                  <th className="w-[38%] px-4 py-4 font-bold">Feature</th>
+                  <th className="px-4 py-4 font-bold">Free ospite</th>
+                  <th className="px-4 py-4 font-bold">Registrato</th>
+                  <th className="px-4 py-4 font-bold">Premium</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tierRows.map((row) => (
+                  <tr key={row.label} className="border-t border-white/10">
+                    <th className="px-4 py-4 font-semibold text-white">
+                      {row.label}
+                    </th>
+                    <td className="px-4 py-4 font-semibold text-slate-200">
+                      {row.guest}
+                    </td>
+                    <td className="px-4 py-4 font-semibold text-slate-200">
+                      {row.registered}
+                    </td>
+                    <td className="px-4 py-4 font-semibold text-teal-100">
+                      {row.premium}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section className="px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl justify-items-start gap-6">
           <Image
@@ -229,7 +311,7 @@ export function LandingPage() {
             </p>
           </div>
           <p className="max-w-xl text-lg font-bold leading-8 text-slate-200">
-            Cinque minuti alla volta.
+            Pochi minuti alla volta.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link

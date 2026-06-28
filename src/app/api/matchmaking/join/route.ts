@@ -2,12 +2,12 @@ import { createHash, randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import {
-  FREE_CALL_LIMIT_SECONDS,
-  FREE_DAILY_MATCH_LIMIT,
+  getCallLimitSeconds,
+  getDailyMatchLimit,
+  getPlanCode,
   MATCH_QUEUE_ACTIVE_SECONDS,
   MATCH_QUEUE_STALE_SECONDS,
   NEXT_COOLDOWN_SECONDS,
-  PREMIUM_CALL_LIMIT_SECONDS,
 } from "@/lib/app-config";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getRequestActor } from "@/lib/session";
@@ -15,7 +15,7 @@ import {
   getSupabaseAdmin,
   hasSupabaseServerConfig,
 } from "@/lib/supabase/server";
-import type { Actor, ActorType, MatchPayload } from "@/lib/types";
+import type { Actor, ActorType, MatchPayload, PlanCode } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -215,22 +215,25 @@ function buildMatchPayload(
   channelName: string,
   role: "caller" | "callee",
   peer: Pick<Actor, "type" | "id">,
-  premium: boolean,
+  planCode: PlanCode,
   dailyUsed: number,
   startedAt = new Date().toISOString(),
 ): MatchPayload {
+  const dailyLimit = getDailyMatchLimit(planCode);
+
   return {
     id: matchId,
     channelName,
     role,
     peerActorType: peer.type,
     peerActorId: peer.id,
-    limitSeconds: premium ? PREMIUM_CALL_LIMIT_SECONDS : FREE_CALL_LIMIT_SECONDS,
+    limitSeconds: getCallLimitSeconds(planCode),
     nextCooldownSeconds: NEXT_COOLDOWN_SECONDS,
-    isPremium: premium,
-    dailyRemaining: premium
+    isPremium: planCode === "premium",
+    planCode,
+    dailyRemaining: dailyLimit === null
       ? null
-      : Math.max(FREE_DAILY_MATCH_LIMIT - dailyUsed, 0),
+      : Math.max(dailyLimit - dailyUsed, 0),
     startedAt,
   };
 }
@@ -292,6 +295,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
     const premium = await isPremium(actor);
+    const planCode = getPlanCode(actor.type, premium);
+    const dailyLimit = getDailyMatchLimit(planCode);
+    const canUseLanguageFilter = planCode !== "guest";
+    const canUseCountryFilter = planCode === "premium";
     const dailyUsed = await getDailyUsage(actor);
     const activeCutoff = new Date(
       Date.now() - MATCH_QUEUE_ACTIVE_SECONDS * 1000,
@@ -304,14 +311,18 @@ export async function POST(request: NextRequest) {
       actorType: actor.type,
       actorHash: hashId(actor.id),
       premium,
+      planCode,
       dailyUsed,
     });
 
-    if (!premium && dailyUsed >= FREE_DAILY_MATCH_LIMIT) {
+    if (dailyLimit !== null && dailyUsed >= dailyLimit) {
       return NextResponse.json(
         {
           status: "limit_reached",
-          message: "Limite giornaliero Free raggiunto. Passa a Premium.",
+          message:
+            planCode === "guest"
+              ? "Limite ospite raggiunto: registrati gratis o passa a Premium."
+              : "Limite giornaliero Registrato raggiunto. Passa a Premium.",
         },
         { status: 402 },
       );
@@ -353,7 +364,7 @@ export async function POST(request: NextRequest) {
             activeMatch.channel_name,
             role,
             peer,
-            premium,
+            planCode,
             dailyUsed,
             activeMatch.started_at,
           ),
@@ -431,7 +442,7 @@ export async function POST(request: NextRequest) {
               type: ownQueue.peer_actor_type ?? "guest",
               id: ownQueue.peer_actor_id ?? "",
             },
-            premium,
+            planCode,
             dailyUsed,
           ),
         });
@@ -471,7 +482,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (
-        premium &&
+        canUseLanguageFilter &&
         body.preferredLanguage !== "any" &&
         candidate.language !== body.preferredLanguage
       ) {
@@ -479,7 +490,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (
-        premium &&
+        canUseCountryFilter &&
         body.preferredCountry !== "any" &&
         candidate.country !== body.preferredCountry
       ) {
@@ -520,8 +531,10 @@ export async function POST(request: NextRequest) {
           is_premium: premium,
           language: body.language,
           country: body.country,
-          preferred_language: premium ? body.preferredLanguage : "any",
-          preferred_country: premium ? body.preferredCountry : "any",
+          preferred_language: canUseLanguageFilter
+            ? body.preferredLanguage
+            : "any",
+          preferred_country: canUseCountryFilter ? body.preferredCountry : "any",
           status: "waiting",
           match_id: null,
           channel_name: null,
@@ -558,7 +571,7 @@ export async function POST(request: NextRequest) {
         actor_b_type: peer.actor_type,
         actor_b_id: peer.actor_id,
         status: "active",
-        plan_snapshot: premium ? "premium" : "free",
+        plan_snapshot: planCode,
       })
       .select("id")
       .single();
@@ -610,8 +623,10 @@ export async function POST(request: NextRequest) {
           is_premium: premium,
           language: body.language,
           country: body.country,
-          preferred_language: premium ? body.preferredLanguage : "any",
-          preferred_country: premium ? body.preferredCountry : "any",
+          preferred_language: canUseLanguageFilter
+            ? body.preferredLanguage
+            : "any",
+          preferred_country: canUseCountryFilter ? body.preferredCountry : "any",
           status: "waiting",
           match_id: null,
           channel_name: null,
@@ -655,7 +670,7 @@ export async function POST(request: NextRequest) {
           type: peer.actor_type,
           id: peer.actor_id,
         },
-        premium,
+        planCode,
         dailyUsed,
       ),
     });

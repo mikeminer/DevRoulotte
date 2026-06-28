@@ -29,8 +29,9 @@ export default function TermsPage() {
         {
           title: "Piani",
           body: [
-            "Il piano Free include limiti di durata, match giornalieri e rate limit sul tasto Next.",
-            "Il piano Premium costa 3,99 EUR al mese, include una prova gratuita di 5 giorni quando disponibile via PayPal e abilita funzioni aggiuntive come filtri e priorita' in coda.",
+            "Il piano Free ospite include 3 match al giorno, chiamate da 2 minuti e rate limit sul tasto Next.",
+            "Il piano Registrato include 15 match al giorno, chiamate da 5 minuti e filtro lingua.",
+            "Il piano Premium costa 3,99 EUR al mese, include una prova gratuita di 5 giorni quando disponibile via PayPal e abilita match illimitati, chiamate da 15 minuti, filtri completi e priorita' in coda.",
           ],
         },
         {

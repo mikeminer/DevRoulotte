@@ -1,6 +1,6 @@
 export type ActorType = "guest" | "user";
 
-export type PlanCode = "free" | "premium";
+export type PlanCode = "guest" | "registered" | "premium";
 
 export type MatchRole = "caller" | "callee";
 
@@ -29,6 +29,7 @@ export type MatchPayload = {
   limitSeconds: number;
   nextCooldownSeconds: number;
   isPremium: boolean;
+  planCode: PlanCode;
   dailyRemaining: number | null;
   startedAt: string;
 };
@@ -51,9 +52,12 @@ export type MatchJoinResponse =
 export type ProfileStatus = {
   actor: Actor;
   isPremium: boolean;
+  planCode: PlanCode;
+  planLabel: string;
   subscriptionStatus: SubscriptionStatus;
-  freeDailyLimit: number;
-  freeDailyUsed: number;
-  freeDailyRemaining: number;
+  dailyMatchLimit: number | null;
+  dailyMatchUsed: number;
+  dailyMatchRemaining: number | null;
+  callLimitSeconds: number;
   nextCooldownSeconds: number;
 };

@@ -382,11 +382,7 @@ export function VideoChat({
       setElapsed(nextElapsed);
 
       if (nextElapsed >= activeMatch.limitSeconds) {
-        setMessage(
-          activeMatch.isPremium
-            ? "Limite chiamata raggiunto."
-            : "Limite Free di 5 minuti raggiunto.",
-        );
+        setMessage("Limite chiamata raggiunto.");
         searchingRef.current = false;
         void cleanupConnection(false).then(() => {
           setStatus("idle");
@@ -845,7 +841,7 @@ export function VideoChat({
             rulesAccepted,
             language: "it",
             country: "IT",
-            preferredLanguage: isPremium ? preferredLanguage : "any",
+            preferredLanguage: isAuthenticated ? preferredLanguage : "any",
             preferredCountry: isPremium ? preferredCountry : "any",
           }),
         });
@@ -1034,7 +1030,7 @@ export function VideoChat({
                   className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
                   value={preferredLanguage}
                   onChange={(event) => setPreferredLanguage(event.target.value)}
-                  disabled={!isPremium}
+                  disabled={!isAuthenticated}
                 >
                   {languages.map((language) => (
                     <option key={language.value} value={language.value}>
@@ -1044,7 +1040,7 @@ export function VideoChat({
                 </select>
               </label>
               <label className="grid gap-1 text-xs text-slate-300">
-                Paese
+                Paese / regione
                 <select
                   className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
                   value={preferredCountry}

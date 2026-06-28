@@ -23,6 +23,14 @@ import { LICENSE_NAME, SOURCE_CODE_URL } from "@/lib/app-config";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ProfileStatus } from "@/lib/types";
 
+function formatPlanDuration(seconds?: number | null) {
+  if (!seconds) {
+    return "-";
+  }
+
+  return `${Math.round(seconds / 60)} min`;
+}
+
 export function HomeShell() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [session, setSession] = useState<Session | null>(null);
@@ -140,35 +148,37 @@ export function HomeShell() {
               onProfileRefresh={() => void refreshProfile()}
             />
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <UsersRound className="h-4 w-4 text-teal-200" />
-                  Free
+                  Free ospite
                 </div>
                 <p className="text-xs leading-5 text-slate-400">
-                  Match casuale 1:1, chiamate da 5 minuti, limite giornaliero e
-                  rate limit su Next.
-                </p>
-                <p className="mt-3 text-xs font-semibold text-slate-200">
-                  Rimasti oggi:{" "}
-                  {profile?.isPremium
-                    ? "illimitati"
-                    : profile?.freeDailyRemaining ?? "-"}
+                  3 match al giorno, chiamate da 2 minuti, niente filtri
+                  avanzati e rate limit su Next.
                 </p>
               </div>
-              {isAuthenticated ? (
-                <div className="rounded-lg border border-amber-300/20 bg-amber-300/10 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-100">
-                    <Sparkles className="h-4 w-4" />
-                    Premium
-                  </div>
-                  <p className="text-xs leading-5 text-amber-100/75">
-                    3,99 €/mese, prova gratuita 5 giorni, match illimitati,
-                    filtri lingua/Paese e priorità in coda.
-                  </p>
+              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <UsersRound className="h-4 w-4 text-teal-200" />
+                  Registrato
                 </div>
-              ) : null}
+                <p className="text-xs leading-5 text-slate-400">
+                  15 match al giorno, chiamate da 5 minuti e filtro lingua per
+                  conoscere developer più affini.
+                </p>
+              </div>
+              <div className="rounded-lg border border-amber-300/20 bg-amber-300/10 p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-100">
+                  <Sparkles className="h-4 w-4" />
+                  Premium
+                </div>
+                <p className="text-xs leading-5 text-amber-100/75">
+                  3,99 €/mese, prova gratuita 5 giorni, match illimitati,
+                  chiamate da 15 minuti, filtri completi e coda prioritaria.
+                </p>
+              </div>
               <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <ShieldCheck className="h-4 w-4 text-teal-200" />
@@ -190,7 +200,7 @@ export function HomeShell() {
                 <div className="flex justify-between gap-3 rounded-md bg-black/20 px-3 py-2">
                   <dt className="text-slate-400">Piano</dt>
                   <dd className="font-semibold text-white">
-                    {isPremium ? "Premium" : "Free"}
+                    {profile?.planLabel ?? (isPremium ? "Premium" : "Free")}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3 rounded-md bg-black/20 px-3 py-2">
@@ -204,6 +214,20 @@ export function HomeShell() {
                   <dt className="text-slate-400">Subscription</dt>
                   <dd className="font-semibold text-white">
                     {profile?.subscriptionStatus ?? "none"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3 rounded-md bg-black/20 px-3 py-2">
+                  <dt className="text-slate-400">Durata</dt>
+                  <dd className="font-semibold text-white">
+                    {formatPlanDuration(profile?.callLimitSeconds)}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3 rounded-md bg-black/20 px-3 py-2">
+                  <dt className="text-slate-400">Match oggi</dt>
+                  <dd className="font-semibold text-white">
+                    {profile?.dailyMatchRemaining === null
+                      ? "illimitati"
+                      : profile?.dailyMatchRemaining ?? "-"}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3 rounded-md bg-black/20 px-3 py-2">

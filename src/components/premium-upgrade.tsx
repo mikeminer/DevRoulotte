@@ -70,7 +70,7 @@ export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
         <div className="mb-3">
           <h2 className="text-sm font-semibold text-amber-100">Premium</h2>
           <p className="text-xs text-amber-100/70">
-            3,99 €/mese con prova gratuita di 5 giorni.
+            3,99 €/mese, prova 5 giorni, match illimitati e chiamate da 15 min.
           </p>
         </div>
       ) : null}

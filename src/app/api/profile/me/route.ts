@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  FREE_DAILY_MATCH_LIMIT,
+  getCallLimitSeconds,
+  getDailyMatchLimit,
+  getPlanCode,
+  getPlanLabel,
   NEXT_COOLDOWN_SECONDS,
 } from "@/lib/app-config";
 import { getRequestActor } from "@/lib/session";
@@ -87,21 +90,29 @@ export async function GET(request: NextRequest) {
 
   try {
     const actor = await getRequestActor(request);
-    const [freeDailyUsed, subscriptionStatus] = await Promise.all([
+    const [dailyMatchUsed, subscriptionStatus] = await Promise.all([
       getFreeUsage(actor.type, actor.id),
       getSubscriptionStatus(actor.type, actor.id),
     ]);
 
     const isPremium =
       subscriptionStatus === "active" || subscriptionStatus === "trialing";
+    const planCode = getPlanCode(actor.type, isPremium);
+    const dailyMatchLimit = getDailyMatchLimit(planCode);
 
     const payload: ProfileStatus = {
       actor,
       isPremium,
+      planCode,
+      planLabel: getPlanLabel(planCode),
       subscriptionStatus,
-      freeDailyLimit: FREE_DAILY_MATCH_LIMIT,
-      freeDailyUsed,
-      freeDailyRemaining: Math.max(FREE_DAILY_MATCH_LIMIT - freeDailyUsed, 0),
+      dailyMatchLimit,
+      dailyMatchUsed,
+      dailyMatchRemaining:
+        dailyMatchLimit === null
+          ? null
+          : Math.max(dailyMatchLimit - dailyMatchUsed, 0),
+      callLimitSeconds: getCallLimitSeconds(planCode),
       nextCooldownSeconds: NEXT_COOLDOWN_SECONDS,
     };
 

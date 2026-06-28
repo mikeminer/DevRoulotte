@@ -2,7 +2,7 @@
 
 # DevRoulotte
 
-Il networking, senza appuntamenti. MVP 18+ con webcam 1:1, WebRTC peer-to-peer, matching random, piano Free e Premium da 3,99 EUR/mese con prova gratuita di 5 giorni via PayPal.
+Il networking, senza appuntamenti. MVP 18+ con webcam 1:1, WebRTC peer-to-peer, matching random, tier Free ospite, Registrato e Premium da 3,99 EUR/mese con prova gratuita di 5 giorni via PayPal.
 
 ## Stack
 
@@ -211,8 +211,9 @@ Durante il test tieni entrambe le pagine `/chat` aperte e attive dopo aver conce
 - Esperienza videochat mobile-first scura su `/chat` con logo DevRoulotte
 - Accesso guest o registrato via Supabase Auth
 - Conferma obbligatoria 18+ e regole community
-- Piano Free: match casuale, 5 minuti, limite giornaliero, rate limit Next
-- Piano Premium: match illimitati, durata più alta, filtri lingua/Paese, priorità in coda, badge
+- Piano Free ospite: 3 match/giorno, chiamate da 2 minuti, rate limit Next
+- Piano Registrato: 15 match/giorno, chiamate da 5 minuti, filtro lingua
+- Piano Premium: match illimitati, chiamate da 15 minuti, filtri completi, priorità in coda, badge
 - WebRTC audio/video P2P
 - API signaling via Supabase `webrtc_signals`
 - Pulsanti Start, Next, Stop, Report, Upgrade

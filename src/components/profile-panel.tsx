@@ -16,6 +16,14 @@ import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ProfileStatus } from "@/lib/types";
 
+function formatPlanDuration(seconds?: number | null) {
+  if (!seconds) {
+    return "-";
+  }
+
+  return `${Math.round(seconds / 60)} min`;
+}
+
 export function ProfilePanel() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [session, setSession] = useState<Session | null>(null);
@@ -130,7 +138,7 @@ export function ProfilePanel() {
             <div>
               <h1 className="text-2xl font-black">Profilo</h1>
               <p className="mt-1 text-sm text-slate-400">
-                Stato piano, limiti Free e abbonamento PayPal.
+                Stato piano, limiti giornalieri e abbonamento PayPal.
               </p>
             </div>
             <button
@@ -164,7 +172,7 @@ export function ProfilePanel() {
                 ) : (
                   <ShieldCheck className="h-4 w-4 text-teal-200" />
                 )}
-                {profile?.isPremium ? "Premium" : "Free"}
+                {profile?.planLabel ?? (profile?.isPremium ? "Premium" : "Free")}
               </dd>
             </div>
             <div className="rounded-lg border border-white/10 bg-black/20 p-4">
@@ -177,12 +185,20 @@ export function ProfilePanel() {
             </div>
             <div className="rounded-lg border border-white/10 bg-black/20 p-4">
               <dt className="text-xs uppercase text-slate-500">
-                Match Free rimasti oggi
+                Match rimasti oggi
               </dt>
               <dd className="mt-2 text-sm font-semibold text-white">
-                {profile?.isPremium
+                {profile?.dailyMatchRemaining === null
                   ? "illimitati"
-                  : profile?.freeDailyRemaining ?? "-"}
+                  : profile?.dailyMatchRemaining ?? "-"}
+              </dd>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+              <dt className="text-xs uppercase text-slate-500">
+                Durata chiamata
+              </dt>
+              <dd className="mt-2 text-sm font-semibold text-white">
+                {formatPlanDuration(profile?.callLimitSeconds)}
               </dd>
             </div>
           </dl>

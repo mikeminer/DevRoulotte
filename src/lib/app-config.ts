@@ -1,17 +1,27 @@
+import type { ActorType, PlanCode } from "@/lib/types";
+
 export const APP_NAME = "DevRoulotte";
 export const SOURCE_CODE_URL = "https://github.com/mikeminer/DevRoulotte";
 export const LICENSE_NAME = "AGPL-3.0-only";
 
-export const FREE_DAILY_MATCH_LIMIT = Number(
-  process.env.FREE_DAILY_MATCH_LIMIT ?? 20,
+export const GUEST_DAILY_MATCH_LIMIT = Number(
+  process.env.GUEST_DAILY_MATCH_LIMIT ?? 3,
 );
 
-export const FREE_CALL_LIMIT_SECONDS = Number(
-  process.env.FREE_CALL_LIMIT_SECONDS ?? 300,
+export const REGISTERED_DAILY_MATCH_LIMIT = Number(
+  process.env.REGISTERED_DAILY_MATCH_LIMIT ?? 15,
+);
+
+export const GUEST_CALL_LIMIT_SECONDS = Number(
+  process.env.GUEST_CALL_LIMIT_SECONDS ?? 120,
+);
+
+export const REGISTERED_CALL_LIMIT_SECONDS = Number(
+  process.env.REGISTERED_CALL_LIMIT_SECONDS ?? 300,
 );
 
 export const PREMIUM_CALL_LIMIT_SECONDS = Number(
-  process.env.PREMIUM_CALL_LIMIT_SECONDS ?? 3600,
+  process.env.PREMIUM_TIER_CALL_LIMIT_SECONDS ?? 900,
 );
 
 export const NEXT_COOLDOWN_SECONDS = Number(
@@ -40,3 +50,39 @@ export const REPORT_REASONS = [
 ] as const;
 
 export type ReportReason = (typeof REPORT_REASONS)[number];
+
+export function getPlanCode(actorType: ActorType, isPremium: boolean): PlanCode {
+  if (isPremium) {
+    return "premium";
+  }
+
+  return actorType === "user" ? "registered" : "guest";
+}
+
+export function getPlanLabel(planCode: PlanCode) {
+  if (planCode === "premium") {
+    return "Premium";
+  }
+
+  return planCode === "registered" ? "Registrato" : "Free ospite";
+}
+
+export function getDailyMatchLimit(planCode: PlanCode) {
+  if (planCode === "premium") {
+    return null;
+  }
+
+  return planCode === "registered"
+    ? REGISTERED_DAILY_MATCH_LIMIT
+    : GUEST_DAILY_MATCH_LIMIT;
+}
+
+export function getCallLimitSeconds(planCode: PlanCode) {
+  if (planCode === "premium") {
+    return PREMIUM_CALL_LIMIT_SECONDS;
+  }
+
+  return planCode === "registered"
+    ? REGISTERED_CALL_LIMIT_SECONDS
+    : GUEST_CALL_LIMIT_SECONDS;
+}
