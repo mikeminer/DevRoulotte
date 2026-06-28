@@ -44,6 +44,17 @@ type QueueRow = {
   last_seen_at: string;
 };
 
+type ActiveMatchRow = {
+  id: string;
+  channel_name: string;
+  actor_a_type: ActorType;
+  actor_a_id: string;
+  actor_b_type: ActorType;
+  actor_b_id: string;
+  started_at: string;
+  connected_at: string | null;
+};
+
 function hashId(id: string) {
   return createHash("sha256").update(id).digest("hex").slice(0, 10);
 }
@@ -162,6 +173,43 @@ async function getRecentPeerKeys(actor: Actor) {
   ]);
 }
 
+async function getActiveMatch(actor: Actor) {
+  const supabase = getSupabaseAdmin();
+  const selectColumns =
+    "id,channel_name,actor_a_type,actor_a_id,actor_b_type,actor_b_id,started_at,connected_at";
+  const [asA, asB] = await Promise.all([
+    supabase
+      .from("match_logs")
+      .select(selectColumns)
+      .eq("status", "active")
+      .eq("actor_a_type", actor.type)
+      .eq("actor_a_id", actor.id)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<ActiveMatchRow>(),
+    supabase
+      .from("match_logs")
+      .select(selectColumns)
+      .eq("status", "active")
+      .eq("actor_b_type", actor.type)
+      .eq("actor_b_id", actor.id)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<ActiveMatchRow>(),
+  ]);
+
+  if (asA.error || asB.error) {
+    throw new Error(asA.error?.message ?? asB.error?.message);
+  }
+
+  const matches = [asA.data, asB.data].filter(Boolean) as ActiveMatchRow[];
+
+  return matches.sort(
+    (left, right) =>
+      new Date(right.started_at).getTime() - new Date(left.started_at).getTime(),
+  )[0] ?? null;
+}
+
 function buildMatchPayload(
   matchId: string,
   channelName: string,
@@ -169,6 +217,7 @@ function buildMatchPayload(
   peer: Pick<Actor, "type" | "id">,
   premium: boolean,
   dailyUsed: number,
+  startedAt = new Date().toISOString(),
 ): MatchPayload {
   return {
     id: matchId,
@@ -182,7 +231,7 @@ function buildMatchPayload(
     dailyRemaining: premium
       ? null
       : Math.max(FREE_DAILY_MATCH_LIMIT - dailyUsed, 0),
-    startedAt: new Date().toISOString(),
+    startedAt,
   };
 }
 
@@ -266,6 +315,68 @@ export async function POST(request: NextRequest) {
         },
         { status: 402 },
       );
+    }
+
+    const activeMatch = await getActiveMatch(actor);
+
+    if (activeMatch) {
+      const isCaller =
+        activeMatch.actor_a_type === actor.type &&
+        activeMatch.actor_a_id === actor.id;
+      const isFresh =
+        new Date(activeMatch.started_at).getTime() >=
+        new Date(staleCutoff).getTime();
+
+      if (activeMatch.connected_at || isFresh) {
+        const role = isCaller ? "caller" : "callee";
+        const peer = isCaller
+          ? {
+              type: activeMatch.actor_b_type,
+              id: activeMatch.actor_b_id,
+            }
+          : {
+              type: activeMatch.actor_a_type,
+              id: activeMatch.actor_a_id,
+            };
+
+        logMatchmaking("active_match_reused", {
+          actorType: actor.type,
+          actorHash: hashId(actor.id),
+          role,
+          matchId: activeMatch.id,
+        });
+
+        return NextResponse.json({
+          status: "matched",
+          match: buildMatchPayload(
+            activeMatch.id,
+            activeMatch.channel_name,
+            role,
+            peer,
+            premium,
+            dailyUsed,
+            activeMatch.started_at,
+          ),
+        });
+      }
+
+      await supabase
+        .from("match_logs")
+        .update({
+          status: "ended",
+          ended_at: new Date().toISOString(),
+          ended_reason: "stale_active_rejoin",
+        })
+        .eq("id", activeMatch.id)
+        .eq("status", "active");
+
+      await supabase.from("match_queue").delete().eq("match_id", activeMatch.id);
+
+      logMatchmaking("stale_active_match_removed", {
+        actorType: actor.type,
+        actorHash: hashId(actor.id),
+        matchId: activeMatch.id,
+      });
     }
 
     const { data: ownQueue } = await supabase
@@ -549,11 +660,15 @@ export async function POST(request: NextRequest) {
       ),
     });
   } catch (error) {
+    const message =
+      error instanceof Error && error.message.trim()
+        ? error.message
+        : "Matchmaking non riuscito";
+
     return NextResponse.json(
       {
         status: "error",
-        message:
-          error instanceof Error ? error.message : "Matchmaking non riuscito",
+        message,
       },
       { status: 400 },
     );

@@ -108,6 +108,8 @@ export function VideoChat({
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const matchRef = useRef<MatchPayload | null>(null);
   const searchingRef = useRef(false);
+  const matchSearchTokenRef = useRef(0);
+  const isPollingForMatchRef = useRef(false);
   const clientIdRef = useRef("");
   const offerRetryTimersRef = useRef<number[]>([]);
   const connectionWatchdogTimersRef = useRef<number[]>([]);
@@ -801,42 +803,63 @@ export function VideoChat({
   }
 
   async function pollForMatch() {
+    if (isPollingForMatchRef.current) {
+      return;
+    }
+
+    const searchToken = matchSearchTokenRef.current + 1;
+    matchSearchTokenRef.current = searchToken;
+    isPollingForMatchRef.current = true;
     const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
 
-    while (searchingRef.current) {
-      const response = await fetch("/api/matchmaking/join", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          ageConfirmed,
-          rulesAccepted,
-          language: "it",
-          country: "IT",
-          preferredLanguage: isPremium ? preferredLanguage : "any",
-          preferredCountry: isPremium ? preferredCountry : "any",
-        }),
-      });
-      const data = (await response.json()) as MatchJoinResponse;
+    try {
+      while (
+        searchingRef.current &&
+        matchSearchTokenRef.current === searchToken &&
+        !matchRef.current
+      ) {
+        const response = await fetch("/api/matchmaking/join", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            ageConfirmed,
+            rulesAccepted,
+            language: "it",
+            country: "IT",
+            preferredLanguage: isPremium ? preferredLanguage : "any",
+            preferredCountry: isPremium ? preferredCountry : "any",
+          }),
+        });
+        const data = (await response.json()) as MatchJoinResponse;
 
-      if (data.status === "matched") {
-        await connectToMatch(data.match);
-        onProfileRefresh();
-        return;
-      }
+        if (matchSearchTokenRef.current !== searchToken) {
+          return;
+        }
 
-      if (data.status !== "waiting") {
-        setStatus("idle");
+        if (data.status === "matched") {
+          await connectToMatch(data.match);
+          onProfileRefresh();
+          return;
+        }
+
+        if (data.status !== "waiting") {
+          setStatus("idle");
+          setMessage(data.message);
+          searchingRef.current = false;
+          onProfileRefresh();
+          return;
+        }
+
+        setStatus("waiting");
         setMessage(data.message);
-        searchingRef.current = false;
-        onProfileRefresh();
-        return;
+        await new Promise((resolve) =>
+          window.setTimeout(resolve, data.retryAfterMs),
+        );
       }
-
-      setStatus("waiting");
-      setMessage(data.message);
-      await new Promise((resolve) =>
-        window.setTimeout(resolve, data.retryAfterMs),
-      );
+    } finally {
+      if (matchSearchTokenRef.current === searchToken) {
+        isPollingForMatchRef.current = false;
+      }
     }
   }
 
