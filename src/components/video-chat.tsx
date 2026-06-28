@@ -118,6 +118,7 @@ export function VideoChat({
   const signalPollingTokenRef = useRef(0);
   const lastSignalIdRef = useRef(0);
   const connectedMatchIdsRef = useRef<Set<string>>(new Set());
+  const connectedAtRef = useRef<number | null>(null);
 
   const [ageConfirmed, setAgeConfirmed] = useState(
     () =>
@@ -135,6 +136,7 @@ export function VideoChat({
   const [message, setMessage] = useState("Pronto quando vuoi.");
   const [match, setMatch] = useState<MatchPayload | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [connectedAt, setConnectedAt] = useState<number | null>(null);
   const [preferredLanguage, setPreferredLanguage] = useState("any");
   const [preferredCountry, setPreferredCountry] = useState("any");
   const [reportReason, setReportReason] = useState("nudity");
@@ -347,7 +349,9 @@ export function VideoChat({
     }
 
     matchRef.current = null;
+    connectedAtRef.current = null;
     setMatch(null);
+    setConnectedAt(null);
     setElapsed(0);
   }, [
     clearAutoNext,
@@ -366,18 +370,20 @@ export function VideoChat({
   }, [cleanupConnection]);
 
   useEffect(() => {
-    if (!match) {
+    if (!match || connectedAt === null) {
       return;
     }
 
-    const interval = window.setInterval(() => {
-      const startedAt = new Date(match.startedAt).getTime();
-      const nextElapsed = Math.floor((Date.now() - startedAt) / 1000);
+    const activeMatch = match;
+    const callConnectedAt = connectedAt;
+
+    function tick() {
+      const nextElapsed = Math.floor((Date.now() - callConnectedAt) / 1000);
       setElapsed(nextElapsed);
 
-      if (nextElapsed >= match.limitSeconds) {
+      if (nextElapsed >= activeMatch.limitSeconds) {
         setMessage(
-          match.isPremium
+          activeMatch.isPremium
             ? "Limite chiamata raggiunto."
             : "Limite Free di 5 minuti raggiunto.",
         );
@@ -387,10 +393,13 @@ export function VideoChat({
           onProfileRefresh();
         });
       }
-    }, 1000);
+    }
+
+    tick();
+    const interval = window.setInterval(tick, 1000);
 
     return () => window.clearInterval(interval);
-  }, [cleanupConnection, match, onProfileRefresh]);
+  }, [cleanupConnection, connectedAt, match, onProfileRefresh]);
 
   async function ensureMedia() {
     if (localStreamRef.current) {
@@ -559,9 +568,12 @@ export function VideoChat({
 
     connectionTokenRef.current = connectionToken;
     lastSignalIdRef.current = 0;
+    connectedAtRef.current = null;
     peerConnectionRef.current = pc;
     matchRef.current = nextMatch;
     setMatch(nextMatch);
+    setConnectedAt(null);
+    setElapsed(0);
     setStatus("connecting");
     setMessage("Connessione peer-to-peer in corso.");
     logWebRtcEvent("connect_start", {
@@ -629,6 +641,12 @@ export function VideoChat({
         clearOfferRetries();
         clearConnectionWatchdogs();
         clearAutoNext();
+        if (!connectedAtRef.current) {
+          const now = Date.now();
+          connectedAtRef.current = now;
+          setConnectedAt(now);
+          setElapsed(0);
+        }
         setStatus("connected");
         setMessage("Connesso.");
         void markMatchConnected(nextMatch);
@@ -959,7 +977,13 @@ export function VideoChat({
             ) : null}
           </div>
           <div className="absolute left-3 top-3 rounded-md border border-white/10 bg-black/60 px-3 py-1 text-xs font-semibold text-slate-100">
-            {match ? formatTime(elapsed) : status === "waiting" ? "In coda" : "Offline"}
+            {match
+              ? connectedAt
+                ? formatTime(elapsed)
+                : "In connessione"
+              : status === "waiting"
+                ? "In coda"
+                : "Offline"}
           </div>
           <div className="absolute bottom-3 right-3 w-36 overflow-hidden rounded-lg border border-white/15 bg-black">
             <video
