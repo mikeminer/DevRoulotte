@@ -596,7 +596,7 @@ export function VideoChat({
 
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
-      await remoteVideoRef.current.play().catch(() => null);
+      void remoteVideoRef.current.play().catch(() => null);
     }
 
     pc.ontrack = (event) => {
@@ -607,6 +607,7 @@ export function VideoChat({
       event.streams[0]?.getTracks().forEach((track) => {
         remoteStream.addTrack(track);
       });
+      void remoteVideoRef.current?.play().catch(() => null);
       logWebRtcEvent("remote_track", {
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
