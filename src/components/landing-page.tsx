@@ -16,7 +16,7 @@ import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   CONTACT_EMAIL,
-  CONTACT_MAILTO,
+  LEGAL_CONTACT_MAILTO,
   LINKEDIN_COMPANY_URL,
   WORKSHOP_FEEDBACK_URL,
 } from "@/lib/app-config";
@@ -404,10 +404,10 @@ export function LandingPage() {
               LinkedIn
             </a>
             <a
-              href={CONTACT_MAILTO}
+              href={LEGAL_CONTACT_MAILTO}
               className="text-slate-300 hover:text-white"
             >
-              Contacts: {CONTACT_EMAIL}
+              Contatti legali: {CONTACT_EMAIL}
             </a>
             <CookiePreferencesButton className="text-slate-300 hover:text-white" />
           </div>

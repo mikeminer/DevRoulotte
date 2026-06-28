@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
+import { CONTACT_EMAIL } from "@/lib/app-config";
 
 export const metadata: Metadata = {
   title: "Privacy | DevRoulotte",
@@ -9,14 +10,23 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy"
-      updatedAt="27 giugno 2026"
-      intro="Questa informativa descrive i dati trattati dall'MVP DevRoulotte. Non e' consulenza legale: prima di una produzione commerciale serve revisione professionale."
+      updatedAt="28 giugno 2026"
+      intro={`Questa informativa descrive i dati trattati da DevRoulotte e la procedura privacy operativa. Contatto legale e privacy: ${CONTACT_EMAIL}.`}
       sections={[
+        {
+          title: "Titolare e contatto privacy",
+          body: [
+            `DevRoulotte e' il progetto responsabile del trattamento dei dati raccolti tramite devroulotte.chat. Il contatto legale e privacy operativo e' ${CONTACT_EMAIL}.`,
+            "Se in futuro il progetto verra' gestito da una societa' o altra entita' giuridica, questa pagina sara' aggiornata con ragione sociale, sede e riferimenti completi.",
+            "Non e' nominato un DPO/RPD. Per richieste privacy, contestazioni, rimozioni, accesso ai dati o segnalazioni di sicurezza usa il contatto indicato sopra.",
+          ],
+        },
         {
           title: "Dati trattati",
           body: [
             "Per utenti registrati trattiamo email, identificativo Supabase, profilo base, preferenze lingua/Paese e stato abbonamento.",
             "Per ospiti usiamo un identificativo casuale salvato nel browser per applicare limiti, report e ban.",
+            "Trattiamo inoltre dati tecnici come indirizzi IP visibili ai provider, user agent, log applicativi essenziali, eventi di errore, stato online/offline e informazioni necessarie a sicurezza, limiti Free e prevenzione abusi.",
           ],
         },
         {
@@ -35,6 +45,16 @@ export default function PrivacyPage() {
           ],
         },
         {
+          title: "Finalita' e basi giuridiche",
+          body: [
+            "Erogazione del servizio: usiamo account, sessione, profilo, matchmaking, signaling e stato Premium per fornire la videochat richiesta e gestire il rapporto con l'utente.",
+            "Sicurezza e prevenzione abusi: usiamo log minimi, report, ban, limiti e controlli anti-spam per proteggere utenti, servizio e infrastruttura.",
+            "Pagamenti e adempimenti: usiamo identificativi PayPal e stati subscription per attivare Premium, gestire cancellazioni, contestazioni e obblighi amministrativi.",
+            "Statistiche opzionali: Google Analytics 4 viene usato solo dopo consenso alla categoria Statistiche; puoi revocare il consenso dal centro preferenze cookie.",
+            "Comunicazioni di servizio: possiamo usare l'email dell'account per conferma registrazione, reset password, notifiche di sicurezza e comunicazioni strettamente legate al servizio.",
+          ],
+        },
+        {
           title: "Cookie e strumenti simili",
           body: [
             "Usiamo strumenti tecnici necessari nel browser per login, ID ospite, conferma 18+, accettazione regole, limiti Free, sicurezza e preferenze cookie.",
@@ -47,6 +67,17 @@ export default function PrivacyPage() {
           body: [
             "Usiamo Vercel per hosting e API, Supabase per Auth/database/signaling temporaneo, Cloudflare per STUN/TURN, PayPal per abbonamenti e, se accettato in Statistiche, Google Analytics 4 per metriche aggregate.",
             "Questi fornitori possono trattare dati tecnici secondo le rispettive policy e impostazioni account.",
+            "Alcuni fornitori possono trattare dati fuori dallo Spazio Economico Europeo o con sub-responsabili internazionali. La valutazione definitiva di trasferimenti, SCC e ruoli privacy va mantenuta aggiornata in base ai contratti e alle impostazioni dei singoli provider.",
+          ],
+        },
+        {
+          title: "Conservazione",
+          body: [
+            "Account e profilo vengono conservati finche' l'account resta attivo o finche' servono per obblighi legali, sicurezza o gestione di contestazioni.",
+            "Le preferenze cookie restano nel browser finche' non vengono modificate, revocate o cancellate dall'utente.",
+            "I dati di signaling WebRTC sono temporanei: la procedura di cleanup elimina i segnali piu' vecchi di circa 10 minuti.",
+            "I log dei match e i report sono conservati in forma minima per sicurezza, audit anti-abuso, limiti Free, ban e contestazioni. I dati non piu' necessari vanno eliminati o anonimizzati durante le manutenzioni periodiche.",
+            "I dati collegati a pagamenti, rimborsi e cancellazioni Premium possono essere conservati per il tempo richiesto da PayPal, obblighi fiscali, contabili o difesa da contestazioni.",
           ],
         },
         {
@@ -57,10 +88,38 @@ export default function PrivacyPage() {
           ],
         },
         {
-          title: "Diritti",
+          title: "Diritti privacy",
           body: [
-            "Gli utenti possono chiedere aggiornamento, cancellazione o limitazione dei dati dove applicabile.",
-            "Prima del lancio pubblico devi inserire contatti legali reali e una procedura privacy completa.",
+            "Puoi chiedere accesso ai dati, rettifica, cancellazione, limitazione del trattamento, portabilita' dei dati forniti, opposizione ai trattamenti basati su interesse legittimo e revoca del consenso per cookie/statistiche.",
+            "La revoca del consenso non rende illecito il trattamento effettuato prima della revoca. Alcuni dati possono non essere cancellati subito quando servono per sicurezza, obblighi legali, contestazioni, prevenzione abusi o tutela di altri utenti.",
+            "Non usiamo decisioni automatizzate con effetti giuridici significativi. Limiti, shadowban o blocchi anti-abuso possono essere rivisti manualmente scrivendo al contatto privacy.",
+          ],
+        },
+        {
+          title: "Procedura per richieste privacy",
+          body: [
+            `Invia una email a ${CONTACT_EMAIL} con oggetto "Richiesta privacy DevRoulotte".`,
+            "Indica il diritto che vuoi esercitare, l'email dell'account se sei registrato, l'eventuale guest ID se stai usando il servizio come ospite, una descrizione chiara della richiesta e un recapito per la risposta.",
+            "Per proteggere l'account possiamo chiedere informazioni aggiuntive proporzionate per verificare che la richiesta arrivi dalla persona interessata o da un delegato autorizzato.",
+            "Rispondiamo di norma entro un mese dalla ricezione. Se la richiesta e' complessa o numerosa, possiamo estendere il termine fino a due mesi ulteriori informandoti del motivo.",
+            "La richiesta e' gratuita, salvo casi manifestamente infondati, eccessivi o ripetitivi in cui potremmo rifiutare motivatamente o chiedere un contributo ragionevole nei limiti consentiti.",
+            "Se non possiamo soddisfare integralmente una richiesta, spieghiamo il motivo, le parti eventualmente escluse e le possibilita' di contestazione.",
+          ],
+        },
+        {
+          title: "Cancellazione account e dati",
+          body: [
+            "Per cancellare l'account scrivi al contatto privacy indicando l'email dell'account. Disattiviamo o cancelliamo l'account Supabase e rimuoviamo i dati di profilo non piu' necessari.",
+            "Prima di chiedere cancellazione, cancella eventuali abbonamenti Premium attivi da PayPal o dal profilo DevRoulotte. Alcuni identificativi subscription possono restare nei log necessari a pagamenti, sicurezza e contestazioni.",
+            "Per ospiti possiamo eliminare o disassociare dati backend ragionevolmente collegabili al guest ID indicato, quando tecnicamente possibile e salvo necessita' di sicurezza o obblighi legali.",
+          ],
+        },
+        {
+          title: "Reclami e data breach",
+          body: [
+            `Se ritieni che una richiesta privacy non sia stata gestita correttamente, puoi scrivere prima a ${CONTACT_EMAIL} per una revisione interna.`,
+            "Puoi inoltre proporre reclamo all'autorita' di controllo competente, in Italia il Garante per la protezione dei dati personali.",
+            "In caso di violazione dei dati personali, DevRoulotte registra l'incidente, valuta rischio e impatto, mitiga il problema e, quando richiesto dal GDPR, notifica l'autorita' competente entro 72 ore dalla conoscenza e informa gli utenti interessati se il rischio e' elevato.",
           ],
         },
       ]}

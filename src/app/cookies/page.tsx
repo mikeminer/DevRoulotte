@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
+import { CONTACT_EMAIL } from "@/lib/app-config";
 
 export const metadata: Metadata = {
   title: "Cookie | DevRoulotte",
@@ -9,8 +10,8 @@ export default function CookiesPage() {
   return (
     <LegalPage
       title="Cookie"
-      updatedAt="27 giugno 2026"
-      intro="Questa pagina descrive gli strumenti tecnici e le preferenze cookie dell'MVP DevRoulotte. Non e' consulenza legale: prima del lancio pubblico serve revisione professionale."
+      updatedAt="28 giugno 2026"
+      intro={`Questa pagina descrive strumenti tecnici e preferenze cookie DevRoulotte. Per richieste privacy o cookie: ${CONTACT_EMAIL}.`}
       sections={[
         {
           title: "Strumenti necessari",
@@ -43,6 +44,7 @@ export default function CookiesPage() {
           body: [
             "Puoi riaprire il centro preferenze dal pulsante Cookie presente nell'interfaccia e modificare o revocare le scelte opzionali in qualsiasi momento.",
             "La revoca non elimina gli strumenti tecnici necessari, ma impedisce l'uso futuro delle categorie opzionali rifiutate.",
+            `Per richieste relative a cookie, consenso o dati analytics scrivi a ${CONTACT_EMAIL} con oggetto "Richiesta privacy DevRoulotte".`,
           ],
         },
       ]}

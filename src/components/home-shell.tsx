@@ -25,7 +25,7 @@ import { VideoChat } from "@/components/video-chat";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import {
   CONTACT_EMAIL,
-  CONTACT_MAILTO,
+  LEGAL_CONTACT_MAILTO,
   LICENSE_NAME,
   LINKEDIN_COMPANY_URL,
   SOURCE_CODE_URL,
@@ -321,11 +321,11 @@ export function HomeShell() {
               LinkedIn
             </a>
             <a
-              href={CONTACT_MAILTO}
+              href={LEGAL_CONTACT_MAILTO}
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
             >
               <Mail className="h-3.5 w-3.5" />
-              Contacts: {CONTACT_EMAIL}
+              Contatti legali: {CONTACT_EMAIL}
             </a>
             <a
               href={SOURCE_CODE_URL}

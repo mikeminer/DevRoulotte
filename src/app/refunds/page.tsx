@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
+import { CONTACT_EMAIL } from "@/lib/app-config";
 
 export const metadata: Metadata = {
   title: "Cancellazioni e rimborsi | DevRoulotte",
@@ -9,8 +10,8 @@ export default function RefundsPage() {
   return (
     <LegalPage
       title="Cancellazioni e rimborsi"
-      updatedAt="27 giugno 2026"
-      intro="Il piano Premium usa PayPal Subscriptions. Questa pagina spiega il comportamento previsto dell'MVP."
+      updatedAt="28 giugno 2026"
+      intro={`Il piano Premium usa PayPal Subscriptions. Per richieste su pagamenti, cancellazioni o rimborsi scrivi a ${CONTACT_EMAIL}.`}
       sections={[
         {
           title: "Abbonamento Premium",
@@ -30,7 +31,8 @@ export default function RefundsPage() {
           title: "Rimborsi",
           body: [
             "L'MVP non gestisce rimborsi automatici. Eventuali rimborsi vanno gestiti manualmente dal dashboard PayPal secondo le regole applicabili.",
-            "Prima del lancio commerciale devi inserire contatti reali, tempi di risposta e condizioni di rimborso definitive.",
+            `Per chiedere verifica o rimborso scrivi a ${CONTACT_EMAIL} indicando email account, ID transazione PayPal se disponibile, data del pagamento e motivo della richiesta.`,
+            "Rispondiamo di norma entro 14 giorni. Se servono verifiche PayPal o controlli anti-frode, comunichiamo l'eventuale estensione dei tempi.",
           ],
         },
       ]}

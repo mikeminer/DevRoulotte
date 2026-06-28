@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
+import { CONTACT_EMAIL } from "@/lib/app-config";
 
 export const metadata: Metadata = {
   title: "Termini di servizio | DevRoulotte",
@@ -9,8 +10,8 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Termini di servizio"
-      updatedAt="27 giugno 2026"
-      intro="DevRoulotte e' un servizio 18+ per networking casuale 1:1 via webcam. Usando il servizio accetti questi termini, le regole community e la nostra informativa privacy."
+      updatedAt="28 giugno 2026"
+      intro={`DevRoulotte e' un servizio 18+ per networking casuale 1:1 via webcam. Usando il servizio accetti questi termini, le regole community e la nostra informativa privacy. Contatto legale: ${CONTACT_EMAIL}.`}
       sections={[
         {
           title: "Accesso 18+",
@@ -53,6 +54,13 @@ export default function TermsPage() {
           body: [
             "L'MVP usa servizi esterni come Vercel, Supabase, Cloudflare e PayPal. Interruzioni o limiti di questi servizi possono influire sul funzionamento.",
             "Possiamo modificare o sospendere funzioni per sicurezza, manutenzione, abuso o obblighi legali.",
+          ],
+        },
+        {
+          title: "Contatti legali e privacy",
+          body: [
+            `Per comunicazioni legali, richieste privacy, contestazioni, cancellazione account, reclami su moderazione o problemi relativi a pagamenti scrivi a ${CONTACT_EMAIL}.`,
+            "Per richieste privacy usa preferibilmente oggetto \"Richiesta privacy DevRoulotte\" e segui la procedura indicata nella pagina Privacy.",
           ],
         },
       ]}

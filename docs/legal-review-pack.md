@@ -8,7 +8,7 @@ Non trattare questo documento come autorizzazione al lancio pubblico. Per un tes
 
 Blocchi principali prima del pubblico:
 
-- Identita' reale del titolare, contatti legali/privacy e giurisdizione.
+- Identita' reale del titolare, contatti legali/privacy e giurisdizione. Contatto operativo attuale: dev@devroulotte.chat.
 - Informativa privacy completa con basi giuridiche, retention, fornitori, trasferimenti extra UE e diritti interessati.
 - Terms, refunds e subscription flow revisionati per prezzo, rinnovo automatico e cancellazione.
 - Valutazione DSA/moderazione: punto di contatto, notice-and-action, gestione contenuti illegali e reclami.
@@ -39,7 +39,7 @@ Blocchi principali prima del pubblico:
 - `LICENSE`: AGPL-3.0-only per codice sorgente.
 - `TRADEMARKS.md`: marchio, logo e identita' visiva riservati.
 
-Le pagine sono bozze operative. Prima del lancio pubblico devono essere revisionate, completate con titolare reale, contatti, giurisdizione, procedure, tempi e riferimenti specifici.
+Le pagine sono bozze operative aggiornate con contatto legale/privacy dev@devroulotte.chat e procedura privacy di base. Prima del lancio pubblico devono comunque essere revisionate e completate con eventuale titolare legale, indirizzo, giurisdizione, ruoli privacy e riferimenti contrattuali specifici.
 
 ## Data map
 
@@ -75,7 +75,7 @@ Da validare:
 
 ## GDPR/privacy checklist
 
-- Identificare il titolare del trattamento con nome legale, indirizzo e contatti reali.
+- Identificare il titolare del trattamento con nome legale e indirizzo. Contatto privacy operativo gia' pubblicato: dev@devroulotte.chat.
 - Definire se serve DPO/RPD o solo referente privacy.
 - Definire basi giuridiche per ogni trattamento: contratto, obbligo legale, legittimo interesse, consenso dove necessario.
 - Scrivere informativa privacy completa con diritti interessati, reclamo al Garante, retention, fornitori, trasferimenti extra UE.

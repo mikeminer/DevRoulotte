@@ -5,6 +5,8 @@ export const SOURCE_CODE_URL = "https://github.com/mikeminer/DevRoulotte";
 export const LICENSE_NAME = "AGPL-3.0-only";
 export const CONTACT_EMAIL = "dev@devroulotte.chat";
 export const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`;
+export const LEGAL_CONTACT_EMAIL = CONTACT_EMAIL;
+export const LEGAL_CONTACT_MAILTO = `mailto:${LEGAL_CONTACT_EMAIL}?subject=Richiesta%20privacy%20DevRoulotte`;
 export const LINKEDIN_COMPANY_URL =
   "https://www.linkedin.com/company/135304204/";
 export const WORKSHOP_FEEDBACK_URL =
