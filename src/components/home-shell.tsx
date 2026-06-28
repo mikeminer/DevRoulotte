@@ -116,7 +116,7 @@ export function HomeShell() {
               className="brand-wordmark h-auto w-40 max-w-[54vw] sm:w-56"
             />
           </Link>
-          <nav className="flex items-center gap-2">
+          <nav className="flex flex-wrap items-center justify-end gap-2">
             <ThemeToggle />
             {isPremium ? (
               <span className="inline-flex h-9 items-center gap-2 rounded-md border border-amber-300/30 bg-amber-300/10 px-3 text-xs font-bold text-amber-100">
@@ -132,6 +132,15 @@ export function HomeShell() {
             >
               Profilo
             </Link>
+            <a
+              href={WORKSHOP_FEEDBACK_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-200 hover:bg-white/10"
+            >
+              <Wrench className="h-4 w-4" />
+              In officina
+            </a>
             <Link
               href="/admin"
               className="inline-flex h-9 items-center rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-200 hover:bg-white/10"
