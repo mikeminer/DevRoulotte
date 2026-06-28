@@ -43,17 +43,38 @@ async function cleanup(request: NextRequest) {
     const queueCutoff = new Date(
       now.getTime() - MATCH_QUEUE_STALE_SECONDS * 1000,
     ).toISOString();
+    const unconnectedMatchCutoff = new Date(
+      now.getTime() - MATCH_QUEUE_STALE_SECONDS * 2 * 1000,
+    ).toISOString();
     const activeMatchCutoff = new Date(
       now.getTime() -
         (PREMIUM_CALL_LIMIT_SECONDS + MATCH_QUEUE_STALE_SECONDS) * 1000,
     ).toISOString();
     const signalCutoff = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
 
-    const [queueCleanup, matchCleanup, signalCleanup] = await Promise.all([
+    const [
+      queueCleanup,
+      unconnectedMatchCleanup,
+      matchCleanup,
+      signalCleanup,
+    ] = await Promise.all([
       supabase
         .from("match_queue")
         .delete({ count: "exact" })
         .lt("last_seen_at", queueCutoff),
+      supabase
+        .from("match_logs")
+        .update(
+          {
+            status: "ended",
+            ended_at: now.toISOString(),
+            ended_reason: "cleanup_unconnected_stale",
+          },
+          { count: "exact" },
+        )
+        .eq("status", "active")
+        .is("connected_at", null)
+        .lt("started_at", unconnectedMatchCutoff),
       supabase
         .from("match_logs")
         .update(
@@ -76,6 +97,10 @@ async function cleanup(request: NextRequest) {
       throw new Error(queueCleanup.error.message);
     }
 
+    if (unconnectedMatchCleanup.error) {
+      throw new Error(unconnectedMatchCleanup.error.message);
+    }
+
     if (matchCleanup.error) {
       throw new Error(matchCleanup.error.message);
     }
@@ -87,9 +112,11 @@ async function cleanup(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       deletedQueueRows: queueCleanup.count ?? 0,
+      endedUnconnectedMatchLogs: unconnectedMatchCleanup.count ?? 0,
       endedMatchLogs: matchCleanup.count ?? 0,
       deletedWebrtcSignals: signalCleanup.count ?? 0,
       queueCutoff,
+      unconnectedMatchCutoff,
       activeMatchCutoff,
       signalCutoff,
     });
