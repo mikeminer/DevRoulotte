@@ -68,7 +68,10 @@ export function LandingPage() {
 
         <div className="relative mx-auto grid w-full min-w-0 max-w-7xl gap-12">
           <header className="flex flex-wrap items-center justify-between gap-3">
-            <Link href="/" className="inline-flex min-w-0 items-center gap-3">
+            <Link
+              href="/"
+              className="brand-wordmark-plate inline-flex min-w-0 items-center gap-3 rounded-lg px-3 py-2"
+            >
               <Image
                 src="/devroulotte-wordmark.png"
                 alt="DevRoulotte"
@@ -212,14 +215,16 @@ export function LandingPage() {
 
       <section className="px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl justify-items-start gap-6">
-          <Image
-            src="/devroulotte-banner.gif"
-            alt="DevRoulotte"
-            width={640}
-            height={162}
-            unoptimized
-            className="h-auto w-56 sm:w-72"
-          />
+          <div className="brand-wordmark-plate rounded-lg px-3 py-2">
+            <Image
+              src="/devroulotte-banner.gif"
+              alt="DevRoulotte"
+              width={640}
+              height={162}
+              unoptimized
+              className="h-auto w-56 sm:w-72"
+            />
+          </div>
           <div className="grid gap-5 text-3xl font-black leading-tight tracking-normal text-white sm:text-5xl">
             <p>Benvenuto a bordo di DevRoulotte.</p>
             <p className="text-teal-200">

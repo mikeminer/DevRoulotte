@@ -105,15 +105,17 @@ export function ResetPasswordPanel() {
         </Link>
 
         <div className="flex justify-center">
-          <Image
-            src="/devroulotte-banner.gif"
-            alt="DevRoulotte"
-            width={640}
-            height={162}
-            unoptimized
-            priority
-            className="h-auto w-64 max-w-full sm:w-80"
-          />
+          <div className="brand-wordmark-plate rounded-lg px-3 py-2">
+            <Image
+              src="/devroulotte-banner.gif"
+              alt="DevRoulotte"
+              width={640}
+              height={162}
+              unoptimized
+              priority
+              className="h-auto w-64 max-w-full sm:w-80"
+            />
+          </div>
         </div>
 
         <section className="rounded-lg border border-white/10 bg-white/[0.04] p-5">

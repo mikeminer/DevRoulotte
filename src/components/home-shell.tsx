@@ -86,21 +86,23 @@ export function HomeShell() {
               alt="DevRoulotte"
               width={64}
               height={64}
-              className="h-12 w-12 rounded-md object-cover"
+              className="brand-mark-plate h-12 w-12 rounded-md object-cover"
               priority
             />
             <div className="min-w-0">
               <h1 className="sr-only">DevRoulotte</h1>
-              <Image
-                src="/devroulotte-banner.gif"
-                alt=""
-                aria-hidden="true"
-                width={640}
-                height={162}
-                unoptimized
-                className="h-auto w-48 max-w-[58vw] sm:w-64 md:w-72"
-                priority
-              />
+              <div className="brand-wordmark-plate rounded-lg px-2 py-1">
+                <Image
+                  src="/devroulotte-banner.gif"
+                  alt=""
+                  aria-hidden="true"
+                  width={640}
+                  height={162}
+                  unoptimized
+                  className="h-auto w-48 max-w-[58vw] sm:w-64 md:w-72"
+                  priority
+                />
+              </div>
               <p className="text-xs text-slate-400">
                 Il networking, senza appuntamenti.
               </p>

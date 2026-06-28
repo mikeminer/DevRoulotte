@@ -17,18 +17,20 @@ export default function MaintenancePage() {
           width={320}
           height={320}
           priority
-          className="h-36 w-36 rounded-lg object-cover shadow-2xl shadow-teal-950/30 sm:h-44 sm:w-44"
+          className="brand-mark-plate h-36 w-36 rounded-lg object-cover sm:h-44 sm:w-44"
         />
         <div className="grid gap-4">
-          <Image
-            src="/devroulotte-banner.gif"
-            alt="DevRoulotte"
-            width={640}
-            height={162}
-            unoptimized
-            priority
-            className="mx-auto h-auto w-72 max-w-full sm:w-96"
-          />
+          <div className="brand-wordmark-plate mx-auto rounded-lg px-3 py-2">
+            <Image
+              src="/devroulotte-banner.gif"
+              alt="DevRoulotte"
+              width={640}
+              height={162}
+              unoptimized
+              priority
+              className="h-auto w-72 max-w-full sm:w-96"
+            />
+          </div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-200">
             Manutenzione in corso
           </p>
