@@ -7,6 +7,7 @@ import {
   Code2,
   Crown,
   FileText,
+  Linkedin,
   Mail,
   Scale,
   ShieldCheck,
@@ -25,6 +26,7 @@ import {
   CONTACT_EMAIL,
   CONTACT_MAILTO,
   LICENSE_NAME,
+  LINKEDIN_COMPANY_URL,
   SOURCE_CODE_URL,
   WORKSHOP_FEEDBACK_URL,
 } from "@/lib/app-config";
@@ -306,6 +308,15 @@ export function HomeShell() {
             >
               <Wrench className="h-3.5 w-3.5" />
               In officina
+            </a>
+            <a
+              href={LINKEDIN_COMPANY_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <Linkedin className="h-3.5 w-3.5" />
+              LinkedIn
             </a>
             <a
               href={CONTACT_MAILTO}

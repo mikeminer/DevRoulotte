@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft, Linkedin, Mail } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
-import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/app-config";
+import {
+  CONTACT_EMAIL,
+  CONTACT_MAILTO,
+  LINKEDIN_COMPANY_URL,
+} from "@/lib/app-config";
 
 type LegalSection = {
   title: string;
@@ -61,6 +65,15 @@ export function LegalPage({
           >
             <Mail className="h-3.5 w-3.5" />
             Contacts: {CONTACT_EMAIL}
+          </a>
+          <a
+            href={LINKEDIN_COMPANY_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+          >
+            <Linkedin className="h-3.5 w-3.5" />
+            LinkedIn
           </a>
           <CookiePreferencesButton className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white" />
         </footer>
