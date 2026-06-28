@@ -89,32 +89,16 @@ export function HomeShell() {
     <main className="theme-page min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-4 text-white sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-5">
         <header className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="inline-flex min-w-0 items-center gap-3">
             <Image
-              src="/devroulotte-camper-only.png"
+              src="/devroulotte-wordmark.png"
               alt="DevRoulotte"
-              width={226}
-              height={156}
-              className="h-12 w-16 rounded-md object-contain"
+              width={1200}
+              height={294}
               priority
+              className="brand-wordmark h-auto w-40 max-w-[54vw] sm:w-56"
             />
-            <div className="min-w-0">
-              <h1 className="sr-only">DevRoulotte</h1>
-              <Image
-                src="/devroulotte-banner.gif"
-                alt=""
-                aria-hidden="true"
-                width={640}
-                height={162}
-                unoptimized
-                className="brand-wordmark h-auto w-48 max-w-[58vw] sm:w-64 md:w-72"
-                priority
-              />
-              <p className="text-xs text-slate-400">
-                Il networking, senza appuntamenti.
-              </p>
-            </div>
-          </div>
+          </Link>
           <nav className="flex items-center gap-2">
             <ThemeToggle />
             {isPremium ? (
