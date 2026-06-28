@@ -284,12 +284,13 @@ DevRoulotte è progettata solo per utenti 18+. Non registra chiamate, non salva 
 
 L'app include un banner cookie con rifiuto opzionali, accetta tutto e personalizzazione granulare. Le categorie opzionali sono disattivate di default. Gli strumenti tecnici necessari coprono login, ID ospite, conferma 18+, regole, limiti Free, sicurezza e salvataggio della scelta. La pagina `/cookies` descrive gli strumenti attuali e dal pulsante Cookie l'utente puo' modificare o revocare le scelte.
 
-Google Analytics 4 e' opzionale e viene caricato solo se:
+Google Analytics 4 e' opzionale ed e' configurato tramite Google tag globale con Consent Mode:
 
 1. `NEXT_PUBLIC_GA_MEASUREMENT_ID` contiene un Measurement ID GA4, ad esempio `G-XXXXXXXXXX`.
-2. L'utente accetta la categoria Statistiche nel centro preferenze cookie.
+2. Il tag viene inizializzato con `analytics_storage` negato di default e `send_page_view: false`.
+3. L'utente accetta la categoria Statistiche nel centro preferenze cookie.
 
-Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, il tag GA non viene caricato e l'app prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
+Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, l'app mantiene il consenso analytics negato, non invia page view GA4 e prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
 
 ## Revisione legale
 

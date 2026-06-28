@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           body: [
             "Usiamo strumenti tecnici necessari nel browser per login, ID ospite, conferma 18+, accettazione regole, limiti Free, sicurezza e preferenze cookie.",
             "Le categorie opzionali Preferenze, Statistiche e Marketing sono disattivate di default e modificabili dal centro preferenze.",
-            "La categoria Statistiche puo' abilitare Google Analytics 4 per misurare visite, pagine viste ed eventi tecnici aggregati. Google Analytics non viene caricato prima del consenso e viene disattivato se revochi la categoria Statistiche.",
+            "Il Google tag puo' essere caricato con Consent Mode e `analytics_storage` negato di default. La categoria Statistiche abilita Google Analytics 4 per misurare visite, pagine viste ed eventi tecnici aggregati solo dopo consenso e viene disattivata se revochi la categoria Statistiche.",
           ],
         },
         {

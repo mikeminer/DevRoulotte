@@ -1,8 +1,7 @@
 "use client";
 
-import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   COOKIE_CONSENT_STORAGE_KEY,
   COOKIE_CONSENT_UPDATED_EVENT,
@@ -73,19 +72,20 @@ function updateGoogleConsent(analyticsAccepted: boolean) {
 export function GoogleAnalytics() {
   const pathname = usePathname();
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
-  const measurementIdJson = useMemo(
-    () => JSON.stringify(measurementId),
-    [measurementId],
-  );
   const [analyticsAccepted, setAnalyticsAccepted] = useState(false);
   const [isTagReady, setIsTagReady] = useState(false);
 
   useEffect(() => {
+    if (!measurementId) {
+      return;
+    }
+
     function syncConsent() {
       const accepted = hasAnalyticsConsent();
 
       setAnalyticsAccepted(accepted);
       updateGoogleConsent(accepted);
+      setIsTagReady(Boolean(window.gtag));
     }
 
     function syncFromStorage(event: StorageEvent) {
@@ -95,14 +95,24 @@ export function GoogleAnalytics() {
     }
 
     syncConsent();
+    const readinessTimer = window.setInterval(() => {
+      if (!window.gtag) {
+        return;
+      }
+
+      syncConsent();
+      window.clearInterval(readinessTimer);
+    }, 200);
+
     window.addEventListener(COOKIE_CONSENT_UPDATED_EVENT, syncConsent);
     window.addEventListener("storage", syncFromStorage);
 
     return () => {
+      window.clearInterval(readinessTimer);
       window.removeEventListener(COOKIE_CONSENT_UPDATED_EVENT, syncConsent);
       window.removeEventListener("storage", syncFromStorage);
     };
-  }, []);
+  }, [measurementId]);
 
   useEffect(() => {
     if (!measurementId || !analyticsAccepted || !isTagReady || !window.gtag) {
@@ -119,42 +129,5 @@ export function GoogleAnalytics() {
     });
   }, [analyticsAccepted, isTagReady, measurementId, pathname]);
 
-  if (!measurementId || !analyticsAccepted) {
-    return null;
-  }
-
-  return (
-    <>
-      <Script
-        id="devroulotte-google-analytics-init"
-        strategy="afterInteractive"
-        onReady={() => {
-          updateGoogleConsent(true);
-          setIsTagReady(true);
-        }}
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){window.dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('consent', 'default', {
-              ad_personalization: 'denied',
-              ad_storage: 'denied',
-              ad_user_data: 'denied',
-              analytics_storage: 'granted'
-            });
-            gtag('js', new Date());
-            gtag('config', ${measurementIdJson}, {
-              send_page_view: false
-            });
-          `,
-        }}
-      />
-      <Script
-        id="devroulotte-google-analytics"
-        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
-        strategy="afterInteractive"
-      />
-    </>
-  );
+  return null;
 }

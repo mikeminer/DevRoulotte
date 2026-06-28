@@ -32,6 +32,26 @@ try {
 }
 `;
 
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+const gaMeasurementIdJson = JSON.stringify(gaMeasurementId);
+const googleTagScript = gaMeasurementId
+  ? `
+window.dataLayer = window.dataLayer || [];
+window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+window.gtag('consent', 'default', {
+  ad_personalization: 'denied',
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  analytics_storage: 'denied',
+  wait_for_update: 500
+});
+window.gtag('js', new Date());
+window.gtag('config', ${gaMeasurementIdJson}, {
+  send_page_view: false
+});
+`
+  : "";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,6 +66,15 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {gaMeasurementId ? (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+            />
+            <script dangerouslySetInnerHTML={{ __html: googleTagScript }} />
+          </>
+        ) : null}
       </head>
       <body className="min-h-full antialiased">
         {children}
