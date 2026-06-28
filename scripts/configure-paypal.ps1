@@ -7,6 +7,7 @@ param(
   [string]$WebhookId = $env:PAYPAL_WEBHOOK_ID,
   [string]$AppUrl = $env:NEXT_PUBLIC_APP_URL,
   [string]$VercelScope = "mikeminers-projects",
+  [switch]$ForceNewPlan,
   [switch]$SkipVercel,
   [switch]$SkipDeploy,
   [switch]$DisableNodeTlsVerification
@@ -79,6 +80,27 @@ function Set-LocalEnvValue {
   }
 
   Set-Content -LiteralPath $path -Value $nextLines -Encoding UTF8
+}
+
+function Set-ConfigFileValue {
+  param(
+    [object]$Config,
+    [string]$Path,
+    [string]$Name,
+    [string]$Value
+  )
+
+  if ($null -eq $Config -or -not (Test-Path -LiteralPath $Path)) {
+    return
+  }
+
+  if ($Config.PSObject.Properties.Name -contains $Name) {
+    $Config.$Name = $Value
+  } else {
+    $Config | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
+  }
+
+  $Config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $Path -Encoding UTF8
 }
 
 function Add-VercelEnv {
@@ -173,6 +195,10 @@ $ClientSecret = Use-ConfigValue -Config $config -Property "clientSecret" -Curren
 $PlanId = Use-ConfigValue -Config $config -Property "planId" -CurrentValue $PlanId
 $WebhookId = Use-ConfigValue -Config $config -Property "webhookId" -CurrentValue $WebhookId
 
+if ($ForceNewPlan) {
+  $PlanId = ""
+}
+
 if ([string]::IsNullOrWhiteSpace($Mode)) {
   $Mode = "sandbox"
 }
@@ -215,35 +241,20 @@ if (Is-Placeholder -Value $PlanId) {
     -AccessToken $accessToken `
     -Method "Post" `
     -Path "/v1/billing/plans" `
-    -RequestId "devroulotte-plan-399-$Mode" `
+    -RequestId "devroulotte-plan-399-no-trial-$Mode" `
     -Body @{
       product_id = $product.id
       name = "DevRoulotte Premium"
-      description = "Premium con trial gratuito di 5 giorni, poi 3,99 EUR al mese."
+      description = "Premium a 3,99 EUR al mese, senza prova gratuita."
       status = "ACTIVE"
       billing_cycles = @(
-        @{
-          frequency = @{
-            interval_unit = "DAY"
-            interval_count = 5
-          }
-          tenure_type = "TRIAL"
-          sequence = 1
-          total_cycles = 1
-          pricing_scheme = @{
-            fixed_price = @{
-              value = "0"
-              currency_code = "EUR"
-            }
-          }
-        },
         @{
           frequency = @{
             interval_unit = "MONTH"
             interval_count = 1
           }
           tenure_type = "REGULAR"
-          sequence = 2
+          sequence = 1
           total_cycles = 0
           pricing_scheme = @{
             fixed_price = @{
@@ -265,6 +276,7 @@ if (Is-Placeholder -Value $PlanId) {
     }
 
   $PlanId = $plan.id
+  Set-ConfigFileValue -Config $config -Path $CredentialFile -Name "planId" -Value $PlanId
 }
 
 $webhookUrl = "$AppUrl/api/paypal/webhook"
@@ -306,6 +318,8 @@ if (Is-Placeholder -Value $WebhookId) {
 
     $WebhookId = $webhook.id
   }
+
+  Set-ConfigFileValue -Config $config -Path $CredentialFile -Name "webhookId" -Value $WebhookId
 }
 
 $returnUrl = "$AppUrl/profile?paypal=approved"

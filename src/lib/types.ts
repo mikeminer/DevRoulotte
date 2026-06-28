@@ -7,7 +7,6 @@ export type MatchRole = "caller" | "callee";
 export type SubscriptionStatus =
   | "none"
   | "approval_pending"
-  | "trialing"
   | "active"
   | "cancelled"
   | "expired"

@@ -10,7 +10,7 @@ Blocchi principali prima del pubblico:
 
 - Identita' reale del titolare, contatti legali/privacy e giurisdizione.
 - Informativa privacy completa con basi giuridiche, retention, fornitori, trasferimenti extra UE e diritti interessati.
-- Terms, refunds e subscription flow revisionati per trial gratuito, rinnovo automatico, cancellazione e prezzo.
+- Terms, refunds e subscription flow revisionati per prezzo, rinnovo automatico e cancellazione.
 - Valutazione DSA/moderazione: punto di contatto, notice-and-action, gestione contenuti illegali e reclami.
 - Valutazione 18+ e safety: self-declaration, sospetto minorenne, escalation e procedure interne.
 - Retention reale implementata per match logs, report, ban e raw webhook PayPal.
@@ -21,7 +21,7 @@ Blocchi principali prima del pubblico:
 - Pubblico previsto: solo utenti 18+.
 - Funzione principale: videochat casuale 1:1 via WebRTC peer-to-peer.
 - Registrazione audio/video: non prevista e non implementata.
-- Piani: Free e Premium PayPal a 3,99 EUR/mese con prova gratuita di 5 giorni.
+- Piani: Free e Premium PayPal a 3,99 EUR/mese senza prova gratuita.
 - Hosting/API: Vercel.
 - Database/Auth/signaling temporaneo: Supabase.
 - STUN/TURN: Cloudflare Realtime TURN.
@@ -104,7 +104,7 @@ DevRoulotte permette comunicazione tra utenti e segnalazioni di contenuti/compor
 ## Consumer/payments checklist
 
 - Verificare chiarezza prezzo: 3,99 EUR/mese.
-- Verificare chiarezza prova gratuita 5 giorni e rinnovo automatico.
+- Verificare chiarezza prezzo, assenza di prova gratuita e rinnovo automatico.
 - Verificare flusso PayPal: consenso informato prima del pagamento.
 - Verificare diritto di recesso, eccezioni per servizi digitali e modalita' di cancellazione.
 - Definire policy rimborso reale e contatti.
@@ -138,7 +138,7 @@ DevRoulotte permette comunicazione tra utenti e segnalazioni di contenuti/compor
 5. Quale retention e' proporzionata per match logs, report, ban e subscription raw_json?
 6. Serve DPIA prima del lancio pubblico?
 7. Serve DPO/RPD?
-8. Quali testi obbligatori servono per trial gratuito, rinnovo automatico, cancellazione e rimborsi?
+8. Quali testi obbligatori servono per prezzo, rinnovo automatico, cancellazione e rimborsi?
 9. Quali dati societari e contatti devono comparire in Terms/Privacy/Refunds?
 10. Quale giurisdizione/foro/legge applicabile e' corretta per il titolare reale?
 11. I fornitori Vercel/Supabase/Cloudflare/PayPal/Google Analytics sono configurati correttamente come processor/controller e con trasferimenti dati validi?

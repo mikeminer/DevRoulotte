@@ -65,10 +65,10 @@ async function getSubscriptionStatus(
   const supabase = getSupabaseAdmin();
   const { data } = await supabase
     .from("subscriptions")
-    .select("status,current_period_end,trial_ends_at")
+    .select("status,current_period_end")
     .eq("actor_type", actorType)
     .eq("actor_id", actorId)
-    .in("status", ["trialing", "active"])
+    .eq("status", "active")
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -95,8 +95,7 @@ export async function GET(request: NextRequest) {
       getSubscriptionStatus(actor.type, actor.id),
     ]);
 
-    const isPremium =
-      subscriptionStatus === "active" || subscriptionStatus === "trialing";
+    const isPremium = subscriptionStatus === "active";
     const planCode = getPlanCode(actor.type, isPremium);
     const dailyMatchLimit = getDailyMatchLimit(planCode);
 

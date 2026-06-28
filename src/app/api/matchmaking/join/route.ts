@@ -79,7 +79,7 @@ async function isPremium(actor: Actor) {
     .select("id")
     .eq("actor_type", actor.type)
     .eq("actor_id", actor.id)
-    .in("status", ["trialing", "active"])
+    .eq("status", "active")
     .limit(1)
     .maybeSingle();
 

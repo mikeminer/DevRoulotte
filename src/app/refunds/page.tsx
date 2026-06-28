@@ -13,10 +13,10 @@ export default function RefundsPage() {
       intro="Il piano Premium usa PayPal Subscriptions. Questa pagina spiega il comportamento previsto dell'MVP."
       sections={[
         {
-          title: "Prova gratuita",
+          title: "Abbonamento Premium",
           body: [
-            "Il piano Premium prevede una prova gratuita di 5 giorni quando il piano PayPal e' configurato correttamente.",
-            "Dopo la prova, PayPal rinnova automaticamente a 3,99 EUR al mese fino a cancellazione.",
+            "Il piano Premium non prevede prova gratuita.",
+            "PayPal gestisce l'abbonamento a 3,99 EUR al mese e rinnova automaticamente fino a cancellazione.",
           ],
         },
         {

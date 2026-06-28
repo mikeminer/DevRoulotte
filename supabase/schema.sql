@@ -29,14 +29,12 @@ create table if not exists public.subscriptions (
     status in (
       'none',
       'approval_pending',
-      'trialing',
       'active',
       'cancelled',
       'expired',
       'suspended'
     )
   ),
-  trial_ends_at timestamptz,
   current_period_end timestamptz,
   cancel_at_period_end boolean not null default false,
   raw_json jsonb,

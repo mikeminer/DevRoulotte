@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       .select("id,paypal_subscription_id,status,raw_json")
       .eq("actor_type", actor.type)
       .eq("actor_id", actor.id)
-      .in("status", ["approval_pending", "trialing", "active", "suspended"])
+      .in("status", ["approval_pending", "active", "suspended"])
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();

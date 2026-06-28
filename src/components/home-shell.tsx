@@ -176,8 +176,8 @@ export function HomeShell() {
                   Premium
                 </div>
                 <p className="text-xs leading-5 text-amber-100/75">
-                  3,99 €/mese, prova gratuita 5 giorni, match illimitati,
-                  chiamate da 15 minuti, filtri completi e coda prioritaria.
+                  3,99 €/mese, match illimitati, chiamate da 15 minuti,
+                  filtri completi e coda prioritaria.
                 </p>
               </div>
               <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">

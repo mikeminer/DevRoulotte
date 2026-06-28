@@ -2,7 +2,7 @@
 
 # DevRoulotte
 
-Il networking, senza appuntamenti. MVP 18+ con webcam 1:1, WebRTC peer-to-peer, matching random, tier Free ospite, Registrato e Premium da 3,99 EUR/mese con prova gratuita di 5 giorni via PayPal.
+Il networking, senza appuntamenti. MVP 18+ con webcam 1:1, WebRTC peer-to-peer, matching random, tier Free ospite, Registrato e Premium da 3,99 EUR/mese senza prova gratuita via PayPal.
 
 ## Stack
 
@@ -160,9 +160,15 @@ Riferimenti: [Cloudflare TURN credentials](https://developers.cloudflare.com/rea
 ./scripts/configure-paypal.ps1 -DisableNodeTlsVerification
 ```
 
-Lo script crea Product, Plan Premium `3.99 EUR` mensile con trial gratuito di 5 giorni, webhook su `https://devroulotte.chat/api/paypal/webhook`, aggiorna `.env.local`, sincronizza le env su Vercel e ridistribuisce in produzione.
+Lo script crea Product, Plan Premium `3.99 EUR` mensile senza prova gratuita, webhook su `https://devroulotte.chat/api/paypal/webhook`, aggiorna `.env.local`, sincronizza le env su Vercel e ridistribuisce in produzione.
 
-Se hai gia' creato piano o webhook nel dashboard PayPal, puoi valorizzare `planId` e `webhookId` nel file `.paypal-credentials.local.json` e lo script li riusera'.
+Se hai gia' creato piano o webhook nel dashboard PayPal, puoi valorizzare `planId` e `webhookId` nel file `.paypal-credentials.local.json` e lo script li riusera'. Se stai passando da un vecchio piano con trial, crea un nuovo piano senza prova gratuita con:
+
+```powershell
+./scripts/configure-paypal.ps1 -ForceNewPlan -DisableNodeTlsVerification
+```
+
+Lo script aggiorna `PAYPAL_PLAN_ID` in `.env.local`, Vercel e `.paypal-credentials.local.json`.
 
 L'upgrade chiama `/api/paypal/create-subscription`, crea la subscription server-side e reindirizza alla approval URL PayPal. Il webhook verifica la firma con PayPal prima di aggiornare Supabase.
 
