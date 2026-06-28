@@ -74,14 +74,22 @@ create table if not exists public.match_logs (
   ended_reason text,
   plan_snapshot text not null default 'free',
   started_at timestamptz not null default now(),
+  connected_at timestamptz,
   ended_at timestamptz
 );
+
+alter table public.match_logs
+  add column if not exists connected_at timestamptz;
 
 create index if not exists match_logs_actor_a_idx
   on public.match_logs (actor_a_type, actor_a_id, started_at desc);
 
 create index if not exists match_logs_actor_b_idx
   on public.match_logs (actor_b_type, actor_b_id, started_at desc);
+
+create index if not exists match_logs_connected_idx
+  on public.match_logs (connected_at desc)
+  where connected_at is not null;
 
 create table if not exists public.match_queue (
   id uuid primary key default gen_random_uuid(),

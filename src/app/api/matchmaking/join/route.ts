@@ -94,21 +94,47 @@ async function getDailyUsage(actor: Actor) {
   const supabase = getSupabaseAdmin();
   const since = new Date();
   since.setHours(0, 0, 0, 0);
+  const sinceIso = since.toISOString();
+
+  async function countMatches(side: "a" | "b", connectedOnly: boolean) {
+    const typeColumn = side === "a" ? "actor_a_type" : "actor_b_type";
+    const idColumn = side === "a" ? "actor_a_id" : "actor_b_id";
+    let query = supabase
+      .from("match_logs")
+      .select("id", { count: "exact", head: true })
+      .eq(typeColumn, actor.type)
+      .eq(idColumn, actor.id);
+
+    query = connectedOnly
+      ? query.not("connected_at", "is", null).gte("connected_at", sinceIso)
+      : query.gte("started_at", sinceIso);
+
+    return query;
+  }
 
   const [asA, asB] = await Promise.all([
-    supabase
-      .from("match_logs")
-      .select("id", { count: "exact", head: true })
-      .eq("actor_a_type", actor.type)
-      .eq("actor_a_id", actor.id)
-      .gte("started_at", since.toISOString()),
-    supabase
-      .from("match_logs")
-      .select("id", { count: "exact", head: true })
-      .eq("actor_b_type", actor.type)
-      .eq("actor_b_id", actor.id)
-      .gte("started_at", since.toISOString()),
+    countMatches("a", true),
+    countMatches("b", true),
   ]);
+
+  const connectedAtMissing = [asA.error, asB.error].some(
+    (error) =>
+      error?.code === "PGRST204" ||
+      error?.message.toLowerCase().includes("connected_at"),
+  );
+
+  if (connectedAtMissing) {
+    const [fallbackAsA, fallbackAsB] = await Promise.all([
+      countMatches("a", false),
+      countMatches("b", false),
+    ]);
+
+    return (fallbackAsA.count ?? 0) + (fallbackAsB.count ?? 0);
+  }
+
+  if (asA.error || asB.error) {
+    throw new Error(asA.error?.message ?? asB.error?.message);
+  }
 
   return (asA.count ?? 0) + (asB.count ?? 0);
 }
@@ -161,7 +187,7 @@ function buildMatchPayload(
     isPremium: premium,
     dailyRemaining: premium
       ? null
-      : Math.max(FREE_DAILY_MATCH_LIMIT - dailyUsed - 1, 0),
+      : Math.max(FREE_DAILY_MATCH_LIMIT - dailyUsed, 0),
     startedAt: new Date().toISOString(),
   };
 }

@@ -111,8 +111,11 @@ export function VideoChat({
   const clientIdRef = useRef("");
   const offerRetryTimersRef = useRef<number[]>([]);
   const connectionWatchdogTimersRef = useRef<number[]>([]);
+  const autoNextTimerRef = useRef<number | null>(null);
+  const connectionTokenRef = useRef(0);
   const signalPollingTokenRef = useRef(0);
   const lastSignalIdRef = useRef(0);
+  const connectedMatchIdsRef = useRef<Set<string>>(new Set());
 
   const [ageConfirmed, setAgeConfirmed] = useState(
     () =>
@@ -176,16 +179,56 @@ export function VideoChat({
     connectionWatchdogTimersRef.current = [];
   }, []);
 
+  const clearAutoNext = useCallback(() => {
+    if (autoNextTimerRef.current) {
+      window.clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+  }, []);
+
   const stopSignalPolling = useCallback(() => {
     signalPollingTokenRef.current += 1;
   }, []);
+
+  function isCurrentConnection(
+    token: number,
+    pc: RTCPeerConnection,
+    matchId: string,
+  ) {
+    return (
+      connectionTokenRef.current === token &&
+      peerConnectionRef.current === pc &&
+      matchRef.current?.id === matchId &&
+      pc.connectionState !== "closed"
+    );
+  }
+
+  function scheduleAutoNext(messageText: string, reason: string) {
+    if (!searchingRef.current || autoNextTimerRef.current) {
+      return;
+    }
+
+    setStatus("waiting");
+    setMessage(`${messageText} Cerco automaticamente un nuovo match.`);
+
+    autoNextTimerRef.current = window.setTimeout(() => {
+      autoNextTimerRef.current = null;
+
+      if (!searchingRef.current) {
+        return;
+      }
+
+      void goToNext({ reason });
+    }, 1400);
+  }
 
   const logWebRtcEvent = useCallback(
     (
       event: string,
       details: Record<string, string | null | undefined> = {},
+      targetMatch?: MatchPayload | null,
     ) => {
-      const currentMatch = matchRef.current;
+      const currentMatch = targetMatch ?? matchRef.current;
 
       if (!currentMatch) {
         return;
@@ -208,24 +251,19 @@ export function VideoChat({
     [supabase],
   );
 
-  const sendSignal = useCallback(
-    async (message: OutgoingSignalMessage) => {
-      const currentMatch = matchRef.current;
-
-      if (!currentMatch) {
-        return;
-      }
-
+  const sendSignalForMatch = useCallback(
+    async (targetMatch: MatchPayload, message: OutgoingSignalMessage) => {
+      const senderClientId = clientIdRef.current || getOrCreateGuestId();
       const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
       const response = await fetch("/api/webrtc/signal/send", {
         method: "POST",
         headers,
         body: JSON.stringify({
-          matchId: currentMatch.id,
-          senderClientId: clientIdRef.current,
+          matchId: targetMatch.id,
+          senderClientId,
           message: {
             ...message,
-            sender: clientIdRef.current,
+            sender: senderClientId,
           },
         }),
       });
@@ -240,15 +278,48 @@ export function VideoChat({
     [supabase],
   );
 
-  const cleanupConnection = useCallback(async (keepCamera: boolean) => {
-    const currentMatch = matchRef.current;
+  const markMatchConnected = useCallback(
+    async (targetMatch: MatchPayload) => {
+      if (connectedMatchIdsRef.current.has(targetMatch.id)) {
+        return;
+      }
 
+      connectedMatchIdsRef.current.add(targetMatch.id);
+      const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
+      const response = await fetch("/api/matchmaking/connected", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ matchId: targetMatch.id }),
+      });
+
+      if (!response.ok) {
+        connectedMatchIdsRef.current.delete(targetMatch.id);
+        return;
+      }
+
+      onProfileRefresh();
+    },
+    [onProfileRefresh, supabase],
+  );
+
+  const cleanupConnection = useCallback(async (keepCamera: boolean, reason = "left") => {
+    const currentMatch = matchRef.current;
+    const currentPeerConnection = peerConnectionRef.current;
+
+    clearAutoNext();
     clearOfferRetries();
     clearConnectionWatchdogs();
     stopSignalPolling();
+    connectionTokenRef.current += 1;
 
-    await sendSignal({ kind: "control", control: "leave" }).catch(() => null);
-    peerConnectionRef.current?.close();
+    if (currentMatch) {
+      await sendSignalForMatch(currentMatch, {
+        kind: "control",
+        control: "leave",
+      }).catch(() => null);
+    }
+
+    currentPeerConnection?.close();
     peerConnectionRef.current = null;
 
     if (remoteVideoRef.current) {
@@ -269,7 +340,7 @@ export function VideoChat({
       await fetch("/api/matchmaking/leave", {
         method: "POST",
         headers,
-        body: JSON.stringify({ matchId: currentMatch.id, reason: "left" }),
+        body: JSON.stringify({ matchId: currentMatch.id, reason }),
       }).catch(() => null);
     }
 
@@ -277,9 +348,10 @@ export function VideoChat({
     setMatch(null);
     setElapsed(0);
   }, [
+    clearAutoNext,
     clearConnectionWatchdogs,
     clearOfferRetries,
-    sendSignal,
+    sendSignalForMatch,
     stopSignalPolling,
     supabase,
   ]);
@@ -348,21 +420,24 @@ export function VideoChat({
     return stream;
   }
 
-  async function handleSignal(message: SignalMessage) {
+  async function handleSignal(
+    message: SignalMessage,
+    pc: RTCPeerConnection,
+    token: number,
+    currentMatch: MatchPayload,
+    sendScopedSignal: (message: OutgoingSignalMessage) => Promise<void>,
+  ) {
     if (message.sender === clientIdRef.current) {
       return;
     }
 
-    const pc = peerConnectionRef.current;
-
-    if (!pc) {
+    if (!isCurrentConnection(token, pc, currentMatch.id)) {
       return;
     }
 
     try {
       if (message.kind === "control" && message.control === "leave") {
-        setStatus("failed");
-        setMessage("L'altra persona ha lasciato la chiamata.");
+        scheduleAutoNext("L'altra persona ha lasciato la chiamata.", "peer_left");
         return;
       }
 
@@ -371,16 +446,16 @@ export function VideoChat({
           connectionState: pc.connectionState,
           iceConnectionState: pc.iceConnectionState,
           signalingState: pc.signalingState,
-        });
+        }, currentMatch);
         await pc.setRemoteDescription(message.description);
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-        await sendSignal({ kind: "answer", description: answer });
+        await sendScopedSignal({ kind: "answer", description: answer });
         logWebRtcEvent("answer_sent", {
           connectionState: pc.connectionState,
           iceConnectionState: pc.iceConnectionState,
           signalingState: pc.signalingState,
-        });
+        }, currentMatch);
       }
 
       if (
@@ -391,7 +466,7 @@ export function VideoChat({
           connectionState: pc.connectionState,
           iceConnectionState: pc.iceConnectionState,
           signalingState: pc.signalingState,
-        });
+        }, currentMatch);
         await pc.setRemoteDescription(message.description);
         clearOfferRetries();
       }
@@ -404,22 +479,24 @@ export function VideoChat({
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
         signalingState: pc.signalingState,
-      });
-      setStatus("failed");
-      setMessage("Signaling WebRTC non riuscito. Puoi premere Next.");
+      }, currentMatch);
+      scheduleAutoNext("Signaling WebRTC non riuscito.", "signal_error");
     }
   }
 
-  async function pollSignals(pc: RTCPeerConnection, token: number) {
+  async function pollSignals(
+    pc: RTCPeerConnection,
+    token: number,
+    currentMatch: MatchPayload,
+    sendScopedSignal: (message: OutgoingSignalMessage) => Promise<void>,
+  ) {
     let failures = 0;
 
     while (
       signalPollingTokenRef.current === token &&
-      matchRef.current &&
-      pc.connectionState !== "closed"
+      isCurrentConnection(token, pc, currentMatch.id)
     ) {
       try {
-        const currentMatch = matchRef.current;
         const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
         const response = await fetch("/api/webrtc/signal/poll", {
           method: "POST",
@@ -444,7 +521,13 @@ export function VideoChat({
             lastSignalIdRef.current,
             signal.id,
           );
-          await handleSignal(signal.message);
+          await handleSignal(
+            signal.message,
+            pc,
+            token,
+            currentMatch,
+            sendScopedSignal,
+          );
         }
       } catch (error) {
         failures += 1;
@@ -453,11 +536,10 @@ export function VideoChat({
           iceConnectionState: pc.iceConnectionState,
           signalingState: pc.signalingState,
           detail: error instanceof Error ? error.message : "poll_error",
-        });
+        }, currentMatch);
 
         if (failures >= 4) {
-          setStatus("failed");
-          setMessage("Signaling non disponibile. Premi Next.");
+          scheduleAutoNext("Signaling non disponibile.", "signal_poll_failed");
           return;
         }
       }
@@ -471,7 +553,9 @@ export function VideoChat({
     const iceServers = await getIceServers();
     const pc = new RTCPeerConnection({ iceServers });
     const remoteStream = new MediaStream();
+    const connectionToken = connectionTokenRef.current + 1;
 
+    connectionTokenRef.current = connectionToken;
     lastSignalIdRef.current = 0;
     peerConnectionRef.current = pc;
     matchRef.current = nextMatch;
@@ -482,7 +566,15 @@ export function VideoChat({
       connectionState: pc.connectionState,
       iceConnectionState: pc.iceConnectionState,
       signalingState: pc.signalingState,
-    });
+    }, nextMatch);
+
+    async function sendScopedSignal(message: OutgoingSignalMessage) {
+      if (!isCurrentConnection(connectionToken, pc, nextMatch.id)) {
+        return;
+      }
+
+      await sendSignalForMatch(nextMatch, message);
+    }
 
     for (const track of stream.getTracks()) {
       pc.addTrack(track, stream);
@@ -494,6 +586,10 @@ export function VideoChat({
     }
 
     pc.ontrack = (event) => {
+      if (!isCurrentConnection(connectionToken, pc, nextMatch.id)) {
+        return;
+      }
+
       event.streams[0]?.getTracks().forEach((track) => {
         remoteStream.addTrack(track);
       });
@@ -501,12 +597,15 @@ export function VideoChat({
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
         signalingState: pc.signalingState,
-      });
+      }, nextMatch);
     };
 
     pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        void sendSignal({
+      if (
+        event.candidate &&
+        isCurrentConnection(connectionToken, pc, nextMatch.id)
+      ) {
+        void sendScopedSignal({
           kind: "candidate",
           candidate: event.candidate.toJSON(),
         });
@@ -514,55 +613,76 @@ export function VideoChat({
     };
 
     pc.onconnectionstatechange = () => {
+      if (!isCurrentConnection(connectionToken, pc, nextMatch.id)) {
+        return;
+      }
+
       logWebRtcEvent("connection_state", {
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
         signalingState: pc.signalingState,
-      });
+      }, nextMatch);
 
       if (pc.connectionState === "connected") {
         clearOfferRetries();
         clearConnectionWatchdogs();
+        clearAutoNext();
         setStatus("connected");
         setMessage("Connesso.");
+        void markMatchConnected(nextMatch);
       }
 
-      if (
-        pc.connectionState === "failed" ||
-        pc.connectionState === "disconnected"
-      ) {
-        setStatus("failed");
-        setMessage("Connessione interrotta. Puoi premere Next.");
+      if (pc.connectionState === "failed") {
+        scheduleAutoNext("Connessione WebRTC fallita.", "webrtc_failed");
+      }
+
+      if (pc.connectionState === "disconnected") {
+        scheduleAutoNext("Connessione interrotta.", "webrtc_disconnected");
       }
     };
 
     pc.oniceconnectionstatechange = () => {
+      if (!isCurrentConnection(connectionToken, pc, nextMatch.id)) {
+        return;
+      }
+
       logWebRtcEvent("ice_connection_state", {
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
         signalingState: pc.signalingState,
-      });
+      }, nextMatch);
     };
 
     pc.onicegatheringstatechange = () => {
+      if (!isCurrentConnection(connectionToken, pc, nextMatch.id)) {
+        return;
+      }
+
       logWebRtcEvent("ice_gathering_state", {
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
         iceGatheringState: pc.iceGatheringState,
         signalingState: pc.signalingState,
-      });
+      }, nextMatch);
     };
 
     pc.onsignalingstatechange = () => {
+      if (!isCurrentConnection(connectionToken, pc, nextMatch.id)) {
+        return;
+      }
+
       logWebRtcEvent("signaling_state", {
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
         signalingState: pc.signalingState,
-      });
+      }, nextMatch);
     };
 
     async function sendOffer(iceRestart = false) {
-      if (nextMatch.role !== "caller" || pc.connectionState === "closed") {
+      if (
+        nextMatch.role !== "caller" ||
+        !isCurrentConnection(connectionToken, pc, nextMatch.id)
+      ) {
         return;
       }
 
@@ -589,7 +709,7 @@ export function VideoChat({
         return;
       }
 
-      await sendSignal({
+      await sendScopedSignal({
         kind: "offer",
         description: localDescription,
       });
@@ -597,7 +717,7 @@ export function VideoChat({
         connectionState: pc.connectionState,
         iceConnectionState: pc.iceConnectionState,
         signalingState: pc.signalingState,
-      });
+      }, nextMatch);
     }
 
     function scheduleOfferRetries() {
@@ -614,7 +734,10 @@ export function VideoChat({
       clearConnectionWatchdogs();
       connectionWatchdogTimersRef.current = [
         window.setTimeout(() => {
-          if (pc.connectionState === "connected" || pc.connectionState === "closed") {
+          if (
+            !isCurrentConnection(connectionToken, pc, nextMatch.id) ||
+            pc.connectionState === "connected"
+          ) {
             return;
           }
 
@@ -622,7 +745,7 @@ export function VideoChat({
             connectionState: pc.connectionState,
             iceConnectionState: pc.iceConnectionState,
             signalingState: pc.signalingState,
-          });
+          }, nextMatch);
 
           if (nextMatch.role === "caller") {
             setMessage("Peer trovato. Ritento il collegamento WebRTC.");
@@ -632,7 +755,10 @@ export function VideoChat({
           }
         }, 10000),
         window.setTimeout(() => {
-          if (pc.connectionState === "connected" || pc.connectionState === "closed") {
+          if (
+            !isCurrentConnection(connectionToken, pc, nextMatch.id) ||
+            pc.connectionState === "connected"
+          ) {
             return;
           }
 
@@ -643,12 +769,12 @@ export function VideoChat({
             detail: pc.remoteDescription
               ? "ice_or_media_not_connected"
               : "no_remote_description",
-          });
-          setStatus("failed");
-          setMessage(
+          }, nextMatch);
+          scheduleAutoNext(
             pc.remoteDescription
-              ? "WebRTC non si e' stabilito su questa rete. Premi Next."
-              : "Il signaling non si e' completato. Premi Next.",
+              ? "WebRTC non si e' stabilito su questa rete."
+              : "Il signaling non si e' completato.",
+            pc.remoteDescription ? "webrtc_timeout" : "signaling_timeout",
           );
         }, 22000),
       ];
@@ -656,12 +782,12 @@ export function VideoChat({
 
     const signalPollingToken = signalPollingTokenRef.current + 1;
     signalPollingTokenRef.current = signalPollingToken;
-    void pollSignals(pc, signalPollingToken);
+    void pollSignals(pc, signalPollingToken, nextMatch, sendScopedSignal);
     logWebRtcEvent("signal_poll_start", {
       connectionState: pc.connectionState,
       iceConnectionState: pc.iceConnectionState,
       signalingState: pc.signalingState,
-    });
+    }, nextMatch);
 
     if (nextMatch.role === "caller") {
       setMessage("Peer trovato. Invio offer WebRTC.");
@@ -749,7 +875,15 @@ export function VideoChat({
     onProfileRefresh();
   }
 
-  async function next() {
+  async function goToNext(options: { reason?: string } = {}) {
+    await cleanupConnection(true, options.reason ?? "next");
+    setStatus("waiting");
+    setMessage("Cerco un nuovo match.");
+    searchingRef.current = true;
+    await pollForMatch();
+  }
+
+  async function manualNext() {
     if (Date.now() < nextLockedUntil) {
       return;
     }
@@ -757,11 +891,8 @@ export function VideoChat({
     const cooldownSeconds = match?.nextCooldownSeconds ?? 8;
     setNextLockedUntil(Date.now() + cooldownSeconds * 1000);
     setNextLockedSeconds(cooldownSeconds);
-    await cleanupConnection(true);
-    setStatus("waiting");
-    setMessage("Cerco un nuovo match.");
-    searchingRef.current = true;
-    await pollForMatch();
+
+    await goToNext({ reason: "next" });
   }
 
   async function reportPeer() {
@@ -898,7 +1029,7 @@ export function VideoChat({
             </button>
             <button
               type="button"
-              onClick={next}
+              onClick={manualNext}
               disabled={!match || nextLockedSeconds > 0}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-sm font-semibold text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45"
             >
@@ -953,7 +1084,7 @@ export function VideoChat({
           {status === "failed" ? (
             <div className="flex gap-2 rounded-md border border-amber-300/20 bg-amber-300/10 p-3 text-xs text-amber-100">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
-              Usa Next se il peer si è disconnesso o WebRTC non riesce a stabilire la chiamata.
+              Se il peer si disconnette o WebRTC fallisce, cerco automaticamente un nuovo match.
             </div>
           ) : null}
         </aside>

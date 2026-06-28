@@ -16,21 +16,47 @@ async function getFreeUsage(actorType: string, actorId: string) {
   const supabase = getSupabaseAdmin();
   const since = new Date();
   since.setHours(0, 0, 0, 0);
+  const sinceIso = since.toISOString();
+
+  async function countMatches(side: "a" | "b", connectedOnly: boolean) {
+    const typeColumn = side === "a" ? "actor_a_type" : "actor_b_type";
+    const idColumn = side === "a" ? "actor_a_id" : "actor_b_id";
+    let query = supabase
+      .from("match_logs")
+      .select("id", { count: "exact", head: true })
+      .eq(typeColumn, actorType)
+      .eq(idColumn, actorId);
+
+    query = connectedOnly
+      ? query.not("connected_at", "is", null).gte("connected_at", sinceIso)
+      : query.gte("started_at", sinceIso);
+
+    return query;
+  }
 
   const [asA, asB] = await Promise.all([
-    supabase
-      .from("match_logs")
-      .select("id", { count: "exact", head: true })
-      .eq("actor_a_type", actorType)
-      .eq("actor_a_id", actorId)
-      .gte("started_at", since.toISOString()),
-    supabase
-      .from("match_logs")
-      .select("id", { count: "exact", head: true })
-      .eq("actor_b_type", actorType)
-      .eq("actor_b_id", actorId)
-      .gte("started_at", since.toISOString()),
+    countMatches("a", true),
+    countMatches("b", true),
   ]);
+
+  const connectedAtMissing = [asA.error, asB.error].some(
+    (error) =>
+      error?.code === "PGRST204" ||
+      error?.message.toLowerCase().includes("connected_at"),
+  );
+
+  if (connectedAtMissing) {
+    const [fallbackAsA, fallbackAsB] = await Promise.all([
+      countMatches("a", false),
+      countMatches("b", false),
+    ]);
+
+    return (fallbackAsA.count ?? 0) + (fallbackAsB.count ?? 0);
+  }
+
+  if (asA.error || asB.error) {
+    throw new Error(asA.error?.message ?? asB.error?.message);
+  }
 
   return (asA.count ?? 0) + (asB.count ?? 0);
 }
