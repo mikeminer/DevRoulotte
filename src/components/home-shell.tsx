@@ -7,6 +7,7 @@ import {
   Code2,
   Crown,
   FileText,
+  Mail,
   Scale,
   ShieldCheck,
   Sparkles,
@@ -21,6 +22,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { VideoChat } from "@/components/video-chat";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import {
+  CONTACT_EMAIL,
+  CONTACT_MAILTO,
   LICENSE_NAME,
   SOURCE_CODE_URL,
   WORKSHOP_FEEDBACK_URL,
@@ -294,6 +297,13 @@ export function HomeShell() {
             >
               <Wrench className="h-3.5 w-3.5" />
               In officina
+            </a>
+            <a
+              href={CONTACT_MAILTO}
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Contacts: {CONTACT_EMAIL}
             </a>
             <a
               href={SOURCE_CODE_URL}

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
+import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/app-config";
 
 type LegalSection = {
   title: string;
@@ -53,7 +54,14 @@ export function LegalPage({
           ))}
         </div>
 
-        <footer className="border-t border-white/10 py-5 text-xs text-slate-400">
+        <footer className="flex flex-wrap items-center gap-3 border-t border-white/10 py-5 text-xs text-slate-400">
+          <a
+            href={CONTACT_MAILTO}
+            className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+          >
+            <Mail className="h-3.5 w-3.5" />
+            Contacts: {CONTACT_EMAIL}
+          </a>
           <CookiePreferencesButton className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white" />
         </footer>
       </div>

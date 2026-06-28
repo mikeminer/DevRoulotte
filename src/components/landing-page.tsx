@@ -12,7 +12,11 @@ import {
 } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { WORKSHOP_FEEDBACK_URL } from "@/lib/app-config";
+import {
+  CONTACT_EMAIL,
+  CONTACT_MAILTO,
+  WORKSHOP_FEEDBACK_URL,
+} from "@/lib/app-config";
 
 const painLines = [
   "Niente “ci aggiorniamo”.",
@@ -392,6 +396,12 @@ export function LandingPage() {
               className="text-slate-300 hover:text-white"
             >
               In officina
+            </a>
+            <a
+              href={CONTACT_MAILTO}
+              className="text-slate-300 hover:text-white"
+            >
+              Contacts: {CONTACT_EMAIL}
             </a>
             <CookiePreferencesButton className="text-slate-300 hover:text-white" />
           </div>
