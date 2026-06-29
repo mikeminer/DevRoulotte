@@ -1095,8 +1095,8 @@ export function VideoChat({
     }
 
     try {
-      await cleanupConnection(true);
       await ensureMedia();
+      await cleanupConnection(true);
       searchingRef.current = true;
       await pollForMatch("start");
     } catch (error) {
@@ -1186,6 +1186,9 @@ export function VideoChat({
 
     setMessage(data.ok ? "Report inviato alla moderazione." : data.message ?? "Report fallito.");
   }
+
+  const isStartBusy =
+    status === "permissions" || status === "waiting" || status === "connecting";
 
   return (
     <section className="grid gap-4">
@@ -1306,10 +1309,10 @@ export function VideoChat({
             <button
               type="button"
               onClick={start}
-              disabled={status === "waiting" || status === "connecting"}
+              disabled={isStartBusy}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-teal-300 px-3 text-sm font-bold text-slate-950 hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status === "waiting" || status === "connecting" ? (
+              {isStartBusy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Video className="h-4 w-4" />
