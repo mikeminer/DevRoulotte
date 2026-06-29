@@ -95,20 +95,33 @@ Marca come key events/conversioni:
 `currency: EUR` e `payment_provider: paypal` quando PayPal restituisce
 l'approval URL.
 
-Non tracciare `purchase` dal solo ritorno browser: un utente puo' chiudere la
-pagina, annullare su PayPal o non completare l'approvazione. Per revenue
-affidabile bisogna emettere l'evento solo dopo conferma webhook/server PayPal,
-idealmente tramite Measurement Protocol con un evento come:
+Il revenue affidabile viene tracciato dal webhook PayPal, non dal redirect
+browser. Quando il webhook verificato riceve
+`BILLING.SUBSCRIPTION.ACTIVATED`, la subscription passa ad `active` e il
+checkout aveva un `client_id` GA4 derivato dal cookie `_ga`, il server invia
+Measurement Protocol:
 
-- `purchase` o `subscription_activated`
+- evento `purchase`
 - `currency: EUR`
 - `value: 3.99`
 - `payment_provider: paypal`
 - `subscription_period: monthly`
+- `items[0].item_id: devroulotte_premium_monthly`
 
-TODO: se viene aggiunto Measurement Protocol server-side, inserire
-`GA4_API_SECRET` come variabile server-only su Vercel e non esporla mai al
-client.
+Il `transaction_id` e' un hash stabile generato lato server, non il PayPal
+subscription id in chiaro. Questo aiuta GA4 a deduplicare il purchase senza
+ricevere identificativi PayPal leggibili.
+
+Variabili richieste:
+
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID`: Measurement ID dello stream web.
+- `GA4_API_SECRET`: secret Measurement Protocol server-only creato in GA4.
+- `GA4_MEASUREMENT_PROTOCOL_ENDPOINT`: opzionale, default
+  `https://region1.google-analytics.com/mp/collect`.
+- `PREMIUM_MONTHLY_PRICE_EUR`: opzionale, default `3.99`.
+
+Se manca consenso Statistiche, il cookie `_ga` non e' disponibile: il webhook
+attiva Premium ma non invia revenue a Google.
 
 ## Privacy
 

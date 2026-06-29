@@ -50,7 +50,7 @@ export default function PrivacyPage() {
             "Erogazione del servizio: usiamo account, sessione, profilo, matchmaking, signaling e stato Premium per fornire la videochat richiesta e gestire il rapporto con l'utente.",
             "Sicurezza e prevenzione abusi: usiamo log minimi, report, ban, limiti e controlli anti-spam per proteggere utenti, servizio e infrastruttura.",
             "Pagamenti e adempimenti: usiamo identificativi PayPal e stati subscription per attivare Premium, gestire cancellazioni, contestazioni e obblighi amministrativi.",
-            "Statistiche opzionali: Google Analytics 4 viene usato solo dopo consenso alla categoria Statistiche per metriche aggregate su pagine, CTA, accesso, matching, chiamate connesse, report e checkout Premium; puoi revocare il consenso dal centro preferenze cookie.",
+            "Statistiche opzionali: Google Analytics 4 viene usato solo dopo consenso alla categoria Statistiche per metriche aggregate su pagine, CTA, accesso, matching, chiamate connesse, report, checkout Premium e revenue PayPal confermata da webhook; puoi revocare il consenso dal centro preferenze cookie.",
             "Comunicazioni di servizio: possiamo usare l'email dell'account per conferma registrazione, reset password, notifiche di sicurezza e comunicazioni strettamente legate al servizio.",
           ],
         },
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
           body: [
             "Usiamo strumenti tecnici necessari nel browser per login, ID ospite, conferma 18+, accettazione regole, limiti Free, sicurezza e preferenze cookie.",
             "Le categorie opzionali Preferenze, Statistiche e Marketing sono disattivate di default e modificabili dal centro preferenze.",
-            "Il Google tag puo' essere caricato con Consent Mode e `analytics_storage` negato di default. La categoria Statistiche abilita Google Analytics 4 per misurare visite, pagine viste, CTA ed eventi tecnici aggregati solo dopo consenso e viene disattivata se revochi la categoria Statistiche.",
+            "Il Google tag puo' essere caricato con Consent Mode e `analytics_storage` negato di default. La categoria Statistiche abilita Google Analytics 4 per misurare visite, pagine viste, CTA, eventi tecnici aggregati e revenue Premium confermata solo dopo consenso e viene disattivata se revochi la categoria Statistiche.",
           ],
         },
         {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { extractGaClientIdFromRequest } from "@/lib/ga4-server";
 import { createPayPalSubscription, hasPayPalConfig } from "@/lib/paypal";
 import { getRequestActor } from "@/lib/session";
 import {
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     const subscription = await createPayPalSubscription(actor.key);
+    const gaClientId = extractGaClientIdFromRequest(request);
     const approvalUrl = subscription.links?.find(
       (link) => link.rel === "approve",
     )?.href;
@@ -64,7 +66,17 @@ export async function POST(request: NextRequest) {
         paypal_subscription_id: subscription.id,
         paypal_plan_id: process.env.PAYPAL_PLAN_ID,
         status: "approval_pending",
-        raw_json: subscription,
+        raw_json: {
+          paypal_subscription: subscription,
+          ...(gaClientId
+            ? {
+                ga4: {
+                  client_id: gaClientId,
+                  checkout_started_at: new Date().toISOString(),
+                },
+              }
+            : {}),
+        },
         updated_at: new Date().toISOString(),
       },
       { onConflict: "paypal_subscription_id" },

@@ -275,6 +275,9 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `ADMIN_ACCESS_TOKEN`
 - `CRON_SECRET`
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID` opzionale, solo se vuoi Google Analytics 4
+- `GA4_API_SECRET` opzionale server-only, necessario per revenue PayPal via Measurement Protocol
+- `GA4_MEASUREMENT_PROTOCOL_ENDPOINT` opzionale, default consigliato `https://region1.google-analytics.com/mp/collect`
+- `PREMIUM_MONTHLY_PRICE_EUR` opzionale, default `3.99`
 
 ## Policy prodotto
 
@@ -289,8 +292,11 @@ Google Analytics 4 e' opzionale ed e' configurato tramite Google tag globale con
 1. `NEXT_PUBLIC_GA_MEASUREMENT_ID` contiene un Measurement ID GA4, ad esempio `G-XXXXXXXXXX`.
 2. Il tag viene inizializzato con `analytics_storage` negato di default e `send_page_view: false`.
 3. L'utente accetta la categoria Statistiche nel centro preferenze cookie.
+4. Per il revenue server-side PayPal, crea un API secret in GA4 Admin > Data streams > Measurement Protocol API secrets e salvalo come `GA4_API_SECRET` solo nelle env server di Vercel.
 
-Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, l'app mantiene il consenso analytics negato, non invia page view GA4 e prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
+Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, l'app mantiene il consenso analytics negato, non invia page view o eventi GA4 e prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
+
+Il checkout PayPal salva il `client_id` GA4 solo se il cookie `_ga` esiste, quindi solo dopo consenso Statistiche. Il webhook PayPal invia poi un evento GA4 `purchase` tramite Measurement Protocol quando riceve `BILLING.SUBSCRIPTION.ACTIVATED` e la subscription passa ad `active`. L'evento usa `value: 3.99`, `currency: EUR`, `payment_provider: paypal` e un `transaction_id` hashato, non il PayPal subscription id in chiaro. Se manca consenso, manca `GA4_API_SECRET` o manca il client id GA4, Premium viene comunque attivato ma il revenue non viene inviato a Google.
 
 ## Revisione legale
 

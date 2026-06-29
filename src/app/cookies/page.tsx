@@ -36,7 +36,7 @@ export default function CookiesPage() {
             "`devroulotte_age_18`: ricorda la dichiarazione 18+.",
             "`devroulotte_rules_ok`: ricorda l'accettazione delle regole community.",
             "Supabase Auth puo' salvare token di sessione nel browser quando l'utente effettua login o registrazione.",
-            "Google Analytics 4, se configurato con `NEXT_PUBLIC_GA_MEASUREMENT_ID`, carica il Google tag da `googletagmanager.com` con consenso analytics negato di default. Solo se accetti Statistiche puo' impostare cookie come `_ga` e `_ga_<measurement-id>` per misurazioni aggregate di pagine, CTA, accesso, matching, chiamate connesse, report e checkout Premium.",
+            "Google Analytics 4, se configurato con `NEXT_PUBLIC_GA_MEASUREMENT_ID`, carica il Google tag da `googletagmanager.com` con consenso analytics negato di default. Solo se accetti Statistiche puo' impostare cookie come `_ga` e `_ga_<measurement-id>` per misurazioni aggregate di pagine, CTA, accesso, matching, chiamate connesse, report, checkout Premium e revenue PayPal confermata dal webhook.",
           ],
         },
         {
