@@ -101,6 +101,112 @@ async function getIceServers() {
     : [{ urls: "stun:stun.cloudflare.com:3478" }];
 }
 
+const localMediaConstraints: MediaStreamConstraints = {
+  video: {
+    width: { ideal: 960 },
+    height: { ideal: 540 },
+    facingMode: "user",
+  },
+  audio: {
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  },
+};
+
+function getMediaContext() {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return {
+      isEmbedded: false,
+      isInAppBrowser: false,
+      isSecureContext: true,
+    };
+  }
+
+  let isEmbedded = false;
+
+  try {
+    isEmbedded = window.self !== window.top;
+  } catch {
+    isEmbedded = true;
+  }
+
+  const userAgent = navigator.userAgent ?? "";
+  const isInAppBrowser =
+    /FBAN|FBAV|Instagram|Line\/|LinkedInApp|TikTok|Twitter|Snapchat|Pinterest|\bwv\b/i.test(
+      userAgent,
+    );
+
+  return {
+    isEmbedded,
+    isInAppBrowser,
+    isSecureContext: window.isSecureContext,
+  };
+}
+
+function getMediaErrorName(error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    typeof error.name === "string" &&
+    error.name
+  ) {
+    return error.name;
+  }
+
+  return "unknown";
+}
+
+function getMediaAccessMessage(error: unknown) {
+  const errorName = getMediaErrorName(error);
+  const context = getMediaContext();
+
+  if (!context.isSecureContext) {
+    return "Camera e microfono funzionano solo su HTTPS. Apri https://devroulotte.chat/chat e riprova.";
+  }
+
+  if (context.isEmbedded) {
+    return "Il browser sta aprendo DevRoulotte dentro un frame. Apri la pagina in una scheda completa di Safari o Chrome e riprova.";
+  }
+
+  if (context.isInAppBrowser) {
+    return "Il browser interno dell'app potrebbe bloccare camera e microfono. Apri devroulotte.chat in Safari o Chrome, poi consenti Camera e Microfono.";
+  }
+
+  if (
+    errorName === "NotAllowedError" ||
+    errorName === "PermissionDeniedError" ||
+    errorName === "SecurityError"
+  ) {
+    return "Permesso camera/microfono negato o bloccato. Su mobile apri le impostazioni del sito in Safari/Chrome e consenti Camera e Microfono per devroulotte.chat.";
+  }
+
+  if (errorName === "NotFoundError" || errorName === "DevicesNotFoundError") {
+    return "Non trovo una camera o un microfono disponibili su questo dispositivo.";
+  }
+
+  if (errorName === "NotReadableError" || errorName === "TrackStartError") {
+    return "Camera o microfono sembrano gia' usati da un'altra app. Chiudi le altre app e riprova.";
+  }
+
+  if (errorName === "OverconstrainedError" || errorName === "ConstraintNotSatisfiedError") {
+    return "Il browser non riesce ad aprire la camera con queste impostazioni. Riprova dopo aver chiuso altre app video.";
+  }
+
+  if (errorName === "not_supported") {
+    return "Questo browser non permette a DevRoulotte di usare camera e microfono. Apri il sito in Safari o Chrome aggiornato.";
+  }
+
+  return "Non riesco ad accedere a camera e microfono. Controlla i permessi del browser e riprova da Safari o Chrome.";
+}
+
+function createMediaAccessError(name: string, originalError?: unknown) {
+  const error = new Error(getMediaAccessMessage(originalError ?? { name }));
+  error.name = name;
+  return error;
+}
+
 export function VideoChat({
   isPremium,
   isAuthenticated,
@@ -438,33 +544,41 @@ export function VideoChat({
       return localStreamRef.current;
     }
 
+    const mediaContext = getMediaContext();
+
     setStatus("permissions");
     setMessage("Richiedo webcam e microfono.");
-    trackChatEvent("media_permission_requested");
+    trackChatEvent("media_permission_requested", {
+      embedded_context: mediaContext.isEmbedded,
+      in_app_browser: mediaContext.isInAppBrowser,
+      secure_context: mediaContext.isSecureContext,
+    });
 
     if (!navigator.mediaDevices?.getUserMedia) {
       trackChatEvent("media_permission_failed", {
+        embedded_context: mediaContext.isEmbedded,
         failure_reason: "not_supported",
+        in_app_browser: mediaContext.isInAppBrowser,
+        secure_context: mediaContext.isSecureContext,
       });
-      throw new Error("Webcam o microfono non disponibili in questo browser.");
+      throw createMediaAccessError("not_supported");
     }
 
     let stream: MediaStream;
 
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: true,
-      });
+      stream = await navigator.mediaDevices.getUserMedia(localMediaConstraints);
       trackChatEvent("media_permission_granted");
     } catch (error) {
+      const failureReason = getMediaErrorName(error);
+
       trackChatEvent("media_permission_failed", {
-        failure_reason: error instanceof Error ? error.name : "unknown",
+        embedded_context: mediaContext.isEmbedded,
+        failure_reason: failureReason,
+        in_app_browser: mediaContext.isInAppBrowser,
+        secure_context: mediaContext.isSecureContext,
       });
-      throw error;
+      throw createMediaAccessError(failureReason, error);
     }
 
     localStreamRef.current = stream;

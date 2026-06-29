@@ -211,6 +211,12 @@ Il matching passa da Supabase `match_queue`, quindi funziona anche su Vercel sen
 
 Durante il test tieni entrambe le pagine `/chat` aperte e attive dopo aver concesso webcam/microfono. Per evitare match fantasma, il backend crea match solo con peer visti negli ultimi `MATCH_QUEUE_ACTIVE_SECONDS` secondi, mentre `MATCH_QUEUE_STALE_SECONDS` resta la finestra piu' lunga usata per pulire la coda.
 
+## Webcam e microfono su mobile
+
+Su iPhone e Android apri DevRoulotte in Safari o Chrome aggiornato, non dentro il browser interno di LinkedIn, Instagram, Product Hunt o altre app. I browser in-app possono bloccare `getUserMedia()` anche se il sito e' in HTTPS.
+
+Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulotte.chat` e rimetti Camera e Microfono su "Consenti". Chiudi eventuali app che stanno gia' usando camera o microfono, poi ricarica `/chat` e premi di nuovo "Entra nella roulotte".
+
 ## Funzionalità incluse
 
 - Landing page italiana su `/` con pitch DevRoulotte.chat e CTA verso `/chat`
