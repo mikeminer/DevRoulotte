@@ -42,6 +42,7 @@ yarn-error.log*
 supabase/emailtemplates.txt
 resendapi.txt
 improvmxapi.txt
+ga4apisecret.txt
 .paypal-credentials.local.json
 .cloudflare-turn.local.json
 
