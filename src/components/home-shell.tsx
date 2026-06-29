@@ -376,6 +376,22 @@ export function HomeShell() {
                 className="h-7 w-auto object-contain"
               />
             </a>
+            <a
+              href="https://peerpush.com/p/devroulottechat"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="DevRoulotte.chat su PeerPush"
+              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
+            >
+              <Image
+                src="https://peerpush.com/p/devroulottechat/badge.png"
+                alt="DevRoulotte.chat on PeerPush"
+                width={230}
+                height={54}
+                unoptimized
+                className="h-7 w-auto object-contain"
+              />
+            </a>
           </div>
         </footer>
       </div>

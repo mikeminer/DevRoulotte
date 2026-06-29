@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "api.producthunt.com",
         pathname: "/widgets/embed-image/v1/featured.svg",
       },
+      {
+        protocol: "https",
+        hostname: "peerpush.com",
+        pathname: "/p/devroulottechat/badge.png",
+      },
     ],
   },
 };
