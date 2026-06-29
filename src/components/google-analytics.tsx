@@ -5,25 +5,10 @@ import { useEffect, useState } from "react";
 import {
   COOKIE_CONSENT_STORAGE_KEY,
   COOKIE_CONSENT_UPDATED_EVENT,
-  parseCookieConsent,
 } from "@/lib/cookie-consent";
-
-declare global {
-  interface Window {
-    dataLayer?: unknown[];
-    gtag?: (...args: unknown[]) => void;
-  }
-}
+import { hasAnalyticsConsent, trackEvent } from "@/lib/analytics";
 
 const GOOGLE_ANALYTICS_COOKIE_PREFIXES = ["_ga", "_gid", "_gat"];
-
-function hasAnalyticsConsent() {
-  const stored = parseCookieConsent(
-    window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY),
-  );
-
-  return Boolean(stored?.analytics);
-}
 
 function expireCookie(name: string, domain?: string) {
   const domainPart = domain ? `; domain=${domain}` : "";
@@ -128,6 +113,39 @@ export function GoogleAnalytics() {
       send_to: measurementId,
     });
   }, [analyticsAccepted, isTagReady, measurementId, pathname]);
+
+  useEffect(() => {
+    if (!measurementId) {
+      return;
+    }
+
+    function handleTrackedClick(event: MouseEvent) {
+      const target = event.target;
+
+      if (!(target instanceof Element)) {
+        return;
+      }
+
+      const element = target.closest<HTMLElement>("[data-analytics-event]");
+      const eventName = element?.dataset.analyticsEvent;
+
+      if (!element || !eventName) {
+        return;
+      }
+
+      trackEvent(eventName, {
+        cta_id: element.dataset.analyticsCtaId,
+        destination: element.dataset.analyticsDestination,
+        surface: element.dataset.analyticsSurface,
+      });
+    }
+
+    document.addEventListener("click", handleTrackedClick);
+
+    return () => {
+      document.removeEventListener("click", handleTrackedClick);
+    };
+  }, [measurementId]);
 
   return null;
 }

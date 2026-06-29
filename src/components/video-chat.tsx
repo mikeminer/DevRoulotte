@@ -11,6 +11,11 @@ import {
   Video,
 } from "lucide-react";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
+import {
+  getAnalyticsContext,
+  trackEvent,
+  type AnalyticsParams,
+} from "@/lib/analytics";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { MatchJoinResponse, MatchPayload } from "@/lib/types";
 
@@ -142,6 +147,20 @@ export function VideoChat({
   const [reportReason, setReportReason] = useState("nudity");
   const [nextLockedUntil, setNextLockedUntil] = useState(0);
   const [nextLockedSeconds, setNextLockedSeconds] = useState(0);
+  const analyticsContext = useMemo(
+    () => getAnalyticsContext(isAuthenticated, isPremium),
+    [isAuthenticated, isPremium],
+  );
+  const trackChatEvent = useCallback(
+    (eventName: string, params: AnalyticsParams = {}) => {
+      trackEvent(eventName, {
+        ...analyticsContext,
+        surface: "chat",
+        ...params,
+      });
+    },
+    [analyticsContext],
+  );
 
   useEffect(() => {
     clientIdRef.current = getOrCreateGuestId();
@@ -212,6 +231,10 @@ export function VideoChat({
       return;
     }
 
+    trackChatEvent("auto_next_scheduled", {
+      call_state: connectedAtRef.current ? "connected" : "connecting",
+      failure_reason: reason,
+    });
     setStatus("waiting");
     setMessage(`${messageText} Cerco automaticamente un nuovo match.`);
 
@@ -309,6 +332,18 @@ export function VideoChat({
   const cleanupConnection = useCallback(async (keepCamera: boolean, reason = "left") => {
     const currentMatch = matchRef.current;
     const currentPeerConnection = peerConnectionRef.current;
+    const callConnectedAt = connectedAtRef.current;
+
+    if (currentMatch && callConnectedAt) {
+      trackChatEvent("video_call_ended", {
+        call_duration_sec: Math.max(
+          Math.floor((Date.now() - callConnectedAt) / 1000),
+          0,
+        ),
+        end_reason: reason,
+        role: currentMatch.role,
+      });
+    }
 
     clearAutoNext();
     clearOfferRetries();
@@ -360,6 +395,7 @@ export function VideoChat({
     sendSignalForMatch,
     stopSignalPolling,
     supabase,
+    trackChatEvent,
   ]);
 
   useEffect(() => {
@@ -404,18 +440,32 @@ export function VideoChat({
 
     setStatus("permissions");
     setMessage("Richiedo webcam e microfono.");
+    trackChatEvent("media_permission_requested");
 
     if (!navigator.mediaDevices?.getUserMedia) {
+      trackChatEvent("media_permission_failed", {
+        failure_reason: "not_supported",
+      });
       throw new Error("Webcam o microfono non disponibili in questo browser.");
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-      },
-      audio: true,
-    });
+    let stream: MediaStream;
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: true,
+      });
+      trackChatEvent("media_permission_granted");
+    } catch (error) {
+      trackChatEvent("media_permission_failed", {
+        failure_reason: error instanceof Error ? error.name : "unknown",
+      });
+      throw error;
+    }
 
     localStreamRef.current = stream;
 
@@ -556,6 +606,7 @@ export function VideoChat({
   }
 
   async function connectToMatch(nextMatch: MatchPayload) {
+    const connectStartedAt = Date.now();
     const stream = await ensureMedia();
     const iceServers = await getIceServers();
     const pc = new RTCPeerConnection({ iceServers });
@@ -572,6 +623,10 @@ export function VideoChat({
     setElapsed(0);
     setStatus("connecting");
     setMessage("Connessione peer-to-peer in corso.");
+    trackChatEvent("webrtc_connect_started", {
+      call_limit_sec: nextMatch.limitSeconds,
+      role: nextMatch.role,
+    });
     logWebRtcEvent("connect_start", {
       connectionState: pc.connectionState,
       iceConnectionState: pc.iceConnectionState,
@@ -643,6 +698,11 @@ export function VideoChat({
           connectedAtRef.current = now;
           setConnectedAt(now);
           setElapsed(0);
+          trackChatEvent("video_call_connected", {
+            call_limit_sec: nextMatch.limitSeconds,
+            connection_time_ms: now - connectStartedAt,
+            role: nextMatch.role,
+          });
         }
         setStatus("connected");
         setMessage("Connesso.");
@@ -817,7 +877,7 @@ export function VideoChat({
     scheduleConnectionWatchdogs();
   }
 
-  async function pollForMatch() {
+  async function pollForMatch(searchReason = "start") {
     if (isPollingForMatchRef.current) {
       return;
     }
@@ -826,6 +886,13 @@ export function VideoChat({
     matchSearchTokenRef.current = searchToken;
     isPollingForMatchRef.current = true;
     const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
+    const searchStartedAt = Date.now();
+
+    trackChatEvent("match_search_started", {
+      preferred_country: isPremium ? preferredCountry : "any",
+      preferred_language: isAuthenticated ? preferredLanguage : "any",
+      search_reason: searchReason,
+    });
 
     try {
       while (
@@ -852,12 +919,28 @@ export function VideoChat({
         }
 
         if (data.status === "matched") {
+          trackChatEvent("match_found", {
+            call_limit_sec: data.match.limitSeconds,
+            match_wait_ms: Date.now() - searchStartedAt,
+            role: data.match.role,
+            search_reason: searchReason,
+          });
           await connectToMatch(data.match);
           onProfileRefresh();
           return;
         }
 
         if (data.status !== "waiting") {
+          trackChatEvent(
+            data.status === "limit_reached"
+              ? "free_limit_reached"
+              : "match_search_blocked",
+            {
+              http_status: response.status,
+              match_status: data.status,
+              search_reason: searchReason,
+            },
+          );
           setStatus("idle");
           setMessage(data.message);
           searchingRef.current = false;
@@ -879,12 +962,20 @@ export function VideoChat({
   }
 
   async function start() {
+    trackChatEvent("chat_start_attempted");
+
     if (!ageConfirmed || !rulesAccepted) {
+      trackChatEvent("chat_start_blocked", {
+        block_reason: "age_or_rules",
+      });
       setMessage("Conferma 18+ e accetta le regole prima di iniziare.");
       return;
     }
 
     if (!supabase) {
+      trackChatEvent("chat_start_blocked", {
+        block_reason: "supabase_missing",
+      });
       setMessage("Configura Supabase per matchmaking e signaling.");
       return;
     }
@@ -893,8 +984,11 @@ export function VideoChat({
       await cleanupConnection(true);
       await ensureMedia();
       searchingRef.current = true;
-      await pollForMatch();
+      await pollForMatch("start");
     } catch (error) {
+      trackChatEvent("chat_start_failed", {
+        failure_reason: error instanceof Error ? error.name : "unknown",
+      });
       searchingRef.current = false;
       setStatus("idle");
       setMessage(
@@ -906,6 +1000,9 @@ export function VideoChat({
   }
 
   async function stop() {
+    trackChatEvent("stop_clicked", {
+      call_state: connectedAtRef.current ? "connected" : "not_connected",
+    });
     searchingRef.current = false;
     await cleanupConnection(false);
     setStatus("idle");
@@ -914,19 +1011,28 @@ export function VideoChat({
   }
 
   async function goToNext(options: { reason?: string } = {}) {
-    await cleanupConnection(true, options.reason ?? "next");
+    const nextReason = options.reason ?? "next";
+
+    await cleanupConnection(true, nextReason);
     setStatus("waiting");
     setMessage("Cerco un nuovo match.");
     searchingRef.current = true;
-    await pollForMatch();
+    await pollForMatch(nextReason);
   }
 
   async function manualNext() {
     if (Date.now() < nextLockedUntil) {
+      trackChatEvent("next_blocked", {
+        block_reason: "cooldown",
+      });
       return;
     }
 
     const cooldownSeconds = match?.nextCooldownSeconds ?? 8;
+    trackChatEvent("next_clicked", {
+      call_state: connectedAtRef.current ? "connected" : "not_connected",
+      cooldown_sec: cooldownSeconds,
+    });
     setNextLockedUntil(Date.now() + cooldownSeconds * 1000);
     setNextLockedSeconds(cooldownSeconds);
 
@@ -952,6 +1058,17 @@ export function VideoChat({
       }),
     });
     const data = (await response.json()) as { ok: boolean; message?: string };
+
+    if (data.ok) {
+      trackChatEvent("report_submitted", {
+        report_reason: reportReason,
+      });
+    } else {
+      trackChatEvent("report_failed", {
+        http_status: response.status,
+        report_reason: reportReason,
+      });
+    }
 
     setMessage(data.ok ? "Report inviato alla moderazione." : data.message ?? "Report fallito.");
   }
@@ -1007,7 +1124,14 @@ export function VideoChat({
                 className="mt-0.5 h-4 w-4 accent-teal-300"
                 type="checkbox"
                 checked={ageConfirmed}
-                onChange={(event) => setAgeConfirmed(event.target.checked)}
+                onChange={(event) => {
+                  const checked = event.target.checked;
+
+                  setAgeConfirmed(checked);
+                  if (checked) {
+                    trackChatEvent("age_gate_confirmed");
+                  }
+                }}
               />
               Confermo di avere almeno 18 anni.
             </label>
@@ -1016,7 +1140,14 @@ export function VideoChat({
                 className="mt-0.5 h-4 w-4 accent-teal-300"
                 type="checkbox"
                 checked={rulesAccepted}
-                onChange={(event) => setRulesAccepted(event.target.checked)}
+                onChange={(event) => {
+                  const checked = event.target.checked;
+
+                  setRulesAccepted(checked);
+                  if (checked) {
+                    trackChatEvent("community_rules_accepted");
+                  }
+                }}
               />
               Accetto regole: niente nudità, spam, minacce o contenuti illegali.
             </label>

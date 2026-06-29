@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, KeyRound, Loader2, ShieldCheck } from "lucide-react";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { trackEvent } from "@/lib/analytics";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -52,12 +53,22 @@ export function AuthConfirmPanel() {
 
   async function confirmEmailLink() {
     if (!supabase) {
+      trackEvent("auth_link_confirm_failed", {
+        auth_link_type: type ?? "unknown",
+        failure_reason: "supabase_missing",
+        surface: "auth_confirm",
+      });
       setState("error");
       setMessage("Configura Supabase per completare questo link.");
       return;
     }
 
     if (!tokenHash || !type) {
+      trackEvent("auth_link_confirm_failed", {
+        auth_link_type: type ?? "unknown",
+        failure_reason: "token_missing",
+        surface: "auth_confirm",
+      });
       setState("error");
       setMessage("Il link non contiene un token valido. Richiedi una nuova email.");
       return;
@@ -72,6 +83,11 @@ export function AuthConfirmPanel() {
     });
 
     if (error) {
+      trackEvent("auth_link_confirm_failed", {
+        auth_link_type: type,
+        error_name: error.name,
+        surface: "auth_confirm",
+      });
       setState("error");
       setMessage(
         getAuthErrorMessage(
@@ -83,6 +99,10 @@ export function AuthConfirmPanel() {
     }
 
     setState("success");
+    trackEvent(isRecovery ? "password_reset_link_confirmed" : "email_confirmed", {
+      auth_link_type: type,
+      surface: "auth_confirm",
+    });
     setMessage(
       isRecovery
         ? "Link verificato. Ti porto alla scelta della nuova password."

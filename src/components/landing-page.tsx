@@ -140,12 +140,20 @@ export function LandingPage() {
                 href={WORKSHOP_FEEDBACK_URL}
                 target="_blank"
                 rel="noreferrer"
+                data-analytics-event="workshop_form_opened"
+                data-analytics-surface="landing_header"
+                data-analytics-cta-id="workshop_header"
+                data-analytics-destination="google_forms"
                 className="hidden rounded-md border border-white/10 px-3 py-2 text-slate-300 hover:bg-white/10 hover:text-white sm:inline-flex"
               >
                 In officina
               </a>
               <Link
                 href="/chat"
+                data-analytics-event="cta_clicked"
+                data-analytics-surface="landing_header"
+                data-analytics-cta-id="header_enter"
+                data-analytics-destination="chat"
                 className="inline-flex items-center gap-2 rounded-md bg-teal-300 px-3 py-2 font-bold text-slate-950 hover:bg-teal-200 sm:px-4"
               >
                 Entra
@@ -193,6 +201,10 @@ export function LandingPage() {
             <div className="flex min-w-0 max-w-full flex-col gap-3 sm:flex-row">
               <Link
                 href="/chat"
+                data-analytics-event="cta_clicked"
+                data-analytics-surface="landing_hero"
+                data-analytics-cta-id="hero_enter"
+                data-analytics-destination="chat"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-300 px-5 text-sm font-black text-slate-950 hover:bg-teal-200"
               >
                 Entra nella roulotte
@@ -200,6 +212,10 @@ export function LandingPage() {
               </Link>
               <Link
                 href="#come-funziona"
+                data-analytics-event="cta_clicked"
+                data-analytics-surface="landing_hero"
+                data-analytics-cta-id="hero_how_it_works"
+                data-analytics-destination="how_it_works"
                 className="inline-flex h-12 items-center justify-center rounded-md border border-white/15 px-5 text-sm font-bold text-slate-100 hover:bg-white/10"
               >
                 Scopri come funziona
@@ -334,6 +350,10 @@ export function LandingPage() {
             href={WORKSHOP_FEEDBACK_URL}
             target="_blank"
             rel="noreferrer"
+            data-analytics-event="workshop_form_opened"
+            data-analytics-surface="landing_workshop"
+            data-analytics-cta-id="workshop_section"
+            data-analytics-destination="google_forms"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-300 px-5 text-sm font-black text-slate-950 hover:bg-teal-200"
           >
             Apri il form
@@ -356,6 +376,10 @@ export function LandingPage() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
               href="/chat"
+              data-analytics-event="cta_clicked"
+              data-analytics-surface="landing_final"
+              data-analytics-cta-id="final_enter"
+              data-analytics-destination="chat"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-300 px-5 text-sm font-black text-slate-950 hover:bg-teal-200"
             >
               Entra nella roulotte
@@ -363,6 +387,10 @@ export function LandingPage() {
             </Link>
             <Link
               href="/safety"
+              data-analytics-event="cta_clicked"
+              data-analytics-surface="landing_final"
+              data-analytics-cta-id="final_safety"
+              data-analytics-destination="safety"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-white/15 px-5 text-sm font-bold text-slate-100 hover:bg-white/10"
             >
               <ShieldCheck className="h-4 w-4" />
@@ -390,6 +418,10 @@ export function LandingPage() {
               href={WORKSHOP_FEEDBACK_URL}
               target="_blank"
               rel="noreferrer"
+              data-analytics-event="workshop_form_opened"
+              data-analytics-surface="landing_footer"
+              data-analytics-cta-id="workshop_footer"
+              data-analytics-destination="google_forms"
               className="text-slate-300 hover:text-white"
             >
               In officina
@@ -398,6 +430,10 @@ export function LandingPage() {
               href={LINKEDIN_COMPANY_URL}
               target="_blank"
               rel="noreferrer"
+              data-analytics-event="outbound_link_clicked"
+              data-analytics-surface="landing_footer"
+              data-analytics-cta-id="linkedin"
+              data-analytics-destination="linkedin"
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
             >
               <Linkedin className="h-3.5 w-3.5" />

@@ -13,6 +13,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
+import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ProfileStatus } from "@/lib/types";
 
@@ -74,6 +75,10 @@ export function ProfilePanel() {
   }, [loadProfile]);
 
   const isAuthenticated = Boolean(session);
+  const analyticsContext = getAnalyticsContext(
+    isAuthenticated,
+    Boolean(profile?.isPremium),
+  );
   const canCancelPremium =
     isAuthenticated &&
     Boolean(profile?.subscriptionStatus) &&
@@ -82,6 +87,11 @@ export function ProfilePanel() {
     );
 
   async function cancelPremium() {
+    trackEvent("premium_cancel_clicked", {
+      ...analyticsContext,
+      surface: "profile",
+    });
+
     if (
       !window.confirm(
         "Vuoi annullare Premium? La subscription PayPal verra' cancellata.",
@@ -112,8 +122,19 @@ export function ProfilePanel() {
       }
 
       setActionMessage("Premium cancellato. Lo stato e' stato aggiornato.");
+      trackEvent("premium_cancelled", {
+        ...analyticsContext,
+        payment_provider: "paypal",
+        surface: "profile",
+      });
       await loadProfile();
     } catch (error) {
+      trackEvent("premium_cancel_failed", {
+        ...analyticsContext,
+        error_name: error instanceof Error ? error.name : "unknown",
+        payment_provider: "paypal",
+        surface: "profile",
+      });
       setActionMessage(
         error instanceof Error ? error.message : "Cancellazione non riuscita",
       );

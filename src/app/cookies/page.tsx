@@ -10,7 +10,7 @@ export default function CookiesPage() {
   return (
     <LegalPage
       title="Cookie"
-      updatedAt="28 giugno 2026"
+      updatedAt="29 giugno 2026"
       intro={`Questa pagina descrive strumenti tecnici e preferenze cookie DevRoulotte. Per richieste privacy o cookie: ${CONTACT_EMAIL}.`}
       sections={[
         {
@@ -25,7 +25,7 @@ export default function CookiesPage() {
           body: [
             "Le categorie Preferenze, Statistiche e Marketing sono disattivate di default e possono essere accettate o rifiutate separatamente dal centro preferenze cookie.",
             "Il Google tag usa Consent Mode con `analytics_storage` negato di default. La categoria Statistiche abilita Google Analytics 4 solo dopo consenso. La categoria Marketing resta predisposta ma non carica pixel pubblicitari o strumenti promozionali nell'MVP.",
-            "Se rifiuti o revochi Statistiche, DevRoulotte non invia page view GA4, mantiene il consenso analytics negato e prova a cancellare i cookie analytics gia' presenti sul dominio.",
+            "Se rifiuti o revochi Statistiche, DevRoulotte non invia page view o eventi GA4, mantiene il consenso analytics negato e prova a cancellare i cookie analytics gia' presenti sul dominio.",
           ],
         },
         {
@@ -36,7 +36,7 @@ export default function CookiesPage() {
             "`devroulotte_age_18`: ricorda la dichiarazione 18+.",
             "`devroulotte_rules_ok`: ricorda l'accettazione delle regole community.",
             "Supabase Auth puo' salvare token di sessione nel browser quando l'utente effettua login o registrazione.",
-            "Google Analytics 4, se configurato con `NEXT_PUBLIC_GA_MEASUREMENT_ID`, carica il Google tag da `googletagmanager.com` con consenso analytics negato di default. Solo se accetti Statistiche puo' impostare cookie come `_ga` e `_ga_<measurement-id>` per misurazioni aggregate.",
+            "Google Analytics 4, se configurato con `NEXT_PUBLIC_GA_MEASUREMENT_ID`, carica il Google tag da `googletagmanager.com` con consenso analytics negato di default. Solo se accetti Statistiche puo' impostare cookie come `_ga` e `_ga_<measurement-id>` per misurazioni aggregate di pagine, CTA, accesso, matching, chiamate connesse, report e checkout Premium.",
           ],
         },
         {

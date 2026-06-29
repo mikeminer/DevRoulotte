@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { KeyRound, Loader2, LogIn, LogOut, UserPlus } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
+import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -13,6 +14,10 @@ export function AuthPanel() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isSendingReset, setIsSendingReset] = useState(false);
+  const analyticsContext = useMemo(
+    () => getAnalyticsContext(Boolean(session), false),
+    [session],
+  );
 
   useEffect(() => {
     if (!supabase) {
@@ -30,7 +35,19 @@ export function AuthPanel() {
   }, [supabase]);
 
   async function authenticate(mode: "in" | "up") {
+    trackEvent(mode === "up" ? "sign_up_attempted" : "login_attempted", {
+      ...analyticsContext,
+      method: "email",
+      surface: "auth_panel",
+    });
+
     if (!supabase) {
+      trackEvent("auth_failed", {
+        ...analyticsContext,
+        auth_mode: mode === "up" ? "sign_up" : "login",
+        failure_reason: "supabase_missing",
+        surface: "auth_panel",
+      });
       setMessage("Configura Supabase per abilitare login e registrazione.");
       return;
     }
@@ -43,6 +60,13 @@ export function AuthPanel() {
     const { error } = await action;
 
     if (error) {
+      trackEvent("auth_failed", {
+        ...analyticsContext,
+        auth_mode: mode === "up" ? "sign_up" : "login",
+        error_name: error.name,
+        method: "email",
+        surface: "auth_panel",
+      });
       setMessage(
         getAuthErrorMessage(
           error,
@@ -50,6 +74,11 @@ export function AuthPanel() {
         ),
       );
     } else {
+      trackEvent(mode === "up" ? "sign_up" : "login", {
+        ...analyticsContext,
+        method: "email",
+        surface: "auth_panel",
+      });
       setMessage(mode === "up" ? "Controlla la tua email." : "Accesso fatto.");
       setPassword("");
     }
@@ -57,16 +86,30 @@ export function AuthPanel() {
 
   async function requestPasswordReset() {
     if (!supabase) {
+      trackEvent("password_reset_failed", {
+        ...analyticsContext,
+        failure_reason: "supabase_missing",
+        surface: "auth_panel",
+      });
       setMessage("Configura Supabase per abilitare il reset password.");
       return;
     }
 
     const normalizedEmail = email.trim();
     if (!normalizedEmail) {
+      trackEvent("password_reset_failed", {
+        ...analyticsContext,
+        failure_reason: "email_missing",
+        surface: "auth_panel",
+      });
       setMessage("Inserisci la tua email per ricevere il link di reset.");
       return;
     }
 
+    trackEvent("password_reset_requested", {
+      ...analyticsContext,
+      surface: "auth_panel",
+    });
     setIsSendingReset(true);
     setMessage("Invio link di reset in corso.");
 
@@ -79,6 +122,11 @@ export function AuthPanel() {
     setIsSendingReset(false);
 
     if (error) {
+      trackEvent("password_reset_failed", {
+        ...analyticsContext,
+        error_name: error instanceof Error ? error.name : "unknown",
+        surface: "auth_panel",
+      });
       setMessage(
         getAuthErrorMessage(
           error,
@@ -86,6 +134,10 @@ export function AuthPanel() {
         ),
       );
     } else {
+      trackEvent("password_reset_email_sent", {
+        ...analyticsContext,
+        surface: "auth_panel",
+      });
       setMessage("Link di reset inviato. Controlla la tua email.");
     }
   }
@@ -96,6 +148,10 @@ export function AuthPanel() {
   }
 
   async function signOut() {
+    trackEvent("logout", {
+      ...analyticsContext,
+      surface: "auth_panel",
+    });
     await supabase?.auth.signOut();
   }
 

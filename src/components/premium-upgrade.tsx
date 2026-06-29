@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Crown, Loader2 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
+import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
@@ -11,6 +12,10 @@ export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const analyticsContext = useMemo(
+    () => getAnalyticsContext(Boolean(session), false),
+    [session],
+  );
 
   useEffect(() => {
     if (!supabase) {
@@ -28,7 +33,17 @@ export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
   }, [supabase]);
 
   async function startUpgrade() {
+    trackEvent("premium_upgrade_clicked", {
+      ...analyticsContext,
+      cta_id: compact ? "premium_compact" : "premium_card",
+      surface: compact ? "chat_header" : "premium_card",
+    });
+
     if (!session) {
+      trackEvent("login_required_for_premium", {
+        ...analyticsContext,
+        surface: compact ? "chat_header" : "premium_card",
+      });
       setMessage("Accedi o registrati per attivare Premium.");
       return;
     }
@@ -53,8 +68,22 @@ export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
         throw new Error(data.message ?? "PayPal non disponibile");
       }
 
+      trackEvent("begin_checkout", {
+        ...analyticsContext,
+        currency: "EUR",
+        payment_provider: "paypal",
+        subscription_period: "monthly",
+        surface: compact ? "chat_header" : "premium_card",
+        value: 3.99,
+      });
       window.location.href = data.approvalUrl;
     } catch (error) {
+      trackEvent("checkout_error", {
+        ...analyticsContext,
+        error_name: error instanceof Error ? error.name : "unknown",
+        payment_provider: "paypal",
+        surface: compact ? "chat_header" : "premium_card",
+      });
       setMessage(
         error instanceof Error
           ? error.message

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, KeyRound, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -20,6 +21,7 @@ export function ResetPasswordPanel() {
     supabase ? "" : "Configura Supabase per abilitare il reset password.",
   );
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const analyticsContext = getAnalyticsContext(hasRecoverySession, false);
 
   useEffect(() => {
     if (!supabase) {
@@ -53,21 +55,41 @@ export function ResetPasswordPanel() {
     event.preventDefault();
 
     if (!supabase) {
+      trackEvent("password_reset_save_failed", {
+        ...analyticsContext,
+        failure_reason: "supabase_missing",
+        surface: "reset_password",
+      });
       setMessage("Configura Supabase per abilitare il reset password.");
       return;
     }
 
     if (!hasRecoverySession) {
+      trackEvent("password_reset_save_failed", {
+        ...analyticsContext,
+        failure_reason: "recovery_session_missing",
+        surface: "reset_password",
+      });
       setMessage("Apri questa pagina dal link ricevuto via email.");
       return;
     }
 
     if (password.length < 6) {
+      trackEvent("password_reset_save_failed", {
+        ...analyticsContext,
+        failure_reason: "password_too_short",
+        surface: "reset_password",
+      });
       setMessage("La password deve avere almeno 6 caratteri.");
       return;
     }
 
     if (password !== confirmPassword) {
+      trackEvent("password_reset_save_failed", {
+        ...analyticsContext,
+        failure_reason: "password_mismatch",
+        surface: "reset_password",
+      });
       setMessage("Le password non coincidono.");
       return;
     }
@@ -77,6 +99,11 @@ export function ResetPasswordPanel() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
+      trackEvent("password_reset_save_failed", {
+        ...analyticsContext,
+        error_name: error.name,
+        surface: "reset_password",
+      });
       setSaveState("idle");
       setMessage(
         getAuthErrorMessage(
@@ -88,6 +115,10 @@ export function ResetPasswordPanel() {
     }
 
     await supabase.auth.signOut();
+    trackEvent("password_reset_completed", {
+      ...analyticsContext,
+      surface: "reset_password",
+    });
     setPassword("");
     setConfirmPassword("");
     setSaveState("success");

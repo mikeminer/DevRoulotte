@@ -131,6 +131,10 @@ export function HomeShell() {
             ) : null}
             <Link
               href="/profile"
+              data-analytics-event="cta_clicked"
+              data-analytics-surface="chat_header"
+              data-analytics-cta-id="profile"
+              data-analytics-destination="profile"
               className="inline-flex h-9 items-center rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-200 hover:bg-white/10"
             >
               Profilo
@@ -139,6 +143,10 @@ export function HomeShell() {
               href={WORKSHOP_FEEDBACK_URL}
               target="_blank"
               rel="noreferrer"
+              data-analytics-event="workshop_form_opened"
+              data-analytics-surface="chat_header"
+              data-analytics-cta-id="workshop_header"
+              data-analytics-destination="google_forms"
               className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-200 hover:bg-white/10"
             >
               <Wrench className="h-4 w-4" />
@@ -146,6 +154,10 @@ export function HomeShell() {
             </a>
             <Link
               href="/admin"
+              data-analytics-event="cta_clicked"
+              data-analytics-surface="chat_header"
+              data-analytics-cta-id="admin"
+              data-analytics-destination="admin"
               className="inline-flex h-9 items-center rounded-md border border-white/10 px-3 text-xs font-semibold text-slate-200 hover:bg-white/10"
             >
               Admin
@@ -306,6 +318,10 @@ export function HomeShell() {
               href={WORKSHOP_FEEDBACK_URL}
               target="_blank"
               rel="noreferrer"
+              data-analytics-event="workshop_form_opened"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="workshop_footer"
+              data-analytics-destination="google_forms"
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
             >
               <Wrench className="h-3.5 w-3.5" />
@@ -315,6 +331,10 @@ export function HomeShell() {
               href={LINKEDIN_COMPANY_URL}
               target="_blank"
               rel="noreferrer"
+              data-analytics-event="outbound_link_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="linkedin"
+              data-analytics-destination="linkedin"
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
             >
               <Linkedin className="h-3.5 w-3.5" />
@@ -331,6 +351,10 @@ export function HomeShell() {
               href={SOURCE_CODE_URL}
               target="_blank"
               rel="noreferrer"
+              data-analytics-event="outbound_link_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="source"
+              data-analytics-destination="github"
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
             >
               <Code2 className="h-3.5 w-3.5" />
@@ -340,6 +364,10 @@ export function HomeShell() {
               href={`${SOURCE_CODE_URL}/blob/main/LICENSE`}
               target="_blank"
               rel="noreferrer"
+              data-analytics-event="outbound_link_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="license"
+              data-analytics-destination="github"
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
             >
               <Scale className="h-3.5 w-3.5" />
@@ -350,6 +378,10 @@ export function HomeShell() {
               target="_blank"
               rel="noreferrer"
               aria-label="DevRoulotte su Ship or Die"
+              data-analytics-event="outbound_badge_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="ship_or_die_badge"
+              data-analytics-destination="ship_or_die"
               className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-2 py-1 transition hover:bg-slate-100"
             >
               <Image
@@ -365,6 +397,10 @@ export function HomeShell() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="DevRoulotte.chat su Product Hunt"
+              data-analytics-event="outbound_badge_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="product_hunt_badge"
+              data-analytics-destination="product_hunt"
               className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
             >
               <Image
@@ -381,6 +417,10 @@ export function HomeShell() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="DevRoulotte.chat su PeerPush"
+              data-analytics-event="outbound_badge_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="peerpush_badge"
+              data-analytics-destination="peerpush"
               className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
             >
               <Image
@@ -397,6 +437,10 @@ export function HomeShell() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="DevRoulotte.chat launching soon on Uneed"
+              data-analytics-event="outbound_badge_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="uneed_badge"
+              data-analytics-destination="uneed"
               className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
             >
               <Image
