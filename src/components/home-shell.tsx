@@ -392,6 +392,22 @@ export function HomeShell() {
                 className="h-7 w-auto object-contain"
               />
             </a>
+            <a
+              href="https://www.uneed.best/tool/devroulotte"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="DevRoulotte.chat launching soon on Uneed"
+              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
+            >
+              <Image
+                src="https://www.uneed.best/EMBED3B.png"
+                alt="Launching Soon on Uneed"
+                width={250}
+                height={54}
+                unoptimized
+                className="h-7 w-auto object-contain"
+              />
+            </a>
           </div>
         </footer>
       </div>

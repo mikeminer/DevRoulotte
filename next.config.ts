@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: "peerpush.com",
         pathname: "/p/devroulottechat/badge.png",
       },
+      {
+        protocol: "https",
+        hostname: "www.uneed.best",
+        pathname: "/EMBED3B.png",
+      },
     ],
   },
 };
