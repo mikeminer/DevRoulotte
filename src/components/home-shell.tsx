@@ -360,6 +360,22 @@ export function HomeShell() {
                 className="h-7 w-auto object-contain"
               />
             </a>
+            <a
+              href="https://www.producthunt.com/products/devroulotte-chat?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-devroulotte-chat"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="DevRoulotte.chat su Product Hunt"
+              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
+            >
+              <Image
+                alt="DevRoulotte.chat - networking | Product Hunt"
+                width={250}
+                height={54}
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1183531&theme=light&t=1782720049081"
+                unoptimized
+                className="h-7 w-auto object-contain"
+              />
+            </a>
           </div>
         </footer>
       </div>

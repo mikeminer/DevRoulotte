@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "shipordie.club",
         pathname: "/logo.webp",
       },
+      {
+        protocol: "https",
+        hostname: "api.producthunt.com",
+        pathname: "/widgets/embed-image/v1/featured.svg",
+      },
     ],
   },
 };
