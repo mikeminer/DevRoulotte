@@ -37,6 +37,7 @@ yarn-error.log*
 .env*
 !.env.local.example
 .supabase-access-token.txt
+supabaseaccesstoken*
 .supabase-db-password.txt
 .supabase-smtp.local.json
 supabase/emailtemplates.txt
