@@ -74,13 +74,20 @@ export function ResetPasswordPanel() {
       return;
     }
 
-    if (password.length < 6) {
+    if (
+      password.length < 10 ||
+      !/[a-z]/.test(password) ||
+      !/[A-Z]/.test(password) ||
+      !/[0-9]/.test(password)
+    ) {
       trackEvent("password_reset_save_failed", {
         ...analyticsContext,
         failure_reason: "password_too_short",
         surface: "reset_password",
       });
-      setMessage("La password deve avere almeno 6 caratteri.");
+      setMessage(
+        "La password deve avere almeno 10 caratteri, maiuscole, minuscole e numeri.",
+      );
       return;
     }
 
@@ -195,8 +202,8 @@ export function ResetPasswordPanel() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   type="password"
-                  minLength={6}
-                  placeholder="minimo 6 caratteri"
+                  minLength={10}
+                  placeholder="minimo 10, maiuscole, minuscole e numeri"
                   autoComplete="new-password"
                 />
               </label>

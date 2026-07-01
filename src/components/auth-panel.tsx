@@ -7,6 +7,15 @@ import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
+function isStrongPassword(password: string) {
+  return (
+    password.length >= 10 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password)
+  );
+}
+
 export function AuthPanel() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [session, setSession] = useState<Session | null>(null);
@@ -49,6 +58,20 @@ export function AuthPanel() {
         surface: "auth_panel",
       });
       setMessage("Configura Supabase per abilitare login e registrazione.");
+      return;
+    }
+
+    if (mode === "up" && !isStrongPassword(password)) {
+      trackEvent("auth_failed", {
+        ...analyticsContext,
+        auth_mode: mode === "up" ? "sign_up" : "login",
+        failure_reason: "password_policy",
+        method: "email",
+        surface: "auth_panel",
+      });
+      setMessage(
+        "Password: almeno 10 caratteri, maiuscole, minuscole e numeri.",
+      );
       return;
     }
 
@@ -196,8 +219,8 @@ export function AuthPanel() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               type="password"
-              minLength={6}
-              placeholder="minimo 6 caratteri"
+              minLength={10}
+              placeholder="minimo 10, maiuscole, minuscole e numeri"
               autoComplete="current-password"
             />
           </label>

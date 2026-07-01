@@ -1166,8 +1166,6 @@ export function VideoChat({
       headers,
       body: JSON.stringify({
         matchId: currentMatch.id,
-        reportedActorType: currentMatch.peerActorType,
-        reportedActorId: currentMatch.peerActorId,
         reason: reportReason,
       }),
     });

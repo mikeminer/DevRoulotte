@@ -10,7 +10,7 @@ import {
   NEXT_COOLDOWN_SECONDS,
 } from "@/lib/app-config";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { getRequestActor } from "@/lib/session";
+import { getPublicActorAlias, getRequestActor } from "@/lib/session";
 import {
   getSupabaseAdmin,
   hasSupabaseServerConfig,
@@ -226,7 +226,7 @@ function buildMatchPayload(
     channelName,
     role,
     peerActorType: peer.type,
-    peerActorId: peer.id,
+    peerActorId: getPublicActorAlias(peer, matchId),
     limitSeconds: getCallLimitSeconds(planCode),
     nextCooldownSeconds: NEXT_COOLDOWN_SECONDS,
     isPremium: planCode === "premium",

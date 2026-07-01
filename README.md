@@ -56,6 +56,32 @@ $env:SUPABASE_DB_URL="postgresql://postgres.your-project:password@aws-0-eu-centr
 
 Se il progetto Supabase e' gia' configurato e devi solo aggiungere il signaling DB, esegui nel SQL Editor [supabase/migrations/20260627_webrtc_signals.sql](./supabase/migrations/20260627_webrtc_signals.sql).
 
+### Hardening post pentest
+
+Per chiudere il report KOS-2026-0630-001 applica anche [supabase/migrations/20260701_security_hardening.sql](./supabase/migrations/20260701_security_hardening.sql). La migration:
+
+- blocca modifiche client a `profiles.is_shadow_banned`, oltre a `is_admin`;
+- rimuove campi privilegiati da `auth.users.raw_user_meta_data`;
+- installa un trigger che impedisce nuovi `user_metadata` privilegiati come `is_admin`, `role`, `permissions`.
+
+Nel dashboard Supabase hosted allinea anche Authentication:
+
+- Email confirmations: enabled.
+- Minimum password length: `10`.
+- Password requirements: `lower_upper_letters_digits`.
+- Secure password change: enabled.
+- Email max frequency: almeno `60s`.
+
+Con un Supabase Personal Access Token puoi applicare queste impostazioni via Management API:
+
+```powershell
+$env:SUPABASE_ACCESS_TOKEN="sbp_..."
+$env:SUPABASE_PROJECT_REF="augmsieaeqskjsaozhtp"
+./scripts/configure-supabase-auth-security.ps1
+```
+
+In Vercel aggiungi `GUEST_SESSION_SECRET` come variabile server-only lunga e casuale. Le sessioni ospite non usano piu' `x-guest-id`: l'identita' guest e' firmata in un cookie HttpOnly `__Host-devroulotte_guest`, mentre i peer vedono solo alias pubblici match-scoped.
+
 Tabelle principali:
 
 - `auth.users`: utenti registrati Supabase
@@ -88,7 +114,7 @@ where id = (
 );
 ```
 
-Il campo `is_admin` e' protetto da trigger: un utente autenticato non puo' impostarlo dal client.
+I campi `is_admin` e `is_shadow_banned` sono protetti da trigger: un utente autenticato non puo' impostarli o ripulirli dal client.
 
 ### Email Supabase brandizzate
 
@@ -279,6 +305,7 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `PAYPAL_PLAN_ID`
 - `PAYPAL_WEBHOOK_ID`
 - `ADMIN_ACCESS_TOKEN`
+- `GUEST_SESSION_SECRET`
 - `CRON_SECRET`
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID` opzionale, solo se vuoi Google Analytics 4
 - `GA4_API_SECRET` opzionale server-only, necessario per revenue PayPal via Measurement Protocol
@@ -291,7 +318,7 @@ DevRoulotte è progettata solo per utenti 18+. Non registra chiamate, non salva 
 
 ## Cookie e consenso
 
-L'app include un banner cookie con rifiuto opzionali, accetta tutto e personalizzazione granulare. Le categorie opzionali sono disattivate di default. Gli strumenti tecnici necessari coprono login, ID ospite, conferma 18+, regole, limiti Free, sicurezza e salvataggio della scelta. La pagina `/cookies` descrive gli strumenti attuali e dal pulsante Cookie l'utente puo' modificare o revocare le scelte.
+L'app include un banner cookie con rifiuto opzionali, accetta tutto e personalizzazione granulare. Le categorie opzionali sono disattivate di default. Gli strumenti tecnici necessari coprono login, sessione ospite HttpOnly firmata, conferma 18+, regole, limiti Free, sicurezza e salvataggio della scelta. La pagina `/cookies` descrive gli strumenti attuali e dal pulsante Cookie l'utente puo' modificare o revocare le scelte.
 
 Google Analytics 4 e' opzionale ed e' configurato tramite Google tag globale con Consent Mode:
 

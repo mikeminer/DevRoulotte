@@ -15,8 +15,6 @@ export const runtime = "nodejs";
 
 const reportSchema = z.object({
   matchId: z.string().uuid(),
-  reportedActorType: z.enum(["guest", "user"]),
-  reportedActorId: z.string().uuid(),
   reason: z.enum(REPORT_REASONS),
   details: z.string().max(1000).optional().default(""),
 });
@@ -56,24 +54,26 @@ export async function POST(request: NextRequest) {
       match.actor_a_type === actor.type && match.actor_a_id === actor.id;
     const reporterIsB =
       match.actor_b_type === actor.type && match.actor_b_id === actor.id;
-    const reportedIsPeerOfA =
-      reporterIsA &&
-      match.actor_b_type === body.reportedActorType &&
-      match.actor_b_id === body.reportedActorId;
-    const reportedIsPeerOfB =
-      reporterIsB &&
-      match.actor_a_type === body.reportedActorType &&
-      match.actor_a_id === body.reportedActorId;
 
-    if (!reportedIsPeerOfA && !reportedIsPeerOfB) {
+    if (!reporterIsA && !reporterIsB) {
       throw new Error("Report non valido per questo match");
     }
+
+    const reportedActor = reporterIsA
+      ? {
+          type: match.actor_b_type,
+          id: match.actor_b_id,
+        }
+      : {
+          type: match.actor_a_type,
+          id: match.actor_a_id,
+        };
 
     await supabase.from("reports").insert({
       reporter_actor_type: actor.type,
       reporter_actor_id: actor.id,
-      reported_actor_type: body.reportedActorType,
-      reported_actor_id: body.reportedActorId,
+      reported_actor_type: reportedActor.type,
+      reported_actor_id: reportedActor.id,
       match_id: body.matchId,
       reason: body.reason,
       details: body.details,
@@ -84,14 +84,14 @@ export async function POST(request: NextRequest) {
     const { count } = await supabase
       .from("reports")
       .select("id", { count: "exact", head: true })
-      .eq("reported_actor_type", body.reportedActorType)
-      .eq("reported_actor_id", body.reportedActorId)
+      .eq("reported_actor_type", reportedActor.type)
+      .eq("reported_actor_id", reportedActor.id)
       .gte("created_at", since);
 
     if ((count ?? 0) >= AUTO_SHADOWBAN_REPORT_THRESHOLD) {
       await supabase.from("bans").insert({
-        actor_type: body.reportedActorType,
-        actor_id: body.reportedActorId,
+        actor_type: reportedActor.type,
+        actor_id: reportedActor.id,
         reason: "Auto-shadowban: troppi report nelle ultime 24 ore",
         shadow: true,
         active: true,
