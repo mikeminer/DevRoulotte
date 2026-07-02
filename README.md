@@ -342,7 +342,7 @@ I contatori realtime in landing e `/chat` usano invece GA4 Data API Realtime lat
 4. Imposta `GA4_PROPERTY_ID` con l'ID numerico della property GA4, non il Measurement ID `G-...`.
 5. Imposta `GA4_SERVICE_ACCOUNT_JSON_BASE64` con il JSON della service account codificato base64, oppure usa `GA4_CLIENT_EMAIL` e `GA4_PRIVATE_KEY`.
 
-La landing mostra gli utenti attivi rilevati negli ultimi 30 minuti. La pagina `/chat` invia, dopo consenso Statistiche, un evento GA4 `chat_realtime_active` mentre la tab e' visibile; il server legge GA4 Realtime per quell'evento e mostra gli utenti attivi sulla chat. Sono conteggi aggregati e dipendono dagli utenti misurati da GA4, quindi dal consenso Statistiche e dai limiti standard di Google Analytics Realtime.
+La landing mostra gli utenti attivi rilevati negli ultimi 30 minuti. La pagina `/chat` viene conteggiata tramite la dimensione realtime GA4 `unifiedScreenName`, usando il titolo pagina `Giro 1:1 | DevRoulotte`. Sono conteggi aggregati e dipendono dagli utenti misurati da GA4, quindi dal consenso Statistiche e dai limiti standard di Google Analytics Realtime.
 
 Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, l'app mantiene il consenso analytics negato, non invia page view o eventi GA4 e prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
 

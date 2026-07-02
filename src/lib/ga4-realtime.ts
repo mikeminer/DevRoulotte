@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { GA4_CHAT_REALTIME_ACTIVE_EVENT } from "@/lib/ga4-event-names";
 
 export type Ga4RealtimeScope = "site" | "chat";
 
@@ -47,6 +46,7 @@ const GA4_REALTIME_ENDPOINT = "https://analyticsdata.googleapis.com/v1beta";
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const ANALYTICS_READONLY_SCOPE =
   "https://www.googleapis.com/auth/analytics.readonly";
+const CHAT_SCREEN_NAME = "Giro 1:1 | DevRoulotte";
 const REALTIME_WINDOW_MINUTES = 30;
 
 let tokenCache: TokenCache | null = null;
@@ -192,11 +192,11 @@ function parseActiveUsers(value: string | undefined) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-function sumChatEventRows(response: Ga4RealtimeResponse) {
+function sumChatScreenRows(response: Ga4RealtimeResponse) {
   return (response.rows ?? []).reduce((total, row) => {
-    const eventName = row.dimensionValues?.[0]?.value ?? "";
+    const screenName = row.dimensionValues?.[0]?.value ?? "";
 
-    if (eventName !== GA4_CHAT_REALTIME_ACTIVE_EVENT) {
+    if (screenName !== CHAT_SCREEN_NAME) {
       return total;
     }
 
@@ -229,7 +229,7 @@ async function runRealtimeReport({
   const body =
     scope === "chat"
       ? {
-          dimensions: [{ name: "eventName" }],
+          dimensions: [{ name: "unifiedScreenName" }],
           limit: "1000",
           metrics: [{ name: "activeUsers" }],
           minuteRanges: [
@@ -301,7 +301,7 @@ export async function getGa4RealtimeUsers(
   return {
     activeUsers:
       scope === "chat"
-        ? sumChatEventRows(response)
+        ? sumChatScreenRows(response)
         : readTotalActiveUsers(response),
     configured: true,
     scope,

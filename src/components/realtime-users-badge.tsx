@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Activity, UsersRound } from "lucide-react";
-import { GA4_CHAT_REALTIME_ACTIVE_EVENT } from "@/lib/ga4-event-names";
-import { trackEvent } from "@/lib/analytics";
 
 type RealtimeScope = "site" | "chat";
 
@@ -24,7 +22,6 @@ type RealtimeUsersBadgeProps = {
 };
 
 const REFRESH_MS = 30_000;
-const CHAT_HEARTBEAT_MS = 60_000;
 
 export function RealtimeUsersBadge({
   className = "",
@@ -75,30 +72,6 @@ export function RealtimeUsersBadge({
 
     return () => {
       cancelled = true;
-      window.clearTimeout(initialTimer);
-      window.clearInterval(interval);
-    };
-  }, [scope]);
-
-  useEffect(() => {
-    if (scope !== "chat") {
-      return;
-    }
-
-    function sendChatHeartbeat() {
-      if (document.visibilityState !== "visible") {
-        return;
-      }
-
-      trackEvent(GA4_CHAT_REALTIME_ACTIVE_EVENT, {
-        surface: "chat_realtime_badge",
-      });
-    }
-
-    const initialTimer = window.setTimeout(sendChatHeartbeat, 0);
-    const interval = window.setInterval(sendChatHeartbeat, CHAT_HEARTBEAT_MS);
-
-    return () => {
       window.clearTimeout(initialTimer);
       window.clearInterval(interval);
     };
