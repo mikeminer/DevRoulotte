@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy"
-      updatedAt="29 giugno 2026"
+      updatedAt="2 luglio 2026"
       intro={`Questa informativa descrive i dati trattati da DevRoulotte e la procedura privacy operativa. Contatto legale e privacy: ${CONTACT_EMAIL}.`}
       sections={[
         {
@@ -26,6 +26,7 @@ export default function PrivacyPage() {
           body: [
             "Per utenti registrati trattiamo email, identificativo Supabase, profilo base, preferenze lingua/Paese e stato abbonamento.",
             "Per ospiti usiamo un identificativo casuale salvato nel browser per applicare limiti, report e ban.",
+            "Per il Giro della settimana trattiamo gli slot e i temi scelti dall'utente per generare una heatmap aggregata della settimana corrente. Queste preferenze non determinano il matchmaking live.",
             "Trattiamo inoltre dati tecnici come indirizzi IP visibili ai provider, user agent, log applicativi essenziali, eventi di errore, stato online/offline e informazioni necessarie a sicurezza, limiti Free e prevenzione abusi.",
           ],
         },
@@ -41,6 +42,7 @@ export default function PrivacyPage() {
           body: [
             "Salviamo log minimi dei match, report, ban, stato coda, stato premium e webhook PayPal necessari al funzionamento del servizio.",
             "Per stabilire WebRTC trattiamo temporaneamente offer/answer/ICE candidate di signaling. Questi dati non sono audio/video e vengono usati solo per collegare i due browser.",
+            "Le preferenze del Giro della settimana vengono salvate con identificativo utente/ospite e settimana di riferimento, poi mostrate agli altri utenti solo come conteggi aggregati.",
             "PayPal gestisce i dati di pagamento. DevRoulotte riceve solo identificativi e stati subscription utili ad abilitare Premium.",
           ],
         },
@@ -48,6 +50,7 @@ export default function PrivacyPage() {
           title: "Finalita' e basi giuridiche",
           body: [
             "Erogazione del servizio: usiamo account, sessione, profilo, matchmaking, signaling e stato Premium per fornire la videochat richiesta e gestire il rapporto con l'utente.",
+            "Heatmap settimanale: usiamo gli slot e i temi dichiarati per mostrare conteggi aggregati della community nella settimana corrente, separati dal matchmaking live.",
             "Sicurezza e prevenzione abusi: usiamo log minimi, report, ban, limiti e controlli anti-spam per proteggere utenti, servizio e infrastruttura.",
             "Pagamenti e adempimenti: usiamo identificativi PayPal e stati subscription per attivare Premium, gestire cancellazioni, contestazioni e obblighi amministrativi.",
             "Statistiche opzionali: Google Analytics 4 viene usato solo dopo consenso alla categoria Statistiche per metriche aggregate su pagine, CTA, accesso, matching, chiamate connesse, report, checkout Premium e revenue PayPal confermata da webhook; puoi revocare il consenso dal centro preferenze cookie.",
@@ -75,6 +78,7 @@ export default function PrivacyPage() {
           body: [
             "Account e profilo vengono conservati finche' l'account resta attivo o finche' servono per obblighi legali, sicurezza o gestione di contestazioni.",
             "Le preferenze cookie restano nel browser finche' non vengono modificate, revocate o cancellate dall'utente.",
+            "Le preferenze del Giro della settimana vengono lette per settimana corrente; i periodi precedenti non alimentano la heatmap nuova e possono essere eliminati durante manutenzioni periodiche.",
             "I dati di signaling WebRTC sono temporanei: la procedura di cleanup elimina i segnali piu' vecchi di circa 10 minuti.",
             "I log dei match e i report sono conservati in forma minima per sicurezza, audit anti-abuso, limiti Free, ban e contestazioni. I dati non piu' necessari vanno eliminati o anonimizzati durante le manutenzioni periodiche.",
             "I dati collegati a pagamenti, rimborsi e cancellazioni Premium possono essere conservati per il tempo richiesto da PayPal, obblighi fiscali, contabili o difesa da contestazioni.",

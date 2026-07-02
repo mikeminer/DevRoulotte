@@ -2,7 +2,7 @@
 
 # DevRoulotte
 
-Incontri casuali, ma non a caso. MVP 18+ da superconnector 1:1 per founder, builder e professionisti italiani, con webcam WebRTC, matching random orientato da contesto, opt-in informativo alla disponibilità, tier Free ospite, Registrato e Premium da 3,99 EUR/mese senza prova gratuita via PayPal.
+Incontri casuali, ma non a caso. MVP 18+ da superconnector 1:1 per founder, builder e professionisti italiani, con webcam WebRTC, matching random live, heatmap settimanale delle disponibilità dichiarate, tier Free ospite, Registrato e Premium da 3,99 EUR/mese senza prova gratuita via PayPal.
 
 ## Stack
 
@@ -92,6 +92,7 @@ Tabelle principali:
 - `match_logs`: log essenziali dei match
 - `match_queue`: coda matchmaking
 - `webrtc_signals`: offer/answer/ICE candidate temporanei per stabilire la chiamata WebRTC
+- `weekly_opt_ins`: preferenze aggregate per la heatmap settimanale, separata dal matchmaking
 
 Le chiamate audio/video non vengono salvate. I log contengono solo actor id, stato, timestamp, canale di signaling e diagnostica tecnica redatta.
 
@@ -247,7 +248,7 @@ Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulo
 
 - Landing page italiana su `/` con posizionamento superconnector casuale 1:1 e CTA verso `/chat`
 - Esperienza videochat mobile-first scura su `/chat` con logo DevRoulotte
-- Pannello "Giro della settimana" per opt-in informativo a disponibilità e temi di conversazione
+- Pannello "Giro della settimana" con heatmap settimanale: gli slot più scelti dagli utenti diventano più intensi e la visualizzazione si resetta sulla settimana successiva
 - Accesso guest o registrato via Supabase Auth
 - Conferma obbligatoria 18+ e regole community
 - Piano Free ospite: 3 match/giorno, chiamate da 2 minuti, rate limit Next
@@ -264,6 +265,8 @@ Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulo
 - Link "In officina" al form feedback/proposte: https://docs.google.com/forms/d/e/1FAIpQLSdiwzk0AGdbaPPRtEWR6QhnBRbfcLK-rJFf7es3J_Pnn-Ow8w/viewform
 - Cancellazione Premium dal profilo
 - Cleanup endpoint protetto per coda e match log stale
+
+Nota prodotto: il "Giro della settimana" non influenza il matchmaking live e non crea appuntamenti. È una lettura aggregata della disponibilità dichiarata dagli utenti nella settimana corrente.
 
 ## Sicurezza e limiti MVP
 

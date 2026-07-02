@@ -32,8 +32,8 @@ const painLines = [
 const heroParagraphs = [
   "DevRoulotte è il superconnector 1:1 per conoscere casualmente founder, builder e professionisti italiani.",
   "La casualità resta: non scegli una directory e non fai cold outreach. Sali nella roulotte e il sistema ti mette in rotta con qualcuno che vale una conversazione.",
-  "Puoi entrare live quando vuoi oppure fare opt-in al giro della settimana indicando disponibilità e temi: founder, product, AI, SaaS, feedback, co-founder.",
-  "Il match resta sorprendente, ma non è caos: è serendipity con un minimo di contesto.",
+  "Puoi entrare live quando vuoi e lasciare un segnale nel giro della settimana: una heatmap mostra quando la roulotte è più viva.",
+  "Il match resta sorprendente e casuale. La heatmap non decide chi incontrerai: ti fa solo capire quando c'è più movimento a bordo.",
   "Qui c'è WebRTC, matching, signaling e una missione semplice: far parlare persone che costruiscono senza trasformare tutto nell'ennesimo evento networking.",
 ];
 
@@ -41,12 +41,12 @@ const principles = [
   {
     icon: Shuffle,
     title: "Casuale, non a caso",
-    body: "La roulotte sceglie per te dentro un perimetro di disponibilità, obiettivi e profilo.",
+    body: "La roulotte ti mette davanti una persona, senza directory pubbliche o cold outreach.",
   },
   {
     icon: CalendarDays,
-    title: "Opt-in leggero",
-    body: "Indichi quando ci sei, stile When2meet, senza aprire subito una call se non vuoi.",
+    title: "Heatmap settimanale",
+    body: "Gli slot più scelti diventano più intensi e ogni settimana la tabella riparte pulita.",
   },
   {
     icon: Handshake,
@@ -58,13 +58,13 @@ const principles = [
 const flowSteps = [
   {
     icon: CalendarDays,
-    title: "Fai opt-in",
-    body: "Segni slot e temi della settimana. Serve a dare contesto, non a ingessare il networking.",
+    title: "Lasci un segnale",
+    body: "Scegli slot e temi della settimana. È un indicatore aggregato, non una prenotazione.",
   },
   {
     icon: Shuffle,
-    title: "La roulotte pesca",
-    body: "Il match resta casuale, ma orientato da disponibilità, lingua e obiettivi dichiarati.",
+    title: "La mappa si accende",
+    body: "Più persone scelgono lo stesso periodo, più quel quadratino diventa intenso.",
   },
   {
     icon: Video,
@@ -100,10 +100,10 @@ const tierRows = [
     premium: "illimitati",
   },
   {
-    label: "Opt-in disponibilità",
-    guest: "base",
+    label: "Heatmap disponibilità",
+    guest: "✓",
     registered: "✓",
-    premium: "prioritario",
+    premium: "✓",
   },
   {
     label: "Filtro lingua / stack / regione",
@@ -322,13 +322,12 @@ export function LandingPage() {
               Come gira la roulotte
             </p>
             <h2 className="text-3xl font-black tracking-normal text-white sm:text-4xl">
-              Un match casuale, con disponibilità dichiarata.
+              Una heatmap settimanale, non un calendario.
             </h2>
             <p className="text-sm leading-7 text-slate-300 sm:text-base">
-              La modalità live resta immediata. In parallelo, il giro della
-              settimana permette di indicare quando ci sei e che conversazioni
-              cerchi, così il match casuale parte già con un minimo di
-              contesto.
+              La modalità live resta immediata e casuale. Il giro della
+              settimana serve solo a far emergere i momenti più vivi della
+              community: più opt-in su uno slot, più colore su quel quadratino.
             </p>
           </div>
 

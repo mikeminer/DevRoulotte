@@ -10,7 +10,7 @@ export default function CookiesPage() {
   return (
     <LegalPage
       title="Cookie"
-      updatedAt="1 luglio 2026"
+      updatedAt="2 luglio 2026"
       intro={`Questa pagina descrive strumenti tecnici e preferenze cookie DevRoulotte. Per richieste privacy o cookie: ${CONTACT_EMAIL}.`}
       sections={[
         {
@@ -34,6 +34,7 @@ export default function CookiesPage() {
             "`devroulotte_cookie_consent_v2`: salva la scelta cookie nel browser.",
             "`__Host-devroulotte_guest`: cookie tecnico HttpOnly firmato che identifica la sessione ospite per limiti Free, matchmaking, report e ban. Non e' leggibile da JavaScript.",
             "`devroulotte_client_id`: ID locale non autenticante usato solo per distinguere i messaggi WebRTC del browser corrente.",
+            "`devroulotte_weekly_opt_in_v2`: copia locale delle ultime scelte del Giro della settimana, usata per ripristinare la UI del browser. I conteggi condivisi arrivano da Supabase in forma aggregata.",
             "`devroulotte_age_18`: ricorda la dichiarazione 18+.",
             "`devroulotte_rules_ok`: ricorda l'accettazione delle regole community.",
             "Supabase Auth puo' salvare token di sessione nel browser quando l'utente effettua login o registrazione.",

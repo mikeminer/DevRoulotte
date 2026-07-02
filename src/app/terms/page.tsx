@@ -11,7 +11,7 @@ export default function TermsPage() {
     <LegalPage
       title="Termini di servizio"
       updatedAt="28 giugno 2026"
-      intro={`DevRoulotte è un servizio 18+ per incontri casuali 1:1 tra founder, builder e professionisti, con webcam e opt-in informativo alla disponibilità. Usando il servizio accetti questi termini, le regole community e la nostra informativa privacy. Contatto legale: ${CONTACT_EMAIL}.`}
+      intro={`DevRoulotte è un servizio 18+ per incontri casuali 1:1 tra founder, builder e professionisti, con webcam e heatmap settimanale aggregata delle disponibilità dichiarate. Usando il servizio accetti questi termini, le regole community e la nostra informativa privacy. Contatto legale: ${CONTACT_EMAIL}.`}
       sections={[
         {
           title: "Accesso 18+",
