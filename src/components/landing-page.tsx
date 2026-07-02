@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
+import { RealtimeUsersBadge } from "@/components/realtime-users-badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   CONTACT_EMAIL,
@@ -209,6 +210,7 @@ export function LandingPage() {
               <Code2 className="h-4 w-4" />
               Incontri casuali, ma non a caso.
             </div>
+            <RealtimeUsersBadge scope="site" surface="landing" />
 
             <div className="grid min-w-0 max-w-full gap-5">
               <h1 className="max-w-full break-words text-4xl font-black leading-[0.95] tracking-normal text-white [overflow-wrap:anywhere] sm:text-6xl lg:text-7xl">

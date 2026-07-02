@@ -314,6 +314,9 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID` opzionale, solo se vuoi Google Analytics 4
 - `GA4_API_SECRET` opzionale server-only, necessario per revenue PayPal via Measurement Protocol
 - `GA4_MEASUREMENT_PROTOCOL_ENDPOINT` opzionale, default consigliato `https://region1.google-analytics.com/mp/collect`
+- `GA4_PROPERTY_ID` opzionale server-only, necessario per contatori realtime GA4
+- `GA4_SERVICE_ACCOUNT_JSON_BASE64` opzionale server-only, consigliato per GA4 Data API Realtime
+- `GA4_CLIENT_EMAIL` e `GA4_PRIVATE_KEY` opzionali server-only, alternativa a `GA4_SERVICE_ACCOUNT_JSON_BASE64`
 - `PREMIUM_MONTHLY_PRICE_EUR` opzionale, default `3.99`
 
 ## Policy prodotto
@@ -330,6 +333,16 @@ Google Analytics 4 e' opzionale ed e' configurato tramite Google tag globale con
 2. Il tag viene inizializzato con `analytics_storage` negato di default e `send_page_view: false`.
 3. L'utente accetta la categoria Statistiche nel centro preferenze cookie.
 4. Per il revenue server-side PayPal, crea un API secret in GA4 Admin > Data streams > Measurement Protocol API secrets e salvalo come `GA4_API_SECRET` solo nelle env server di Vercel.
+
+I contatori realtime in landing e `/chat` usano invece GA4 Data API Realtime lato server:
+
+1. Abilita Google Analytics Data API nel progetto Google Cloud collegato.
+2. Crea una service account con chiave JSON.
+3. Aggiungi l'email della service account in GA4 > Admin > Property access management con ruolo Viewer o Analyst.
+4. Imposta `GA4_PROPERTY_ID` con l'ID numerico della property GA4, non il Measurement ID `G-...`.
+5. Imposta `GA4_SERVICE_ACCOUNT_JSON_BASE64` con il JSON della service account codificato base64, oppure usa `GA4_CLIENT_EMAIL` e `GA4_PRIVATE_KEY`.
+
+La landing mostra gli utenti attivi rilevati negli ultimi 30 minuti. La pagina `/chat` filtra le righe GA4 Realtime per path `/chat` e mostra gli utenti attivi su quella pagina. Sono conteggi aggregati e dipendono dagli utenti misurati da GA4, quindi dal consenso Statistiche e dai limiti standard di Google Analytics Realtime.
 
 Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, l'app mantiene il consenso analytics negato, non invia page view o eventi GA4 e prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
 

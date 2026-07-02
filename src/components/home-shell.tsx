@@ -20,6 +20,7 @@ import { AuthPanel } from "@/components/auth-panel";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
+import { RealtimeUsersBadge } from "@/components/realtime-users-badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VideoChat } from "@/components/video-chat";
 import { WeeklyOptInPanel } from "@/components/weekly-opt-in-panel";
@@ -121,6 +122,7 @@ export function HomeShell() {
             />
           </Link>
           <nav className="flex flex-wrap items-center justify-end gap-2">
+            <RealtimeUsersBadge scope="chat" surface="chat" />
             <ThemeToggle />
             {isPremium ? (
               <span className="inline-flex h-9 items-center gap-2 rounded-md border border-amber-300/30 bg-amber-300/10 px-3 text-xs font-bold text-amber-100">
