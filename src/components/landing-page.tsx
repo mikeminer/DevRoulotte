@@ -2,10 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  Clock3,
+  CalendarDays,
   Code2,
+  Handshake,
   Linkedin,
   MessageCircleOff,
+  Shuffle,
   ShieldCheck,
   UsersRound,
   Video,
@@ -22,34 +24,57 @@ import {
 } from "@/lib/app-config";
 
 const painLines = [
-  "Niente “ci aggiorniamo”.",
-  "Niente Calendly e call fissate tra 17 giorni.",
+  "Niente DM morti.",
+  "Niente call senza contesto.",
   "Niente community dove molti sono in panchina e nessuno parla.",
 ];
 
 const heroParagraphs = [
-  "DevRoulotte nasce per saltare tutto il teatro del networking moderno.",
-  "Entri nella roulotte, accendi la webcam, vieni matchato con un altro builder italiano e hai pochi minuti per capire chi hai davanti.",
-  "Un approccio vivo 1:1: il networking speed-date per chi vuole conoscersi e costruire insieme.",
-  "Magari un futuro co-founder, un dev con un repository mezzo rotto, un genio sottovalutato o qualcuno che ha deployato su Vercel alle 3 di notte e vuole raccontarlo a qualcuno.",
-  "Qui c'è WebRTC, matching, signaling e una missione semplice: far parlare i builder italiani senza organizzare convegni, call o gruppi Telegram.",
+  "DevRoulotte è il superconnector 1:1 per conoscere casualmente founder, builder e professionisti italiani.",
+  "La casualità resta: non scegli una directory e non fai cold outreach. Sali nella roulotte e il sistema ti mette in rotta con qualcuno che vale una conversazione.",
+  "Puoi entrare live quando vuoi oppure fare opt-in al giro della settimana indicando disponibilità e temi: founder, product, AI, SaaS, feedback, co-founder.",
+  "Il match resta sorprendente, ma non è caos: è serendipity con un minimo di contesto.",
+  "Qui c'è WebRTC, matching, signaling e una missione semplice: far parlare persone che costruiscono senza trasformare tutto nell'ennesimo evento networking.",
 ];
 
 const principles = [
   {
-    icon: Clock3,
-    title: "Pochi minuti",
-    body: "Il tempo giusto per capire se vale la pena continuare fuori dalla roulotte.",
+    icon: Shuffle,
+    title: "Casuale, non a caso",
+    body: "La roulotte sceglie per te dentro un perimetro di disponibilità, obiettivi e profilo.",
+  },
+  {
+    icon: CalendarDays,
+    title: "Opt-in leggero",
+    body: "Indichi quando ci sei, stile When2meet, senza aprire subito una call se non vuoi.",
+  },
+  {
+    icon: Handshake,
+    title: "1:1 professionale",
+    body: "Founder, builder e professionisti che vogliono conoscersi davvero, non lurkare.",
+  },
+];
+
+const flowSteps = [
+  {
+    icon: CalendarDays,
+    title: "Fai opt-in",
+    body: "Segni slot e temi della settimana. Serve a dare contesto, non a ingessare il networking.",
+  },
+  {
+    icon: Shuffle,
+    title: "La roulotte pesca",
+    body: "Il match resta casuale, ma orientato da disponibilità, lingua e obiettivi dichiarati.",
   },
   {
     icon: Video,
-    title: "WebRTC peer-to-peer",
-    body: "Una webcam, una connessione diretta e zero registrazioni audio/video.",
+    title: "Vi incontrate 1:1",
+    body: "Entrate nella stanza video, parlate, capite se vale la pena continuare fuori.",
   },
   {
     icon: UsersRound,
-    title: "Builder italiani",
-    body: "Developer, maker e founder che stanno costruendo qualcosa, non spettatori.",
+    title: "Restate in rotta",
+    body: "Se la conversazione funziona, vi riconnettete o vi scambiate contatti.",
   },
 ];
 
@@ -69,10 +94,16 @@ const tierRows = [
     premium: "15 min",
   },
   {
-    label: "Match / giorno",
+    label: "Match casuali / giorno",
     guest: "3",
     registered: "15",
     premium: "illimitati",
+  },
+  {
+    label: "Opt-in disponibilità",
+    guest: "base",
+    registered: "✓",
+    premium: "prioritario",
   },
   {
     label: "Filtro lingua / stack / regione",
@@ -176,7 +207,7 @@ export function LandingPage() {
           <div className="grid w-full min-w-0 max-w-4xl gap-8 pt-0 sm:pt-10 lg:pt-20">
             <div className="inline-flex w-fit items-center gap-2 rounded-md border border-teal-300/25 bg-teal-300/10 px-3 py-2 text-xs font-bold uppercase text-teal-100">
               <Code2 className="h-4 w-4" />
-              Il networking, senza appuntamenti.
+              Incontri casuali, ma non a caso.
             </div>
 
             <div className="grid min-w-0 max-w-full gap-5">
@@ -207,7 +238,7 @@ export function LandingPage() {
                 data-analytics-destination="chat"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-300 px-5 text-sm font-black text-slate-950 hover:bg-teal-200"
               >
-                Entra nella roulotte
+                Entra nel giro
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -233,19 +264,19 @@ export function LandingPage() {
           <div className="grid gap-5">
             <p className="inline-flex w-fit items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-xs font-bold uppercase text-slate-300">
               <MessageCircleOff className="h-4 w-4 text-teal-200" />
-              Approccio vivo 1:1
+              Superconnector 1:1
             </p>
             <h2 className="text-3xl font-black tracking-normal text-white sm:text-4xl">
-              Un camper digitale nel caos dell&apos;internet italiano.
+              La casualità resta. Il caos no.
             </h2>
             <div className="grid gap-4 text-sm leading-7 text-slate-300 sm:text-base">
               <p>
-                Ci sali sopra, trovi un altro dev, parli pochi minuti, scambi
-                idee, ti fai due risate e magari trovi qualcuno con cui
-                costruire qualcosa.
+                DevRoulotte non è una directory e non è un evento. È una
+                roulotte che fa da superconnector: ti mette davanti una persona
+                che non avresti cercato, ma che potrebbe avere senso conoscere.
               </p>
               <p>
-                Ogni chat è breve, diretta, casuale. Può nascere{" "}
+                Ogni incontro è breve, diretto, casuale. Può nascere{" "}
                 {outcomes.map((outcome, index) => (
                   <span key={outcome}>
                     {index === outcomes.length - 1 ? " o " : index ? ", " : ""}
@@ -255,9 +286,8 @@ export function LandingPage() {
                 .
               </p>
               <p>
-                E se va male? Hai perso pochi minuti. Meno di quanto perdi ogni
-                giorno leggendo thread motivazionali di gente che non ha mai
-                pushato nulla in produzione.
+                L&apos;idea non è riempirti il calendario. È creare abbastanza
+                attrito buono da far incontrare persone vere, una alla volta.
               </p>
             </div>
           </div>
@@ -277,6 +307,46 @@ export function LandingPage() {
                   </h3>
                   <p className="mt-2 text-xs leading-5 text-slate-400">
                     {principle.body}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-white/10 bg-[#0b1118] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8">
+          <div className="grid max-w-3xl gap-3">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-200">
+              Come gira la roulotte
+            </p>
+            <h2 className="text-3xl font-black tracking-normal text-white sm:text-4xl">
+              Un match casuale, con disponibilità dichiarata.
+            </h2>
+            <p className="text-sm leading-7 text-slate-300 sm:text-base">
+              La modalità live resta immediata. In parallelo, il giro della
+              settimana permette di indicare quando ci sei e che conversazioni
+              cerchi, così il match casuale parte già con un minimo di
+              contesto.
+            </p>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {flowSteps.map((step) => {
+              const Icon = step.icon;
+
+              return (
+                <article
+                  key={step.title}
+                  className="rounded-lg border border-white/10 bg-white/[0.04] p-4"
+                >
+                  <Icon className="h-5 w-5 text-teal-200" />
+                  <h3 className="mt-4 text-sm font-bold text-white">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-5 text-slate-400">
+                    {step.body}
                   </p>
                 </article>
               );
@@ -367,11 +437,11 @@ export function LandingPage() {
           <div className="grid gap-5 text-3xl font-black leading-tight tracking-normal text-white sm:text-5xl">
             <p>Benvenuto a bordo di DevRoulotte.</p>
             <p className="text-teal-200">
-              Il networking peer-to-peer per chi costruisce davvero.
+              Il superconnector casuale per chi costruisce davvero.
             </p>
           </div>
           <p className="max-w-xl text-lg font-bold leading-8 text-slate-200">
-            Pochi minuti alla volta.
+            Una persona alla volta.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
@@ -382,7 +452,7 @@ export function LandingPage() {
               data-analytics-destination="chat"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-300 px-5 text-sm font-black text-slate-950 hover:bg-teal-200"
             >
-              Entra nella roulotte
+              Entra nel giro
               <Video className="h-4 w-4" />
             </Link>
             <Link
@@ -402,7 +472,7 @@ export function LandingPage() {
 
       <footer className="border-t border-white/10 px-4 py-5 text-xs text-slate-500 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-          <span>DevRoulotte.chat · solo utenti 18+ · niente registrazioni audio/video.</span>
+          <span>DevRoulotte.chat · superconnector 1:1 · solo utenti 18+ · niente registrazioni audio/video.</span>
           <div className="flex flex-wrap items-center gap-3">
             <GdprFooterBadge />
             <Link href="/privacy" className="text-slate-300 hover:text-white">

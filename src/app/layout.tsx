@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DevRoulotte",
   description:
-    "Il networking, senza appuntamenti. Piano Free e Premium.",
+    "Incontri casuali, ma non a caso. Il superconnector 1:1 per founder, builder e professionisti italiani.",
 };
 
 const themeScript = `

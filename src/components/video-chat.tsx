@@ -1315,7 +1315,7 @@ export function VideoChat({
               ) : (
                 <Video className="h-4 w-4" />
               )}
-              Start
+              Entra live
             </button>
             <button
               type="button"

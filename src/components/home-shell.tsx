@@ -22,6 +22,7 @@ import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VideoChat } from "@/components/video-chat";
+import { WeeklyOptInPanel } from "@/components/weekly-opt-in-panel";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import {
   CONTACT_EMAIL,
@@ -181,7 +182,7 @@ export function HomeShell() {
                 </div>
                 <p className="text-xs leading-5 text-slate-400">
                   3 match al giorno, chiamate da 2 minuti, niente filtri
-                  avanzati e rate limit su Next.
+                  avanzati e accesso al giro casuale live.
                 </p>
               </div>
               <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
@@ -191,7 +192,7 @@ export function HomeShell() {
                 </div>
                 <p className="text-xs leading-5 text-slate-400">
                   15 match al giorno, chiamate da 5 minuti e filtro lingua per
-                  conoscere developer più affini.
+                  dare più contesto al superconnector.
                 </p>
               </div>
               <div className="rounded-lg border border-amber-300/20 bg-amber-300/10 p-4">
@@ -201,7 +202,7 @@ export function HomeShell() {
                 </div>
                 <p className="text-xs leading-5 text-amber-100/75">
                   3,99 €/mese, match illimitati, chiamate da 15 minuti,
-                  filtri completi e coda prioritaria.
+                  filtri completi e priorità nel matching.
                 </p>
               </div>
               <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
@@ -218,6 +219,7 @@ export function HomeShell() {
           </div>
 
           <aside className="grid content-start gap-4">
+            <WeeklyOptInPanel />
             <AuthPanel />
             <section className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
               <h2 className="text-sm font-semibold text-white">Stato</h2>

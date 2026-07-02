@@ -10,7 +10,7 @@ export default function CommunityRulesPage() {
     <LegalPage
       title="Regole community"
       updatedAt="27 giugno 2026"
-      intro="Regole semplici e severe per mantenere DevRoulotte un prodotto 18+ usabile per networking casuale."
+      intro="Regole semplici e severe per mantenere DevRoulotte un superconnector 1:1 usabile, 18+ e professionale."
       sections={[
         {
           title: "18+ obbligatorio",

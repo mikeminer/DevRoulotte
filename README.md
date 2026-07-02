@@ -2,7 +2,7 @@
 
 # DevRoulotte
 
-Il networking, senza appuntamenti. MVP 18+ con webcam 1:1, WebRTC peer-to-peer, matching random, tier Free ospite, Registrato e Premium da 3,99 EUR/mese senza prova gratuita via PayPal.
+Incontri casuali, ma non a caso. MVP 18+ da superconnector 1:1 per founder, builder e professionisti italiani, con webcam WebRTC, matching random orientato da contesto, opt-in informativo alla disponibilità, tier Free ospite, Registrato e Premium da 3,99 EUR/mese senza prova gratuita via PayPal.
 
 ## Stack
 
@@ -245,8 +245,9 @@ Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulo
 
 ## Funzionalità incluse
 
-- Landing page italiana su `/` con pitch DevRoulotte.chat e CTA verso `/chat`
+- Landing page italiana su `/` con posizionamento superconnector casuale 1:1 e CTA verso `/chat`
 - Esperienza videochat mobile-first scura su `/chat` con logo DevRoulotte
+- Pannello "Giro della settimana" per opt-in informativo a disponibilità e temi di conversazione
 - Accesso guest o registrato via Supabase Auth
 - Conferma obbligatoria 18+ e regole community
 - Piano Free ospite: 3 match/giorno, chiamate da 2 minuti, rate limit Next
@@ -254,7 +255,7 @@ Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulo
 - Piano Premium: match illimitati, chiamate da 15 minuti, filtri completi, priorità in coda, badge
 - WebRTC audio/video P2P
 - API signaling via Supabase `webrtc_signals`
-- Pulsanti Start, Next, Stop, Report, Upgrade
+- Pulsanti Entra live, Next, Stop, Report, Upgrade
 - Report e auto-shadowban dopo troppi report
 - Dashboard admin con report, ban/sban, subscription e match logs
 - PayPal webhook verificato server-side

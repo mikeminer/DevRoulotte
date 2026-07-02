@@ -11,7 +11,7 @@ export default function TermsPage() {
     <LegalPage
       title="Termini di servizio"
       updatedAt="28 giugno 2026"
-      intro={`DevRoulotte e' un servizio 18+ per networking casuale 1:1 via webcam. Usando il servizio accetti questi termini, le regole community e la nostra informativa privacy. Contatto legale: ${CONTACT_EMAIL}.`}
+      intro={`DevRoulotte è un servizio 18+ per incontri casuali 1:1 tra founder, builder e professionisti, con webcam e opt-in informativo alla disponibilità. Usando il servizio accetti questi termini, le regole community e la nostra informativa privacy. Contatto legale: ${CONTACT_EMAIL}.`}
       sections={[
         {
           title: "Accesso 18+",
@@ -23,7 +23,7 @@ export default function TermsPage() {
         {
           title: "Uso consentito",
           body: [
-            "Puoi usare DevRoulotte per conversazioni legittime, networking e incontri casuali professionali o sociali.",
+            "Puoi usare DevRoulotte per conversazioni legittime, networking e incontri casuali professionali.",
             "Sono vietati nudita', spam, minacce, molestie, contenuti illegali, frodi, raccolta invasiva di dati e qualunque uso contrario alla legge applicabile.",
           ],
         },
@@ -32,7 +32,7 @@ export default function TermsPage() {
           body: [
             "Il piano Free ospite include 3 match al giorno, chiamate da 2 minuti e rate limit sul tasto Next.",
             "Il piano Registrato include 15 match al giorno, chiamate da 5 minuti e filtro lingua.",
-            "Il piano Premium costa 3,99 EUR al mese, non include prova gratuita e abilita match illimitati, chiamate da 15 minuti, filtri completi e priorita' in coda.",
+            "Il piano Premium costa 3,99 EUR al mese, non include prova gratuita e abilita match illimitati, chiamate da 15 minuti, filtri completi e priorità in coda.",
           ],
         },
         {
@@ -50,7 +50,7 @@ export default function TermsPage() {
           ],
         },
         {
-          title: "Disponibilita'",
+          title: "Disponibilità",
           body: [
             "L'MVP usa servizi esterni come Vercel, Supabase, Cloudflare e PayPal. Interruzioni o limiti di questi servizi possono influire sul funzionamento.",
             "Possiamo modificare o sospendere funzioni per sicurezza, manutenzione, abuso o obblighi legali.",

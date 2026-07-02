@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { LandingPage } from "@/components/landing-page";
 
 export const metadata: Metadata = {
-  title: "DevRoulotte.chat | Il networking, senza appuntamenti",
+  title: "DevRoulotte.chat | Incontri casuali, ma non a caso",
   description:
-    "Videochat peer-to-peer per conoscere developer, builder e maker italiani: entri nella roulotte e trovi chi sta costruendo davvero.",
+    "Il superconnector 1:1 per conoscere casualmente founder, builder e professionisti italiani, con opt-in leggero e video peer-to-peer.",
 };
 
 export default function Home() {
