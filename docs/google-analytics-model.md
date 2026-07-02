@@ -123,6 +123,34 @@ Variabili richieste:
 Se manca consenso Statistiche, il cookie `_ga` non e' disponibile: il webhook
 attiva Premium ma non invia revenue a Google.
 
+## Revenue PostHog
+
+PostHog Revenue e' un ponte opzionale per prodotti esterni che supportano
+"PostHog Revenue" ma non PayPal diretto.
+
+Quando `POSTHOG_PROJECT_API_KEY` e' configurato, il webhook PayPal verificato
+invia un evento server-side:
+
+- evento `purchase_completed`, oppure il nome indicato in
+  `POSTHOG_REVENUE_EVENT_NAME`
+- `revenue: 399` per `3,99 EUR`, in minor unit
+- `revenue_decimal: 3.99`
+- `currency: EUR`
+- `payment_provider: paypal`
+- `product: DevRoulotte Premium`
+- `subscription_period: monthly`
+
+`subscription_id`, `transaction_id` e `distinct_id` sono hash stabili generati
+lato server, non ID PayPal leggibili. L'evento viene inviato solo dal webhook,
+non dal redirect browser, e l'esito viene salvato in
+`subscriptions.raw_json.posthog`.
+
+Variabili richieste:
+
+- `POSTHOG_PROJECT_API_KEY`: Project API key/token PostHog.
+- `POSTHOG_HOST`: `https://eu.i.posthog.com` o `https://us.i.posthog.com`.
+- `POSTHOG_REVENUE_EVENT_NAME`: opzionale, default `purchase_completed`.
+
 ## Privacy
 
 Non inviare a GA4:

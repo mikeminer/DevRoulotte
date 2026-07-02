@@ -317,6 +317,9 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `GA4_PROPERTY_ID` opzionale server-only, necessario per contatori realtime GA4
 - `GA4_SERVICE_ACCOUNT_JSON_BASE64` opzionale server-only, consigliato per GA4 Data API Realtime
 - `GA4_CLIENT_EMAIL` e `GA4_PRIVATE_KEY` opzionali server-only, alternativa a `GA4_SERVICE_ACCOUNT_JSON_BASE64`
+- `POSTHOG_PROJECT_API_KEY` opzionale server-only, necessario per inviare revenue PayPal verificato a PostHog
+- `POSTHOG_HOST` opzionale, default consigliato `https://eu.i.posthog.com` per PostHog EU Cloud
+- `POSTHOG_REVENUE_EVENT_NAME` opzionale, default `purchase_completed`
 - `PREMIUM_MONTHLY_PRICE_EUR` opzionale, default `3.99`
 
 ## Policy prodotto
@@ -347,6 +350,15 @@ La landing mostra gli utenti attivi rilevati negli ultimi 30 minuti. La pagina `
 Il consenso cookie usa `devroulotte_cookie_consent_v2`, cosi' chi aveva dato scelte prima dell'introduzione di GA vede nuovamente il banner. Se Statistiche viene rifiutato o revocato, l'app mantiene il consenso analytics negato, non invia page view o eventi GA4 e prova a cancellare i cookie Google Analytics gia' presenti sul dominio.
 
 Il checkout PayPal salva il `client_id` GA4 solo se il cookie `_ga` esiste, quindi solo dopo consenso Statistiche. Il webhook PayPal invia poi un evento GA4 `purchase` tramite Measurement Protocol quando riceve `BILLING.SUBSCRIPTION.ACTIVATED` e la subscription passa ad `active`. L'evento usa `value: 3.99`, `currency: EUR`, `payment_provider: paypal` e un `transaction_id` hashato, non il PayPal subscription id in chiaro. Se manca consenso, manca `GA4_API_SECRET` o manca il client id GA4, Premium viene comunque attivato ma il revenue non viene inviato a Google.
+
+PostHog Revenue e' opzionale e funziona come ponte server-side PayPal -> PostHog:
+
+1. Crea un progetto PostHog, preferibilmente EU Cloud per utenti UE.
+2. Copia il Project API key/token in `POSTHOG_PROJECT_API_KEY` nelle env server di Vercel.
+3. Imposta `POSTHOG_HOST` su `https://eu.i.posthog.com` oppure `https://us.i.posthog.com`, in base alla regione del progetto.
+4. Nel prodotto esterno che chiede "PostHog Revenue", collega PostHog e configura l'evento revenue `purchase_completed`, proprieta' importo `revenue`, valuta `currency`, prodotto `product` e subscription `subscription_id`.
+
+Il webhook PayPal verificato invia a PostHog un evento `purchase_completed` quando riceve `BILLING.SUBSCRIPTION.ACTIVATED` e la subscription risulta `active`. L'importo viene inviato in minor unit (`399` per `3,99 EUR`) seguendo la raccomandazione PostHog, insieme a `revenue_decimal: 3.99`. `subscription_id` e `transaction_id` sono hash stabili, non gli ID PayPal leggibili. Se `POSTHOG_PROJECT_API_KEY` manca o PostHog risponde errore, Premium viene comunque attivato e l'errore resta salvato in `subscriptions.raw_json.posthog`.
 
 ## Revisione legale
 

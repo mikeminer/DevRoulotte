@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hashGa4Id, hasGa4ServerConfig, sendGa4PurchaseEvent } from "@/lib/ga4-server";
 import { verifyPayPalWebhook } from "@/lib/paypal";
+import {
+  hasPostHogServerConfig,
+  sendPostHogPurchaseEvent,
+} from "@/lib/posthog-server";
 import { parseActorKey } from "@/lib/session";
 import {
   getSupabaseAdmin,
@@ -45,6 +49,13 @@ function hasSentGa4Purchase(rawJson: unknown) {
   return typeof ga4.purchase_sent_at === "string";
 }
 
+function hasSentPostHogPurchase(rawJson: unknown) {
+  const raw = asRecord(rawJson);
+  const posthog = asRecord(raw.posthog);
+
+  return typeof posthog.purchase_sent_at === "string";
+}
+
 function mergeGa4RawJson(
   rawJson: unknown,
   ga4Patch: Record<string, unknown>,
@@ -57,6 +68,22 @@ function mergeGa4RawJson(
     ga4: {
       ...ga4,
       ...ga4Patch,
+    },
+  };
+}
+
+function mergePostHogRawJson(
+  rawJson: unknown,
+  posthogPatch: Record<string, unknown>,
+) {
+  const raw = asRecord(rawJson);
+  const posthog = asRecord(raw.posthog);
+
+  return {
+    ...raw,
+    posthog: {
+      ...posthog,
+      ...posthogPatch,
     },
   };
 }
@@ -112,7 +139,7 @@ export async function POST(request: NextRequest) {
   const status = mapPayPalStatus(resource?.status);
   const nextBillingTime = resource?.billing_info?.next_billing_time ?? null;
   const existingRawJson = existingSubscription?.raw_json ?? {};
-  const nextRawJson = {
+  let nextRawJson: JsonRecord = {
     ...asRecord(existingRawJson),
     paypal_webhook: event,
   };
@@ -161,26 +188,73 @@ export async function POST(request: NextRequest) {
         value: Number(process.env.PREMIUM_MONTHLY_PRICE_EUR ?? 3.99),
       });
 
+      nextRawJson = mergeGa4RawJson(nextRawJson, {
+        purchase_sent_at: new Date().toISOString(),
+        purchase_transaction_id: transactionId,
+      });
+
       await supabase
         .from("subscriptions")
         .update({
-          raw_json: mergeGa4RawJson(nextRawJson, {
-            purchase_sent_at: new Date().toISOString(),
-            purchase_transaction_id: transactionId,
-          }),
+          raw_json: nextRawJson,
           updated_at: new Date().toISOString(),
         })
         .eq("paypal_subscription_id", subscriptionId);
     } catch (error) {
       console.error("GA4 purchase event failed", error);
+      nextRawJson = mergeGa4RawJson(nextRawJson, {
+        purchase_error_at: new Date().toISOString(),
+        purchase_error:
+          error instanceof Error ? error.message : "unknown_error",
+      });
+
       await supabase
         .from("subscriptions")
         .update({
-          raw_json: mergeGa4RawJson(nextRawJson, {
-            purchase_error_at: new Date().toISOString(),
-            purchase_error:
-              error instanceof Error ? error.message : "unknown_error",
-          }),
+          raw_json: nextRawJson,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("paypal_subscription_id", subscriptionId);
+    }
+  }
+
+  const shouldSendPostHogPurchase =
+    event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED" &&
+    status === "active" &&
+    !hasSentPostHogPurchase(existingRawJson);
+
+  if (shouldSendPostHogPurchase && hasPostHogServerConfig()) {
+    try {
+      const posthogPurchase = await sendPostHogPurchaseEvent({
+        subscriptionSeed: subscriptionId,
+        transactionSeed: `${subscriptionId}:initial`,
+        value: Number(process.env.PREMIUM_MONTHLY_PRICE_EUR ?? 3.99),
+      });
+
+      nextRawJson = mergePostHogRawJson(nextRawJson, {
+        purchase_sent_at: new Date().toISOString(),
+        purchase_transaction_id: posthogPurchase.transactionId,
+      });
+
+      await supabase
+        .from("subscriptions")
+        .update({
+          raw_json: nextRawJson,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("paypal_subscription_id", subscriptionId);
+    } catch (error) {
+      console.error("PostHog purchase event failed", error);
+      nextRawJson = mergePostHogRawJson(nextRawJson, {
+        purchase_error_at: new Date().toISOString(),
+        purchase_error:
+          error instanceof Error ? error.message : "unknown_error",
+      });
+
+      await supabase
+        .from("subscriptions")
+        .update({
+          raw_json: nextRawJson,
           updated_at: new Date().toISOString(),
         })
         .eq("paypal_subscription_id", subscriptionId);

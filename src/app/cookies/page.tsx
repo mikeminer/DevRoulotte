@@ -40,6 +40,7 @@ export default function CookiesPage() {
             "Supabase Auth puo' salvare token di sessione nel browser quando l'utente effettua login o registrazione.",
             "Google Analytics 4, se configurato con `NEXT_PUBLIC_GA_MEASUREMENT_ID`, carica il Google tag da `googletagmanager.com` con consenso analytics negato di default. Solo se accetti Statistiche puo' impostare cookie come `_ga` e `_ga_<measurement-id>` per misurazioni aggregate di pagine, CTA, accesso, matching, chiamate connesse, report, checkout Premium, revenue PayPal confermata dal webhook e contatori realtime aggregati.",
             "La lettura server-side dei contatori realtime usa GA4 Data API con credenziali server-only e non espone chiavi Google nel browser.",
+            "PostHog Revenue, se configurato, non imposta cookie nel browser: riceve solo eventi revenue server-side dal webhook PayPal verificato, con identificativi hashati.",
           ],
         },
         {

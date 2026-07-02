@@ -54,6 +54,7 @@ export default function PrivacyPage() {
             "Sicurezza e prevenzione abusi: usiamo log minimi, report, ban, limiti e controlli anti-spam per proteggere utenti, servizio e infrastruttura.",
             "Pagamenti e adempimenti: usiamo identificativi PayPal e stati subscription per attivare Premium, gestire cancellazioni, contestazioni e obblighi amministrativi.",
             "Statistiche opzionali: Google Analytics 4 viene usato solo dopo consenso alla categoria Statistiche per metriche aggregate su pagine, CTA, accesso, matching, chiamate connesse, report, checkout Premium, revenue PayPal confermata da webhook e contatori realtime aggregati mostrati nel sito; puoi revocare il consenso dal centro preferenze cookie.",
+            "Revenue verificato opzionale: se configurato, PostHog riceve solo eventi server-side aggregati dal webhook PayPal verificato per misurare revenue Premium, con subscription e transaction ID hashati e senza ID PayPal leggibili.",
             "Comunicazioni di servizio: possiamo usare l'email dell'account per conferma registrazione, reset password, notifiche di sicurezza e comunicazioni strettamente legate al servizio.",
           ],
         },
@@ -63,12 +64,13 @@ export default function PrivacyPage() {
             "Usiamo strumenti tecnici necessari nel browser per login, ID ospite, conferma 18+, accettazione regole, limiti Free, sicurezza e preferenze cookie.",
             "Le categorie opzionali Preferenze, Statistiche e Marketing sono disattivate di default e modificabili dal centro preferenze.",
             "Il Google tag puo' essere caricato con Consent Mode e `analytics_storage` negato di default. La categoria Statistiche abilita Google Analytics 4 per misurare visite, pagine viste, CTA, eventi tecnici aggregati, revenue Premium confermata e contatori realtime aggregati solo dopo consenso e viene disattivata se revochi la categoria Statistiche.",
+            "PostHog, se configurato, non carica cookie nel browser in questa implementazione: riceve solo eventi revenue server-side generati dal webhook PayPal verificato.",
           ],
         },
         {
           title: "Fornitori",
           body: [
-            "Usiamo Vercel per hosting e API, Supabase per Auth/database/signaling temporaneo, Cloudflare per STUN/TURN, PayPal per abbonamenti e, se accettato in Statistiche, Google Analytics 4 per metriche aggregate e contatori realtime aggregati.",
+            "Usiamo Vercel per hosting e API, Supabase per Auth/database/signaling temporaneo, Cloudflare per STUN/TURN, PayPal per abbonamenti e, se accettato in Statistiche, Google Analytics 4 per metriche aggregate e contatori realtime aggregati. Se configurato, PostHog puo' ricevere eventi revenue server-side hashati dal webhook PayPal.",
             "Questi fornitori possono trattare dati tecnici secondo le rispettive policy e impostazioni account.",
             "Alcuni fornitori possono trattare dati fuori dallo Spazio Economico Europeo o con sub-responsabili internazionali. La valutazione definitiva di trasferimenti, SCC e ruoli privacy va mantenuta aggiornata in base ai contratti e alle impostazioni dei singoli provider.",
           ],
