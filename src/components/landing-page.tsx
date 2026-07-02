@@ -31,7 +31,7 @@ const painLines = [
 
 const heroParagraphs = [
   "DevRoulotte è il superconnector 1:1 per conoscere casualmente founder, builder e professionisti italiani.",
-  "La casualità resta: non scegli una directory e non fai cold outreach. Sali nella roulotte e il sistema ti mette in rotta con qualcuno che vale una conversazione.",
+  "La casualità resta: non devi sfogliare profili, mandare messaggi a freddo o organizzare l'ennesima call. Sali nella roulotte e il sistema ti mette in rotta con qualcuno che vale una conversazione.",
   "Puoi entrare live quando vuoi e lasciare un segnale nel giro della settimana: una heatmap mostra quando la roulotte è più viva.",
   "Il match resta sorprendente e casuale. La heatmap non decide chi incontrerai: ti fa solo capire quando c'è più movimento a bordo.",
   "Qui c'è WebRTC, matching, signaling e una missione semplice: far parlare persone che costruiscono senza trasformare tutto nell'ennesimo evento networking.",
@@ -41,7 +41,7 @@ const principles = [
   {
     icon: Shuffle,
     title: "Casuale, non a caso",
-    body: "La roulotte ti mette davanti una persona, senza directory pubbliche o cold outreach.",
+    body: "La roulotte ti mette davanti una persona nuova, senza liste da scorrere o messaggi a freddo.",
   },
   {
     icon: CalendarDays,
@@ -51,7 +51,7 @@ const principles = [
   {
     icon: Handshake,
     title: "1:1 professionale",
-    body: "Founder, builder e professionisti che vogliono conoscersi davvero, non lurkare.",
+    body: "Founder, builder e professionisti che vogliono conoscersi davvero, non restare fermi in una community silenziosa.",
   },
 ];
 
