@@ -1,15 +1,26 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
+  getGa4RealtimeWindowMinutes,
   getGa4RealtimeUsers,
   type Ga4RealtimeScope,
 } from "@/lib/ga4-realtime";
 
 export const runtime = "nodejs";
 
-const CACHE_SECONDS = 30;
+const SITE_CACHE_SECONDS = 30;
 
 function parseScope(value: string | null): Ga4RealtimeScope {
   return value === "chat" ? "chat" : "site";
+}
+
+function getCacheHeaders(scope: Ga4RealtimeScope) {
+  if (scope === "chat") {
+    return { "Cache-Control": "no-store" };
+  }
+
+  return {
+    "Cache-Control": `s-maxage=${SITE_CACHE_SECONDS}, stale-while-revalidate=${SITE_CACHE_SECONDS}`,
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -19,9 +30,7 @@ export async function GET(request: NextRequest) {
     const data = await getGa4RealtimeUsers(scope);
 
     return NextResponse.json(data, {
-      headers: {
-        "Cache-Control": `s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS}`,
-      },
+      headers: getCacheHeaders(scope),
     });
   } catch (error) {
     console.error("GA4 realtime query failed", error);
@@ -34,7 +43,7 @@ export async function GET(request: NextRequest) {
         source: "google_analytics",
         status: "unavailable",
         updatedAt: new Date().toISOString(),
-        windowMinutes: 30,
+        windowMinutes: getGa4RealtimeWindowMinutes(scope),
       },
       {
         status: 200,

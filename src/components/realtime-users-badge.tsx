@@ -23,6 +23,12 @@ type RealtimeUsersBadgeProps = {
 
 const REFRESH_MS = 30_000;
 
+function formatWindowLabel(windowMinutes: number) {
+  return windowMinutes === 1
+    ? "nell'ultimo minuto"
+    : `negli ultimi ${windowMinutes} min`;
+}
+
 export function RealtimeUsersBadge({
   className = "",
   scope,
@@ -57,7 +63,7 @@ export function RealtimeUsersBadge({
             source: "google_analytics",
             status: "unavailable",
             updatedAt: new Date().toISOString(),
-            windowMinutes: 30,
+            windowMinutes: scope === "chat" ? 1 : 30,
           });
         }
       }
@@ -88,12 +94,13 @@ export function RealtimeUsersBadge({
       <Activity className="h-4 w-4 text-teal-200" />
     );
   const activeUsers = data.activeUsers ?? 0;
+  const windowLabel = formatWindowLabel(data.windowMinutes);
   const label =
     surface === "chat"
-      ? `${activeUsers} in chat ora`
-      : `${activeUsers} live negli ultimi ${data.windowMinutes} min`;
+      ? `${activeUsers} in chat ${windowLabel}`
+      : `${activeUsers} live ${windowLabel}`;
   const title =
-    "Dato aggregato da Google Analytics 4 Realtime. La finestra standard e' circa 30 minuti.";
+    `Dato aggregato da Google Analytics 4 Realtime, non presenza istantanea. Finestra: ${windowLabel}.`;
 
   return (
     <span

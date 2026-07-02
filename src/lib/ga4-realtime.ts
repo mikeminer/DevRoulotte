@@ -47,9 +47,24 @@ const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const ANALYTICS_READONLY_SCOPE =
   "https://www.googleapis.com/auth/analytics.readonly";
 const CHAT_SCREEN_NAME = "Giro 1:1 | DevRoulotte";
-const REALTIME_WINDOW_MINUTES = 30;
+const SITE_REALTIME_WINDOW_MINUTES = 30;
+const CHAT_REALTIME_WINDOW_MINUTES = 1;
 
 let tokenCache: TokenCache | null = null;
+
+export function getGa4RealtimeWindowMinutes(scope: Ga4RealtimeScope) {
+  return scope === "chat"
+    ? CHAT_REALTIME_WINDOW_MINUTES
+    : SITE_REALTIME_WINDOW_MINUTES;
+}
+
+function buildMinuteRange(windowMinutes: number) {
+  return {
+    name: `last${windowMinutes}${windowMinutes === 1 ? "Minute" : "Minutes"}`,
+    startMinutesAgo: Math.max(windowMinutes - 1, 0),
+    endMinutesAgo: 0,
+  };
+}
 
 function base64UrlEncode(value: string | Buffer) {
   return Buffer.from(value).toString("base64url");
@@ -226,30 +241,19 @@ async function runRealtimeReport({
   propertyId: string;
   scope: Ga4RealtimeScope;
 }) {
+  const minuteRange = buildMinuteRange(getGa4RealtimeWindowMinutes(scope));
   const body =
     scope === "chat"
       ? {
           dimensions: [{ name: "unifiedScreenName" }],
           limit: "1000",
           metrics: [{ name: "activeUsers" }],
-          minuteRanges: [
-            {
-              name: "last30Minutes",
-              startMinutesAgo: 29,
-              endMinutesAgo: 0,
-            },
-          ],
+          minuteRanges: [minuteRange],
         }
       : {
           metricAggregations: ["TOTAL"],
           metrics: [{ name: "activeUsers" }],
-          minuteRanges: [
-            {
-              name: "last30Minutes",
-              startMinutesAgo: 29,
-              endMinutesAgo: 0,
-            },
-          ],
+          minuteRanges: [minuteRange],
         };
 
   const response = await fetch(
@@ -278,6 +282,7 @@ export async function getGa4RealtimeUsers(
 ): Promise<Ga4RealtimeResult> {
   const propertyId = process.env.GA4_PROPERTY_ID?.trim();
   const updatedAt = new Date().toISOString();
+  const windowMinutes = getGa4RealtimeWindowMinutes(scope);
 
   if (!propertyId || !getServiceAccountCredentials()) {
     return {
@@ -287,7 +292,7 @@ export async function getGa4RealtimeUsers(
       source: "google_analytics",
       status: "not_configured",
       updatedAt,
-      windowMinutes: REALTIME_WINDOW_MINUTES,
+      windowMinutes,
     };
   }
 
@@ -308,6 +313,6 @@ export async function getGa4RealtimeUsers(
     source: "google_analytics",
     status: "ok",
     updatedAt,
-    windowMinutes: REALTIME_WINDOW_MINUTES,
+    windowMinutes,
   };
 }
