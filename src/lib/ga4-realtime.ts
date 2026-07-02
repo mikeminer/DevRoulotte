@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { GA4_CHAT_REALTIME_ACTIVE_EVENT } from "@/lib/ga4-event-names";
 
 export type Ga4RealtimeScope = "site" | "chat";
 
@@ -191,11 +192,11 @@ function parseActiveUsers(value: string | undefined) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-function sumChatRows(response: Ga4RealtimeResponse) {
+function sumChatEventRows(response: Ga4RealtimeResponse) {
   return (response.rows ?? []).reduce((total, row) => {
-    const path = row.dimensionValues?.[0]?.value ?? "";
+    const eventName = row.dimensionValues?.[0]?.value ?? "";
 
-    if (!path.startsWith("/chat")) {
+    if (eventName !== GA4_CHAT_REALTIME_ACTIVE_EVENT) {
       return total;
     }
 
@@ -228,7 +229,7 @@ async function runRealtimeReport({
   const body =
     scope === "chat"
       ? {
-          dimensions: [{ name: "unifiedPagePathScreen" }],
+          dimensions: [{ name: "eventName" }],
           limit: "1000",
           metrics: [{ name: "activeUsers" }],
           minuteRanges: [
@@ -299,7 +300,9 @@ export async function getGa4RealtimeUsers(
 
   return {
     activeUsers:
-      scope === "chat" ? sumChatRows(response) : readTotalActiveUsers(response),
+      scope === "chat"
+        ? sumChatEventRows(response)
+        : readTotalActiveUsers(response),
     configured: true,
     scope,
     source: "google_analytics",
