@@ -456,6 +456,26 @@ export function HomeShell() {
                 className="h-7 w-auto object-contain"
               />
             </a>
+            <a
+              href="https://www.nxgntools.com/tools/devroulottechat?utm_source=devroulottechat"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="DevRoulotte.chat launching soon on NextGen Tools"
+              data-analytics-event="outbound_badge_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="nextgen_tools_badge"
+              data-analytics-destination="nextgen_tools"
+              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
+            >
+              <Image
+                src="https://www.nxgntools.com/api/embed/devroulottechat?type=LAUNCHING_SOON_ON"
+                alt="Launching Soon on NextGen Tools"
+                width={250}
+                height={48}
+                unoptimized
+                className="h-7 w-auto object-contain"
+              />
+            </a>
           </div>
         </footer>
       </div>
