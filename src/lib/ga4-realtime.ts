@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { CHAT_PRESENCE_EVENT_NAME } from "@/lib/analytics-events";
+import { CHAT_SCREEN_NAME } from "@/lib/analytics-events";
 
 export type Ga4RealtimeScope = "site" | "chat";
 
@@ -250,15 +250,15 @@ async function runRealtimeReport({
       ? {
           dimensionFilter: {
             filter: {
-              fieldName: "eventName",
+              fieldName: "unifiedScreenName",
               stringFilter: {
                 caseSensitive: true,
                 matchType: "EXACT",
-                value: CHAT_PRESENCE_EVENT_NAME,
+                value: CHAT_SCREEN_NAME,
               },
             },
           },
-          dimensions: [{ name: "eventName" }],
+          dimensions: [{ name: "unifiedScreenName" }],
           limit: "1000",
           metricAggregations: ["TOTAL"],
           metrics: [{ name: "activeUsers" }],
@@ -321,7 +321,7 @@ export async function getGa4RealtimeUsers(
     activeUsers:
       scope === "chat"
         ? readTotalActiveUsers(response) ||
-          sumMatchingRows(response, CHAT_PRESENCE_EVENT_NAME)
+          sumMatchingRows(response, CHAT_SCREEN_NAME)
         : readTotalActiveUsers(response),
     configured: true,
     scope,
