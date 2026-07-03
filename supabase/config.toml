@@ -245,37 +245,37 @@ otp_expiry = 3600
 
 [auth.email.template.invite]
 subject = "Sei stato invitato su DevRoulotte"
-content_path = "./supabase/templates/invite.html"
+content_path = "./templates/invite.html"
 
 [auth.email.template.confirmation]
 subject = "Conferma il tuo account DevRoulotte"
-content_path = "./supabase/templates/confirmation.html"
+content_path = "./templates/confirmation.html"
 
 [auth.email.template.recovery]
 subject = "Reimposta la password DevRoulotte"
-content_path = "./supabase/templates/recovery.html"
+content_path = "./templates/recovery.html"
 
 [auth.email.template.magic_link]
 subject = "Il tuo link di accesso DevRoulotte"
-content_path = "./supabase/templates/magic-link.html"
+content_path = "./templates/magic-link.html"
 
 [auth.email.template.email_change]
 subject = "Conferma la nuova email DevRoulotte"
-content_path = "./supabase/templates/email-change.html"
+content_path = "./templates/email-change.html"
 
 [auth.email.template.reauthentication]
 subject = "{{ .Token }} e' il tuo codice DevRoulotte"
-content_path = "./supabase/templates/reauthentication.html"
+content_path = "./templates/reauthentication.html"
 
 [auth.email.notification.password_changed]
 enabled = true
 subject = "Password DevRoulotte aggiornata"
-content_path = "./supabase/templates/password-changed-notification.html"
+content_path = "./templates/password-changed-notification.html"
 
 [auth.email.notification.email_changed]
 enabled = true
 subject = "Email DevRoulotte aggiornata"
-content_path = "./supabase/templates/email-changed-notification.html"
+content_path = "./templates/email-changed-notification.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.

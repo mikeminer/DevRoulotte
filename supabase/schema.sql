@@ -113,6 +113,20 @@ create table if not exists public.match_queue (
 create index if not exists match_queue_waiting_idx
   on public.match_queue (status, is_premium desc, queued_at, last_seen_at);
 
+create table if not exists public.chat_presence (
+  actor_type text not null check (actor_type in ('guest', 'user')),
+  actor_id uuid not null,
+  client_id uuid not null,
+  user_agent_hash text,
+  last_seen_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (actor_type, actor_id, client_id)
+);
+
+create index if not exists chat_presence_last_seen_idx
+  on public.chat_presence (last_seen_at desc);
+
 create table if not exists public.webrtc_signals (
   id bigserial primary key,
   match_id uuid not null references public.match_logs(id) on delete cascade,
@@ -318,6 +332,7 @@ alter table public.subscriptions enable row level security;
 alter table public.bans enable row level security;
 alter table public.match_logs enable row level security;
 alter table public.match_queue enable row level security;
+alter table public.chat_presence enable row level security;
 alter table public.webrtc_signals enable row level security;
 alter table public.weekly_opt_ins enable row level security;
 alter table public.reports enable row level security;
