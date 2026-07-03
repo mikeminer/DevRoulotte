@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { CHAT_PRESENCE_EVENT_NAME } from "@/lib/analytics-events";
 
 export type Ga4RealtimeScope = "site" | "chat";
 
@@ -46,7 +47,6 @@ const GA4_REALTIME_ENDPOINT = "https://analyticsdata.googleapis.com/v1beta";
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const ANALYTICS_READONLY_SCOPE =
   "https://www.googleapis.com/auth/analytics.readonly";
-const CHAT_SCREEN_NAME = "Giro 1:1 | DevRoulotte";
 const SITE_REALTIME_WINDOW_MINUTES = 30;
 const CHAT_REALTIME_WINDOW_MINUTES = 1;
 
@@ -207,11 +207,14 @@ function parseActiveUsers(value: string | undefined) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-function sumChatScreenRows(response: Ga4RealtimeResponse) {
+function sumMatchingRows(
+  response: Ga4RealtimeResponse,
+  expectedDimensionValue: string,
+) {
   return (response.rows ?? []).reduce((total, row) => {
-    const screenName = row.dimensionValues?.[0]?.value ?? "";
+    const dimensionValue = row.dimensionValues?.[0]?.value ?? "";
 
-    if (screenName !== CHAT_SCREEN_NAME) {
+    if (dimensionValue !== expectedDimensionValue) {
       return total;
     }
 
@@ -245,8 +248,19 @@ async function runRealtimeReport({
   const body =
     scope === "chat"
       ? {
-          dimensions: [{ name: "unifiedScreenName" }],
+          dimensionFilter: {
+            filter: {
+              fieldName: "eventName",
+              stringFilter: {
+                caseSensitive: true,
+                matchType: "EXACT",
+                value: CHAT_PRESENCE_EVENT_NAME,
+              },
+            },
+          },
+          dimensions: [{ name: "eventName" }],
           limit: "1000",
+          metricAggregations: ["TOTAL"],
           metrics: [{ name: "activeUsers" }],
           minuteRanges: [minuteRange],
         }
@@ -306,7 +320,8 @@ export async function getGa4RealtimeUsers(
   return {
     activeUsers:
       scope === "chat"
-        ? sumChatScreenRows(response)
+        ? readTotalActiveUsers(response) ||
+          sumMatchingRows(response, CHAT_PRESENCE_EVENT_NAME)
         : readTotalActiveUsers(response),
     configured: true,
     scope,

@@ -7,6 +7,11 @@ import {
   COOKIE_CONSENT_UPDATED_EVENT,
 } from "@/lib/cookie-consent";
 import { hasAnalyticsConsent, trackEvent } from "@/lib/analytics";
+import {
+  CHAT_PRESENCE_EVENT_NAME,
+  CHAT_PRESENCE_HEARTBEAT_MS,
+  CHAT_SCREEN_NAME,
+} from "@/lib/analytics-events";
 
 const GOOGLE_ANALYTICS_COOKIE_PREFIXES = ["_ga", "_gid", "_gat"];
 
@@ -112,6 +117,52 @@ export function GoogleAnalytics() {
       page_title: document.title,
       send_to: measurementId,
     });
+  }, [analyticsAccepted, isTagReady, measurementId, pathname]);
+
+  useEffect(() => {
+    if (
+      pathname !== "/chat" ||
+      !measurementId ||
+      !analyticsAccepted ||
+      !isTagReady ||
+      !window.gtag
+    ) {
+      return;
+    }
+
+    function sendChatPresencePing() {
+      if (document.visibilityState === "hidden") {
+        return;
+      }
+
+      trackEvent(CHAT_PRESENCE_EVENT_NAME, {
+        page_location: window.location.href,
+        page_path: `${pathname}${window.location.search}`,
+        page_title: document.title,
+        screen_name: CHAT_SCREEN_NAME,
+        surface: "chat",
+      });
+    }
+
+    sendChatPresencePing();
+
+    const interval = window.setInterval(
+      sendChatPresencePing,
+      CHAT_PRESENCE_HEARTBEAT_MS,
+    );
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        sendChatPresencePing();
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [analyticsAccepted, isTagReady, measurementId, pathname]);
 
   useEffect(() => {

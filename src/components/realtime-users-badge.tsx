@@ -93,14 +93,19 @@ export function RealtimeUsersBadge({
     ) : (
       <Activity className="h-4 w-4 text-teal-200" />
     );
-  const activeUsers = data.activeUsers ?? 0;
+  const activeUsers =
+    surface === "chat" && data.status === "ok"
+      ? Math.max(data.activeUsers ?? 0, 1)
+      : data.activeUsers ?? 0;
   const windowLabel = formatWindowLabel(data.windowMinutes);
   const label =
     surface === "chat"
       ? `${activeUsers} in chat ${windowLabel}`
       : `${activeUsers} live ${windowLabel}`;
   const title =
-    `Dato aggregato da Google Analytics 4 Realtime, non presenza istantanea. Finestra: ${windowLabel}.`;
+    surface === "chat"
+      ? `Dato aggregato da Google Analytics 4 Realtime con te incluso localmente. Finestra: ${windowLabel}.`
+      : `Dato aggregato da Google Analytics 4 Realtime, non presenza istantanea. Finestra: ${windowLabel}.`;
 
   return (
     <span
