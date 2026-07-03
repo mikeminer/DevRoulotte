@@ -16,9 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.devroulotte.chat"),
   title: "DevRoulotte",
   description:
     "Incontri casuali, ma non a caso. Il superconnector 1:1 per founder, builder e professionisti italiani.",
+  openGraph: {
+    title: "DevRoulotte.chat | Incontri casuali, ma non a caso",
+    description:
+      "Il superconnector 1:1 per conoscere casualmente founder, builder e professionisti italiani.",
+    url: "https://www.devroulotte.chat",
+    siteName: "DevRoulotte.chat",
+    locale: "it_IT",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "DevRoulotte.chat - incontri casuali, ma non a caso",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DevRoulotte.chat | Incontri casuali, ma non a caso",
+    description:
+      "Il superconnector 1:1 per conoscere casualmente founder, builder e professionisti italiani.",
+    images: ["/og-image.png"],
+  },
 };
 
 const themeScript = `
