@@ -476,6 +476,26 @@ export function HomeShell() {
                 className="h-7 w-auto object-contain"
               />
             </a>
+            <a
+              href="https://devglobe.app/projects/devroulotte?utm_source=badge&utm_medium=embed"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="DevRoulotte launched on DevGlobe"
+              data-analytics-event="outbound_badge_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="devglobe_badge"
+              data-analytics-destination="devglobe"
+              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
+            >
+              <Image
+                src="https://devglobe.app/badges/launched-on-devglobe-dark.svg"
+                alt="Launched on DevGlobe"
+                width={250}
+                height={54}
+                unoptimized
+                className="h-7 w-auto object-contain"
+              />
+            </a>
           </div>
         </footer>
       </div>
