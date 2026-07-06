@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { KeyRound, Loader2, LogIn, LogOut, UserPlus } from "lucide-react";
+import { Github, KeyRound, Loader2, LogIn, LogOut, UserPlus } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
 import { getAuthErrorMessage } from "@/lib/auth-error";
@@ -23,6 +23,7 @@ export function AuthPanel() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isSendingReset, setIsSendingReset] = useState(false);
+  const [isSendingGithub, setIsSendingGithub] = useState(false);
   const analyticsContext = useMemo(
     () => getAnalyticsContext(Boolean(session), false),
     [session],
@@ -165,6 +166,53 @@ export function AuthPanel() {
     }
   }
 
+  async function signInWithGithub() {
+    trackEvent("login_attempted", {
+      ...analyticsContext,
+      method: "github",
+      surface: "auth_panel",
+    });
+
+    if (!supabase) {
+      trackEvent("auth_failed", {
+        ...analyticsContext,
+        auth_mode: "login",
+        failure_reason: "supabase_missing",
+        method: "github",
+        surface: "auth_panel",
+      });
+      setMessage("Configura Supabase per abilitare il login con GitHub.");
+      return;
+    }
+
+    setIsSendingGithub(true);
+    setMessage("Ti porto su GitHub per completare l'accesso.");
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/profile`,
+      },
+    });
+
+    if (error) {
+      trackEvent("auth_failed", {
+        ...analyticsContext,
+        auth_mode: "login",
+        error_name: error.name,
+        method: "github",
+        surface: "auth_panel",
+      });
+      setIsSendingGithub(false);
+      setMessage(
+        getAuthErrorMessage(
+          error,
+          "Login GitHub non riuscito. Verifica la configurazione OAuth in Supabase.",
+        ),
+      );
+    }
+  }
+
   async function handleAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await authenticate("in");
@@ -241,6 +289,19 @@ export function AuthPanel() {
               Registrati
             </button>
           </div>
+          <button
+            type="button"
+            onClick={signInWithGithub}
+            disabled={isSendingGithub}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.06] px-3 text-sm font-semibold text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSendingGithub ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Github className="h-4 w-4" />
+            )}
+            {isSendingGithub ? "Apro GitHub" : "Continua con GitHub"}
+          </button>
           <button
             type="button"
             onClick={requestPasswordReset}

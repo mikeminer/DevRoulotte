@@ -10,13 +10,13 @@ export default function CookiesPage() {
   return (
     <LegalPage
       title="Cookie"
-      updatedAt="3 luglio 2026"
+      updatedAt="6 luglio 2026"
       intro={`Questa pagina descrive strumenti tecnici e preferenze cookie DevRoulotte. Per richieste privacy o cookie: ${CONTACT_EMAIL}.`}
       sections={[
         {
           title: "Strumenti necessari",
           body: [
-            "DevRoulotte usa strumenti tecnici strettamente necessari per fornire il servizio richiesto: login Supabase, sessione utente, ID ospite, presenza temporanea in chat, conferma 18+, accettazione regole community, limiti Free, sicurezza, report e gestione ban.",
+            "DevRoulotte usa strumenti tecnici strettamente necessari per fornire il servizio richiesto: login Supabase, incluso OAuth GitHub se scelto dall'utente, sessione utente, ID ospite, presenza temporanea in chat, conferma 18+, accettazione regole community, limiti Free, sicurezza, report e gestione ban.",
             "Questi strumenti sono necessari al funzionamento della videochat, alla prevenzione degli abusi e alla memorizzazione delle scelte privacy/cookie. Non richiedono consenso preventivo, ma devono essere descritti in modo trasparente.",
           ],
         },
@@ -37,7 +37,7 @@ export default function CookiesPage() {
             "`devroulotte_weekly_opt_in_v2`: copia locale delle ultime scelte del Giro della settimana, usata per ripristinare la UI del browser. I conteggi condivisi arrivano da Supabase in forma aggregata.",
             "`devroulotte_age_18`: ricorda la dichiarazione 18+.",
             "`devroulotte_rules_ok`: ricorda l'accettazione delle regole community.",
-            "Supabase Auth puo' salvare token di sessione nel browser quando l'utente effettua login o registrazione.",
+            "Supabase Auth puo' salvare token di sessione nel browser quando l'utente effettua login o registrazione, anche dopo rientro dal provider OAuth GitHub.",
             "Google Analytics 4, se configurato con `NEXT_PUBLIC_GA_MEASUREMENT_ID`, carica il Google tag da `googletagmanager.com` con consenso analytics negato di default. Solo se accetti Statistiche puo' impostare cookie come `_ga` e `_ga_<measurement-id>` per misurazioni aggregate di pagine, CTA, accesso, matching, chiamate connesse, report, checkout Premium, revenue PayPal confermata dal webhook e contatori realtime aggregati non necessari.",
             "La lettura server-side dei contatori realtime usa GA4 Data API con credenziali server-only e non espone chiavi Google nel browser.",
             "PostHog Revenue, se configurato, non imposta cookie nel browser: riceve solo eventi revenue server-side dal webhook PayPal verificato, con identificativi hashati.",
