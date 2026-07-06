@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -30,6 +31,12 @@ const storyChapters = [
     name: "Nora",
     role: "frontend builder",
     icon: Code2,
+    vignette: {
+      scene: "Repo acceso",
+      line: "Un prototipo cerca una risposta sincera.",
+      accent: "#34d399",
+      tokens: ["02:17", "PR aperta", "DM muti"],
+    },
   },
   {
     eyebrow: "Capitolo 02",
@@ -38,6 +45,12 @@ const storyChapters = [
     name: "Marco",
     role: "founder tecnico",
     icon: Lightbulb,
+    vignette: {
+      scene: "Pitch in bilico",
+      line: "Una domanda giusta può salvare settimane.",
+      accent: "#f59e0b",
+      tokens: ["MVP", "B2B", "dubbi"],
+    },
   },
   {
     eyebrow: "Capitolo 03",
@@ -46,6 +59,12 @@ const storyChapters = [
     name: "Giulia",
     role: "product maker",
     icon: MessageCircle,
+    vignette: {
+      scene: "Panchina piena",
+      line: "Molte presenze, poca conversazione viva.",
+      accent: "#60a5fa",
+      tokens: ["community", "topic", "energia"],
+    },
   },
   {
     eyebrow: "La svolta",
@@ -54,6 +73,12 @@ const storyChapters = [
     name: "DevRoulotte",
     role: "superconnector 1:1",
     icon: Route,
+    vignette: {
+      scene: "La porta si apre",
+      line: "La roulotte trasforma il rumore in incontro.",
+      accent: "#2dd4bf",
+      tokens: ["WebRTC", "casuale", "1:1"],
+    },
   },
   {
     eyebrow: "Il momento",
@@ -62,6 +87,12 @@ const storyChapters = [
     name: "5 minuti",
     role: "un builder alla volta",
     icon: HeartHandshake,
+    vignette: {
+      scene: "Timer vivo",
+      line: "Abbastanza poco per entrare, abbastanza per svoltare.",
+      accent: "#f472b6",
+      tokens: ["05:00", "feedback", "contatto"],
+    },
   },
   {
     eyebrow: "Missione",
@@ -70,6 +101,12 @@ const storyChapters = [
     name: "Sali a bordo",
     role: "il futuro non aspetta il calendario",
     icon: Sparkles,
+    vignette: {
+      scene: "Nuova rotta",
+      line: "Una micro-infrastruttura per chi costruisce davvero.",
+      accent: "#a78bfa",
+      tokens: ["missione", "Italia", "builder"],
+    },
   },
 ];
 
@@ -207,11 +244,199 @@ function createSignalLine(color: number) {
   return new THREE.Line(geometry, material);
 }
 
+function VignetteMiniScene({ index }: { index: number }) {
+  if (index === 0) {
+    return (
+      <>
+        <div className="absolute left-5 top-5 h-16 w-24 rounded-md border border-white/15 bg-slate-950/85 p-2 [transform:translateZ(38px)]">
+          <div className="mb-2 flex gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-rose-300" />
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+          </div>
+          <div className="grid gap-1">
+            <span className="h-1 rounded-full bg-teal-200/70" />
+            <span className="h-1 w-14 rounded-full bg-white/30" />
+            <span className="h-1 w-20 rounded-full bg-white/20" />
+          </div>
+        </div>
+        <div className="absolute bottom-4 right-6 h-14 w-12 rounded-full bg-teal-300/80 [transform:translateZ(56px)]" />
+      </>
+    );
+  }
+
+  if (index === 1) {
+    return (
+      <>
+        <div className="absolute bottom-5 left-7 h-16 w-20 rounded-md border border-amber-200/30 bg-amber-200/10 [transform:translateZ(36px)_rotateY(-8deg)]" />
+        <div className="absolute left-16 top-5 h-12 w-12 rounded-full bg-amber-200 shadow-[0_0_34px_rgba(251,191,36,0.55)] [transform:translateZ(68px)]" />
+        <div className="absolute bottom-7 right-7 h-3 w-24 rounded-full bg-amber-200/70 [transform:translateZ(50px)]" />
+      </>
+    );
+  }
+
+  if (index === 2) {
+    return (
+      <>
+        {[0, 1, 2, 3].map((item) => (
+          <span
+            key={item}
+            className="absolute h-9 w-9 rounded-full border border-sky-200/30 bg-sky-300/40 [transform:translateZ(44px)]"
+            style={{
+              left: `${24 + (item % 2) * 82}px`,
+              top: `${24 + Math.floor(item / 2) * 54}px`,
+            }}
+          />
+        ))}
+        <div className="absolute left-12 top-16 h-px w-28 bg-sky-200/60 [transform:translateZ(60px)_rotateZ(-14deg)]" />
+        <div className="absolute left-16 top-14 h-px w-24 bg-sky-200/50 [transform:translateZ(60px)_rotateZ(20deg)]" />
+      </>
+    );
+  }
+
+  if (index === 3) {
+    return (
+      <>
+        <div className="absolute bottom-5 left-6 h-16 w-32 rounded-xl border border-teal-200/35 bg-amber-50/90 [transform:translateZ(44px)]" />
+        <div className="absolute bottom-5 left-6 h-6 w-32 rounded-b-xl bg-teal-400 [transform:translateZ(48px)]" />
+        <div className="absolute bottom-12 left-20 h-10 w-7 rounded-sm bg-amber-400 [transform:translateZ(58px)]" />
+        <div className="absolute bottom-3 left-12 h-8 w-8 rounded-full bg-slate-950 [transform:translateZ(62px)]" />
+        <div className="absolute bottom-3 left-32 h-8 w-8 rounded-full bg-slate-950 [transform:translateZ(62px)]" />
+      </>
+    );
+  }
+
+  if (index === 4) {
+    return (
+      <>
+        <div className="absolute left-8 top-7 grid h-16 w-16 place-items-center rounded-full border border-pink-200/40 bg-pink-300/20 text-lg font-black text-pink-100 [transform:translateZ(62px)]">
+          5
+        </div>
+        <div className="absolute left-28 top-14 h-1 w-24 rounded-full bg-pink-200/70 [transform:translateZ(44px)]" />
+        <div className="absolute right-7 top-9 h-11 w-11 rounded-full bg-pink-200/70 [transform:translateZ(54px)]" />
+        <div className="absolute bottom-5 right-8 h-8 w-20 rounded-md bg-white/10 [transform:translateZ(38px)]" />
+      </>
+    );
+  }
+
+  return (
+    <>
+      {[0, 1, 2, 3, 4].map((item) => (
+        <span
+          key={item}
+          className="absolute h-2.5 w-2.5 rounded-full bg-violet-200 shadow-[0_0_18px_rgba(167,139,250,0.85)] [transform:translateZ(58px)]"
+          style={{
+            left: `${32 + item * 36}px`,
+            top: `${34 + Math.sin(item) * 34}px`,
+          }}
+        />
+      ))}
+      <div className="absolute left-10 top-14 h-px w-36 bg-violet-200/55 [transform:translateZ(46px)_rotateZ(-10deg)]" />
+      <div className="absolute bottom-6 right-7 h-14 w-20 rounded-t-full border border-violet-200/40 bg-violet-300/15 [transform:translateZ(36px)]" />
+    </>
+  );
+}
+
 export function LandingStoryScene() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
+  const chapterRefs = useRef<Array<HTMLElement | null>>([]);
   const progressRef = useRef(0);
   const [activeChapter, setActiveChapter] = useState(0);
+  const [previewChapter, setPreviewChapter] = useState<number | null>(null);
+
+  const shownChapter = previewChapter ?? activeChapter;
+
+  const handleVignettePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+    event.currentTarget.style.setProperty("--vignette-rotate-x", `${(-y * 10).toFixed(2)}deg`);
+    event.currentTarget.style.setProperty("--vignette-rotate-y", `${(x * 12).toFixed(2)}deg`);
+  };
+
+  const resetVignetteTilt = (event: PointerEvent<HTMLButtonElement>) => {
+    event.currentTarget.style.setProperty("--vignette-rotate-x", "0deg");
+    event.currentTarget.style.setProperty("--vignette-rotate-y", "0deg");
+  };
+
+  const scrollToChapter = (index: number) => {
+    chapterRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    setActiveChapter(index);
+  };
+
+  const renderVignetteButton = (
+    chapter: (typeof storyChapters)[number],
+    index: number,
+  ) => {
+    const Icon = chapter.icon;
+    const isActive = index === activeChapter;
+    const isPreviewed = index === shownChapter;
+
+    return (
+      <button
+        key={chapter.title}
+        type="button"
+        data-testid={`landing-story-vignette-${index}`}
+        aria-pressed={isActive}
+        onClick={() => scrollToChapter(index)}
+        onFocus={() => setPreviewChapter(index)}
+        onBlur={() => setPreviewChapter(null)}
+        onPointerEnter={() => setPreviewChapter(index)}
+        onPointerMove={handleVignettePointerMove}
+        onPointerLeave={(event) => {
+          setPreviewChapter(null);
+          resetVignetteTilt(event);
+        }}
+        className={`group grid min-h-28 min-w-[12.75rem] rounded-lg border p-2 text-left transition duration-300 [perspective:900px] focus:outline-none focus:ring-2 focus:ring-teal-200 sm:min-h-40 sm:min-w-[15.5rem] lg:min-h-48 lg:min-w-0 ${
+          isPreviewed
+            ? "border-teal-200/70 bg-white/[0.075]"
+            : "border-white/10 bg-white/[0.035] hover:border-white/25 hover:bg-white/[0.06]"
+        }`}
+        style={
+          {
+            "--vignette-accent": chapter.vignette.accent,
+            "--vignette-rotate-x": "0deg",
+            "--vignette-rotate-y": "0deg",
+          } as CSSProperties
+        }
+      >
+        <span className="relative grid h-14 overflow-hidden rounded-md border border-white/10 bg-slate-950/70 [transform-style:preserve-3d] [transform:rotateX(var(--vignette-rotate-x))_rotateY(var(--vignette-rotate-y))] transition-transform duration-200 sm:h-24 lg:h-28">
+          <span className="absolute inset-0 bg-[radial-gradient(circle_at_28%_22%,var(--vignette-accent),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.88),rgba(2,6,23,0.96))] opacity-70" />
+          <span className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/70 to-transparent" />
+          <VignetteMiniScene index={index} />
+          <span className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-black/30 text-white [transform:translateZ(70px)]">
+            <Icon className="h-3.5 w-3.5" />
+          </span>
+        </span>
+        <span className="grid gap-1 px-1 pt-3">
+          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-teal-100">
+            {chapter.vignette.scene}
+          </span>
+          <span className="text-xs font-bold leading-5 text-white">
+            {chapter.name}
+          </span>
+          <span className="hidden text-[11px] font-semibold leading-4 text-slate-300 sm:block">
+            {chapter.vignette.line}
+          </span>
+          <span className="mt-1 hidden flex-wrap gap-1 sm:flex">
+            {chapter.vignette.tokens.map((token) => (
+              <span
+                key={token}
+                className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] font-bold text-slate-300"
+              >
+                {token}
+              </span>
+            ))}
+          </span>
+        </span>
+      </button>
+    );
+  };
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -538,6 +763,12 @@ export function LandingStoryScene() {
               DevRoulotte è il superconnector casuale 1:1 per founder, builder
               e professionisti italiani che vogliono conoscersi davvero.
             </p>
+            <div
+              className="pointer-events-auto flex max-w-full gap-3 overflow-x-auto pb-2 lg:grid lg:max-w-6xl lg:grid-cols-6 lg:overflow-visible lg:pb-0"
+              aria-label="Vignette interattive della storia"
+            >
+              {storyChapters.map(renderVignetteButton)}
+            </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/chat"
@@ -564,17 +795,17 @@ export function LandingStoryScene() {
             className="grid max-w-xl gap-4 border-l border-teal-200/30 pl-5"
           >
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-200">
-              {storyChapters[activeChapter].eyebrow}
+              {storyChapters[shownChapter].eyebrow}
             </p>
             <p className="text-sm font-bold text-white">
-              {storyChapters[activeChapter].name} ·{" "}
-              <span className="text-slate-300">{storyChapters[activeChapter].role}</span>
+              {storyChapters[shownChapter].name} ·{" "}
+              <span className="text-slate-300">{storyChapters[shownChapter].role}</span>
             </p>
           </div>
         </div>
       </div>
 
-      <div className="relative z-10 -mt-[100svh] px-5 pb-[18svh] pt-[102svh] sm:px-6 lg:px-8">
+      <div className="pointer-events-none relative z-10 -mt-[100svh] px-5 pb-[18svh] pt-[102svh] sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-[64svh]">
           {storyChapters.map((chapter, index) => {
             const Icon = chapter.icon;
@@ -582,7 +813,10 @@ export function LandingStoryScene() {
             return (
               <article
                 key={chapter.title}
-                className={`min-h-[72svh] max-w-xl border-l pl-5 ${
+                ref={(node) => {
+                  chapterRefs.current[index] = node;
+                }}
+                className={`pointer-events-auto min-h-[72svh] max-w-xl border-l pl-5 ${
                   index % 2
                     ? "ml-auto border-amber-200/40"
                     : "border-teal-200/40"
