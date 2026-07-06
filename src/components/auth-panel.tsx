@@ -16,6 +16,23 @@ function isStrongPassword(password: string) {
   );
 }
 
+async function getOAuthValidationMessage(response: Response) {
+  const payload = (await response.json().catch(() => null)) as {
+    error_code?: string;
+    msg?: string;
+  } | null;
+
+  if (
+    response.status === 400 &&
+    payload?.error_code === "validation_failed" &&
+    payload.msg?.toLowerCase().includes("provider is not enabled")
+  ) {
+    return "Login GitHub non ancora abilitato in Supabase. Abilita il provider GitHub e riprova.";
+  }
+
+  return payload?.msg ?? "Login GitHub non disponibile. Verifica la configurazione OAuth.";
+}
+
 export function AuthPanel() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [session, setSession] = useState<Session | null>(null);
@@ -188,18 +205,19 @@ export function AuthPanel() {
     setIsSendingGithub(true);
     setMessage("Ti porto su GitHub per completare l'accesso.");
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
         redirectTo: `${window.location.origin}/profile`,
+        skipBrowserRedirect: true,
       },
     });
 
-    if (error) {
+    if (error || !data.url) {
       trackEvent("auth_failed", {
         ...analyticsContext,
         auth_mode: "login",
-        error_name: error.name,
+        error_name: error?.name ?? "oauth_url_missing",
         method: "github",
         surface: "auth_panel",
       });
@@ -210,7 +228,29 @@ export function AuthPanel() {
           "Login GitHub non riuscito. Verifica la configurazione OAuth in Supabase.",
         ),
       );
+      return;
     }
+
+    const validation = await fetch(data.url, {
+      credentials: "omit",
+      redirect: "manual",
+    }).catch(() => null);
+
+    if (validation && validation.status >= 400) {
+      trackEvent("auth_failed", {
+        ...analyticsContext,
+        auth_mode: "login",
+        error_name: "oauth_provider_validation_failed",
+        method: "github",
+        status: validation.status,
+        surface: "auth_panel",
+      });
+      setIsSendingGithub(false);
+      setMessage(await getOAuthValidationMessage(validation));
+      return;
+    }
+
+    window.location.assign(data.url);
   }
 
   async function handleAuth(event: FormEvent<HTMLFormElement>) {
