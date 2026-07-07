@@ -6,7 +6,9 @@ import {
   BadgeAlert,
   CircleStop,
   Loader2,
+  Maximize2,
   Mic,
+  Minimize2,
   RefreshCw,
   Video,
 } from "lucide-react";
@@ -23,6 +25,19 @@ type VideoChatProps = {
   isPremium: boolean;
   isAuthenticated: boolean;
   onProfileRefresh: () => void;
+};
+
+type FullscreenDocument = Document & {
+  webkitExitFullscreen?: () => Promise<void> | void;
+  webkitFullscreenElement?: Element | null;
+};
+
+type FullscreenTargetElement = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
+type FullscreenVideoElement = HTMLVideoElement & {
+  webkitEnterFullscreen?: () => void;
 };
 
 type SignalMessage =
@@ -169,6 +184,15 @@ function getRoundTripTimeTone(rttMs: number | null) {
   return "border-rose-300/30 bg-rose-950/70 text-rose-100";
 }
 
+function getCurrentFullscreenElement() {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  const fullscreenDocument = document as FullscreenDocument;
+  return document.fullscreenElement ?? fullscreenDocument.webkitFullscreenElement ?? null;
+}
+
 async function getIceServers() {
   const response = await fetch("/api/ice");
   const data = (await response.json()) as { iceServers?: RTCIceServer[] };
@@ -289,6 +313,7 @@ export function VideoChat({
   onProfileRefresh,
 }: VideoChatProps) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const videoStageRef = useRef<HTMLDivElement>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -324,6 +349,7 @@ export function VideoChat({
   const [match, setMatch] = useState<MatchPayload | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [connectedAt, setConnectedAt] = useState<number | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [networkRttMs, setNetworkRttMs] = useState<number | null>(null);
   const [preferredLanguage, setPreferredLanguage] = useState("any");
   const [preferredCountry, setPreferredCountry] = useState("any");
@@ -373,6 +399,64 @@ export function VideoChat({
 
     return () => window.clearInterval(interval);
   }, [nextLockedUntil]);
+
+  useEffect(() => {
+    function syncFullscreenState() {
+      setIsFullscreen(getCurrentFullscreenElement() === videoStageRef.current);
+    }
+
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+    document.addEventListener("webkitfullscreenchange", syncFullscreenState);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
+      document.removeEventListener("webkitfullscreenchange", syncFullscreenState);
+    };
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    const stage = videoStageRef.current;
+
+    if (!stage) {
+      return;
+    }
+
+    const fullscreenDocument = document as FullscreenDocument;
+
+    try {
+      if (getCurrentFullscreenElement()) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else {
+          await fullscreenDocument.webkitExitFullscreen?.();
+        }
+        return;
+      }
+
+      if (stage.requestFullscreen) {
+        await stage.requestFullscreen();
+        return;
+      }
+
+      const fullscreenTarget = stage as FullscreenTargetElement;
+
+      if (fullscreenTarget.webkitRequestFullscreen) {
+        await fullscreenTarget.webkitRequestFullscreen();
+        return;
+      }
+
+      const remoteVideo = remoteVideoRef.current as FullscreenVideoElement | null;
+
+      if (remoteVideo?.webkitEnterFullscreen) {
+        remoteVideo.webkitEnterFullscreen();
+        return;
+      }
+
+      setMessage("Fullscreen non disponibile in questo browser.");
+    } catch {
+      setMessage("Fullscreen non disponibile in questo browser.");
+    }
+  }, []);
 
   const clearOfferRetries = useCallback(() => {
     offerRetryTimersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -1317,7 +1401,10 @@ export function VideoChat({
   return (
     <section className="grid gap-4">
       <div className="grid gap-3 lg:grid-cols-[1fr_0.56fr]">
-        <div className="relative min-h-[420px] overflow-hidden rounded-lg border border-white/10 bg-black">
+        <div
+          ref={videoStageRef}
+          className="relative min-h-[420px] overflow-hidden rounded-lg border border-white/10 bg-black [&:-webkit-full-screen]:h-screen [&:-webkit-full-screen]:min-h-screen [&:-webkit-full-screen]:rounded-none [&:-webkit-full-screen]:border-0 [&:fullscreen]:h-screen [&:fullscreen]:min-h-screen [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
+        >
           <video
             ref={remoteVideoRef}
             className="h-full min-h-[420px] w-full object-cover"
@@ -1349,6 +1436,27 @@ export function VideoChat({
               <span className="font-mono">RTT {networkRttLabel}</span>
             </div>
           ) : null}
+          <button
+            type="button"
+            onClick={() => void toggleFullscreen()}
+            className="absolute bottom-3 left-3 inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/15 bg-black/65 text-slate-100 shadow-lg backdrop-blur transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-teal-300"
+            aria-label={
+              isFullscreen
+                ? "Esci dalla modalità fullscreen"
+                : "Metti la chiamata in fullscreen"
+            }
+            title={
+              isFullscreen
+                ? "Esci dalla modalità fullscreen"
+                : "Metti la chiamata in fullscreen"
+            }
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </button>
           <div className="absolute bottom-3 right-3 w-36 overflow-hidden rounded-lg border border-white/15 bg-black">
             <video
               ref={localVideoRef}
