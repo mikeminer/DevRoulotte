@@ -208,7 +208,7 @@ export function AuthPanel() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
-        redirectTo: `${window.location.origin}/profile`,
+        redirectTo: `${window.location.origin}/chat`,
         skipBrowserRedirect: true,
       },
     });

@@ -38,7 +38,7 @@ Senza credenziali reali l'app renderizza la UI, ma matchmaking, auth, admin, Pay
 3. In Authentication abilita Email/Password.
 4. Copia Project URL e publishable/anon key in `.env.local`.
 5. Copia la service role/secret key in `SUPABASE_SERVICE_ROLE_KEY`.
-6. In Authentication > URL Configuration aggiungi gli URL di redirect per auth, reset password e OAuth: `https://devroulotte.chat/auth/confirm`, `https://devroulotte.chat/reset-password`, `https://devroulotte.chat/profile`, `https://www.devroulotte.chat/auth/confirm`, `https://www.devroulotte.chat/reset-password`, `https://www.devroulotte.chat/profile`, `http://localhost:3000/auth/confirm`, `http://localhost:3000/reset-password`, `http://localhost:3000/profile`, `http://127.0.0.1:3000/auth/confirm`, `http://127.0.0.1:3000/reset-password` e `http://127.0.0.1:3000/profile`.
+6. In Authentication > URL Configuration aggiungi gli URL di redirect per auth, reset password e OAuth: `https://devroulotte.chat/auth/confirm`, `https://devroulotte.chat/reset-password`, `https://devroulotte.chat/chat`, `https://www.devroulotte.chat/auth/confirm`, `https://www.devroulotte.chat/reset-password`, `https://www.devroulotte.chat/chat`, `http://localhost:3000/auth/confirm`, `http://localhost:3000/reset-password`, `http://localhost:3000/chat`, `http://127.0.0.1:3000/auth/confirm`, `http://127.0.0.1:3000/reset-password` e `http://127.0.0.1:3000/chat`.
 
 Nota: per Supabase hosted questi redirect vanno salvati nel dashboard del progetto. `supabase/config.toml` mantiene l'equivalente configurazione locale/versionata.
 
@@ -82,9 +82,9 @@ DevRoulotte supporta login GitHub tramite Supabase Auth OAuth. Non servono nuove
    - Homepage URL: `https://devroulotte.chat`
    - Authorization callback URL: il Callback URL copiato da Supabase.
 3. Copia Client ID e Client Secret da GitHub dentro il provider GitHub di Supabase e abilitalo.
-4. In Supabase Authentication > URL Configuration verifica che tra i redirect consentiti ci siano `https://devroulotte.chat/profile`, `https://www.devroulotte.chat/profile`, `http://localhost:3000/profile` e `http://127.0.0.1:3000/profile`.
+4. In Supabase Authentication > URL Configuration verifica che tra i redirect consentiti ci siano `https://devroulotte.chat/chat`, `https://www.devroulotte.chat/chat`, `http://localhost:3000/chat` e `http://127.0.0.1:3000/chat`.
 
-Il pulsante "Continua con GitHub" nel pannello Accesso usa `signInWithOAuth({ provider: "github" })` e rientra su `/profile` dopo il login.
+Il pulsante "Continua con GitHub" nel pannello Accesso usa `signInWithOAuth({ provider: "github" })` e rientra su `/chat` dopo il login.
 
 Con un Supabase Personal Access Token puoi applicare queste impostazioni via Management API:
 
