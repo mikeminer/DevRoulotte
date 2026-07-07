@@ -33,6 +33,26 @@ export type MatchPayload = {
   startedAt: string;
 };
 
+export type PremiumCard = {
+  displayName: string;
+  headline: string;
+  bio: string;
+  websiteUrl: string;
+  githubUrl: string;
+  linkedinUrl: string;
+  xUrl: string;
+  productUrl: string;
+  contactEmail: string;
+  preferredContact: string;
+  stack: string;
+  lookingFor: string;
+  building: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  shareInCalls: boolean;
+  updatedAt: string | null;
+};
+
 export type MatchJoinResponse =
   | {
       status: "matched";

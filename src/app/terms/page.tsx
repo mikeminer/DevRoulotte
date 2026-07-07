@@ -10,7 +10,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Termini di servizio"
-      updatedAt="28 giugno 2026"
+      updatedAt="7 luglio 2026"
       intro={`DevRoulotte è un servizio 18+ per incontri casuali 1:1 tra founder, builder e professionisti, con webcam e heatmap settimanale aggregata delle disponibilità dichiarate. Usando il servizio accetti questi termini, le regole community e la nostra informativa privacy. Contatto legale: ${CONTACT_EMAIL}.`}
       sections={[
         {
@@ -32,7 +32,8 @@ export default function TermsPage() {
           body: [
             "Il piano Free ospite include 3 match al giorno, chiamate da 2 minuti e rate limit sul tasto Next.",
             "Il piano Registrato include 15 match al giorno, chiamate da 5 minuti e filtro lingua.",
-            "Il piano Premium costa 3,99 EUR al mese, non include prova gratuita e abilita match illimitati, chiamate da 15 minuti, filtri completi, priorità in coda e parola di sintonia 1:1.",
+            "Il piano Premium costa 3,99 EUR al mese, non include prova gratuita e abilita match illimitati, chiamate da 15 minuti, filtri completi, priorità in coda, parola di sintonia 1:1 e Premium Card.",
+            "La Premium Card e' un biglietto da visita volontario. Se scegli di mostrarla in chiamata, i dati inseriti possono essere visti dal peer durante il match attivo.",
           ],
         },
         {

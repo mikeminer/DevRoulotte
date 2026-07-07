@@ -11,6 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
+import { PremiumCardEditor } from "@/components/premium-card-editor";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
@@ -224,6 +225,13 @@ export function ProfilePanel() {
             </div>
           </dl>
         </section>
+
+        {isAuthenticated ? (
+          <PremiumCardEditor
+            isPremium={Boolean(profile?.isPremium)}
+            isAuthenticated={isAuthenticated}
+          />
+        ) : null}
 
         {!profile?.isPremium && isAuthenticated ? <PremiumUpgrade /> : null}
 

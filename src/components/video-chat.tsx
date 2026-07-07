@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   BadgeAlert,
   CircleStop,
+  ExternalLink,
   Loader2,
   Maximize2,
   Mic,
@@ -19,7 +20,7 @@ import {
   type AnalyticsParams,
 } from "@/lib/analytics";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { MatchJoinResponse, MatchPayload } from "@/lib/types";
+import type { MatchJoinResponse, MatchPayload, PremiumCard } from "@/lib/types";
 
 type VideoChatProps = {
   isPremium: boolean;
@@ -80,6 +81,12 @@ type SignalPollResponse = {
   }>;
 };
 
+type PeerPremiumCardResponse = {
+  ok: boolean;
+  card: PremiumCard | null;
+  message?: string;
+};
+
 const languages = [
   { value: "any", label: "Qualsiasi lingua" },
   { value: "it", label: "Italiano" },
@@ -114,6 +121,16 @@ function normalizeMatchSaltInput(value: string) {
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9_-]/g, "")
     .slice(0, MATCH_SALT_MAX_LENGTH);
+}
+
+function getPremiumCardLinks(card: PremiumCard) {
+  return [
+    ["Sito", card.websiteUrl],
+    ["GitHub", card.githubUrl],
+    ["LinkedIn", card.linkedinUrl],
+    ["X", card.xUrl],
+    ["Prodotto", card.productUrl],
+  ].filter(([, href]) => Boolean(href));
 }
 
 function formatTime(totalSeconds: number) {
@@ -351,6 +368,9 @@ export function VideoChat({
   const [connectedAt, setConnectedAt] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [networkRttMs, setNetworkRttMs] = useState<number | null>(null);
+  const [peerPremiumCard, setPeerPremiumCard] = useState<PremiumCard | null>(
+    null,
+  );
   const [preferredLanguage, setPreferredLanguage] = useState("any");
   const [preferredCountry, setPreferredCountry] = useState("any");
   const [matchSalt, setMatchSalt] = useState("");
@@ -657,6 +677,7 @@ export function VideoChat({
     setConnectedAt(null);
     setElapsed(0);
     setNetworkRttMs(null);
+    setPeerPremiumCard(null);
   }, [
     clearAutoNext,
     clearConnectionWatchdogs,
@@ -742,6 +763,44 @@ export function VideoChat({
       window.clearInterval(interval);
     };
   }, [connectedAt, match, status]);
+
+  useEffect(() => {
+    if (status !== "connected" || connectedAt === null || !match) {
+      return;
+    }
+
+    let cancelled = false;
+    const activeMatch = match;
+
+    async function loadPeerPremiumCard() {
+      try {
+        const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
+        const response = await fetch(
+          `/api/matchmaking/peer-card?matchId=${encodeURIComponent(activeMatch.id)}`,
+          { headers },
+        );
+        const payload = (await response.json()) as PeerPremiumCardResponse;
+
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.message ?? "Premium Card non disponibile");
+        }
+
+        if (!cancelled) {
+          setPeerPremiumCard(payload.card);
+        }
+      } catch {
+        if (!cancelled) {
+          setPeerPremiumCard(null);
+        }
+      }
+    }
+
+    void loadPeerPremiumCard();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [connectedAt, match, status, supabase]);
 
   async function ensureMedia() {
     if (localStreamRef.current) {
@@ -940,6 +999,7 @@ export function VideoChat({
     setConnectedAt(null);
     setElapsed(0);
     setNetworkRttMs(null);
+    setPeerPremiumCard(null);
     setStatus("connecting");
     setMessage("Connessione peer-to-peer in corso.");
     trackChatEvent("webrtc_connect_started", {
@@ -1397,6 +1457,9 @@ export function VideoChat({
     status === "permissions" || status === "waiting" || status === "connecting";
   const networkRttLabel = networkRttMs === null ? "--" : `${networkRttMs} ms`;
   const networkRttTone = getRoundTripTimeTone(networkRttMs);
+  const peerCardLinks = peerPremiumCard
+    ? getPremiumCardLinks(peerPremiumCard)
+    : [];
 
   return (
     <section className="grid gap-4">
@@ -1626,6 +1689,84 @@ export function VideoChat({
               Report
             </button>
           </div>
+
+          {peerPremiumCard ? (
+            <section className="rounded-lg border border-amber-200/20 bg-amber-200/[0.06] p-3">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-amber-100">
+                Premium Card
+              </p>
+              <h3 className="mt-2 text-base font-black text-white">
+                {peerPremiumCard.displayName || "Builder in chiamata"}
+              </h3>
+              {peerPremiumCard.headline ? (
+                <p className="mt-1 text-xs font-semibold text-amber-50">
+                  {peerPremiumCard.headline}
+                </p>
+              ) : null}
+              {peerPremiumCard.bio ? (
+                <p className="mt-3 text-xs leading-5 text-slate-300">
+                  {peerPremiumCard.bio}
+                </p>
+              ) : null}
+              <div className="mt-3 grid gap-2 text-xs text-slate-300">
+                {peerPremiumCard.stack ? (
+                  <p>
+                    <span className="font-bold text-slate-100">Stack:</span>{" "}
+                    {peerPremiumCard.stack}
+                  </p>
+                ) : null}
+                {peerPremiumCard.building ? (
+                  <p>
+                    <span className="font-bold text-slate-100">
+                      Sta costruendo:
+                    </span>{" "}
+                    {peerPremiumCard.building}
+                  </p>
+                ) : null}
+                {peerPremiumCard.lookingFor ? (
+                  <p>
+                    <span className="font-bold text-slate-100">Cerca:</span>{" "}
+                    {peerPremiumCard.lookingFor}
+                  </p>
+                ) : null}
+              </div>
+              {peerCardLinks.length ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {peerCardLinks.map(([label, href]) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[11px] font-bold text-white hover:bg-white/10"
+                    >
+                      {label}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+              {peerPremiumCard.contactEmail || peerPremiumCard.preferredContact ? (
+                <p className="mt-3 rounded-md border border-teal-200/20 bg-teal-200/10 px-2 py-1.5 text-[11px] text-teal-50">
+                  {peerPremiumCard.preferredContact || "Contatto"}{" "}
+                  {peerPremiumCard.contactEmail
+                    ? `- ${peerPremiumCard.contactEmail}`
+                    : ""}
+                </p>
+              ) : null}
+              {peerPremiumCard.ctaUrl ? (
+                <a
+                  href={peerPremiumCard.ctaUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-amber-200 px-3 text-xs font-black text-slate-950 hover:bg-amber-100"
+                >
+                  {peerPremiumCard.ctaLabel || "Apri link"}
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              ) : null}
+            </section>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 py-2">
