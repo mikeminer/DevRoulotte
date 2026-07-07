@@ -1,11 +1,26 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Github, KeyRound, Loader2, LogIn, LogOut, UserPlus } from "lucide-react";
+import {
+  Github,
+  KeyRound,
+  Linkedin,
+  Loader2,
+  LogIn,
+  LogOut,
+  UserPlus,
+} from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { getAnalyticsContext, trackEvent } from "@/lib/analytics";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+
+type OAuthLoginConfig = {
+  provider: "github" | "linkedin_oidc";
+  method: "github" | "linkedin";
+  label: "GitHub" | "LinkedIn";
+  setSending: (isSending: boolean) => void;
+};
 
 function isStrongPassword(password: string) {
   return (
@@ -16,7 +31,7 @@ function isStrongPassword(password: string) {
   );
 }
 
-async function getOAuthValidationMessage(response: Response) {
+async function getOAuthValidationMessage(response: Response, providerLabel: string) {
   const payload = (await response.json().catch(() => null)) as {
     error_code?: string;
     msg?: string;
@@ -27,10 +42,13 @@ async function getOAuthValidationMessage(response: Response) {
     payload?.error_code === "validation_failed" &&
     payload.msg?.toLowerCase().includes("provider is not enabled")
   ) {
-    return "Login GitHub non ancora abilitato in Supabase. Abilita il provider GitHub e riprova.";
+    return `Login ${providerLabel} non ancora abilitato in Supabase. Abilita il provider ${providerLabel} e riprova.`;
   }
 
-  return payload?.msg ?? "Login GitHub non disponibile. Verifica la configurazione OAuth.";
+  return (
+    payload?.msg ??
+    `Login ${providerLabel} non disponibile. Verifica la configurazione OAuth.`
+  );
 }
 
 export function AuthPanel() {
@@ -41,6 +59,8 @@ export function AuthPanel() {
   const [message, setMessage] = useState("");
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [isSendingGithub, setIsSendingGithub] = useState(false);
+  const [isSendingLinkedin, setIsSendingLinkedin] = useState(false);
+  const isSendingOAuth = isSendingGithub || isSendingLinkedin;
   const analyticsContext = useMemo(
     () => getAnalyticsContext(Boolean(session), false),
     [session],
@@ -183,10 +203,15 @@ export function AuthPanel() {
     }
   }
 
-  async function signInWithGithub() {
+  async function signInWithOAuthProvider({
+    provider,
+    method,
+    label,
+    setSending,
+  }: OAuthLoginConfig) {
     trackEvent("login_attempted", {
       ...analyticsContext,
-      method: "github",
+      method,
       surface: "auth_panel",
     });
 
@@ -195,18 +220,18 @@ export function AuthPanel() {
         ...analyticsContext,
         auth_mode: "login",
         failure_reason: "supabase_missing",
-        method: "github",
+        method,
         surface: "auth_panel",
       });
-      setMessage("Configura Supabase per abilitare il login con GitHub.");
+      setMessage(`Configura Supabase per abilitare il login con ${label}.`);
       return;
     }
 
-    setIsSendingGithub(true);
-    setMessage("Ti porto su GitHub per completare l'accesso.");
+    setSending(true);
+    setMessage(`Ti porto su ${label} per completare l'accesso.`);
 
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
+      provider,
       options: {
         redirectTo: `${window.location.origin}/chat`,
         skipBrowserRedirect: true,
@@ -218,14 +243,14 @@ export function AuthPanel() {
         ...analyticsContext,
         auth_mode: "login",
         error_name: error?.name ?? "oauth_url_missing",
-        method: "github",
+        method,
         surface: "auth_panel",
       });
-      setIsSendingGithub(false);
+      setSending(false);
       setMessage(
         getAuthErrorMessage(
           error,
-          "Login GitHub non riuscito. Verifica la configurazione OAuth in Supabase.",
+          `Login ${label} non riuscito. Verifica la configurazione OAuth in Supabase.`,
         ),
       );
       return;
@@ -241,16 +266,34 @@ export function AuthPanel() {
         ...analyticsContext,
         auth_mode: "login",
         error_name: "oauth_provider_validation_failed",
-        method: "github",
+        method,
         status: validation.status,
         surface: "auth_panel",
       });
-      setIsSendingGithub(false);
-      setMessage(await getOAuthValidationMessage(validation));
+      setSending(false);
+      setMessage(await getOAuthValidationMessage(validation, label));
       return;
     }
 
     window.location.assign(data.url);
+  }
+
+  async function signInWithGithub() {
+    await signInWithOAuthProvider({
+      provider: "github",
+      method: "github",
+      label: "GitHub",
+      setSending: setIsSendingGithub,
+    });
+  }
+
+  async function signInWithLinkedin() {
+    await signInWithOAuthProvider({
+      provider: "linkedin_oidc",
+      method: "linkedin",
+      label: "LinkedIn",
+      setSending: setIsSendingLinkedin,
+    });
   }
 
   async function handleAuth(event: FormEvent<HTMLFormElement>) {
@@ -332,7 +375,7 @@ export function AuthPanel() {
           <button
             type="button"
             onClick={signInWithGithub}
-            disabled={isSendingGithub}
+            disabled={isSendingOAuth}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.06] px-3 text-sm font-semibold text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSendingGithub ? (
@@ -341,6 +384,19 @@ export function AuthPanel() {
               <Github className="h-4 w-4" />
             )}
             {isSendingGithub ? "Apro GitHub" : "Continua con GitHub"}
+          </button>
+          <button
+            type="button"
+            onClick={signInWithLinkedin}
+            disabled={isSendingOAuth}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-sky-300/30 bg-sky-400/10 px-3 text-sm font-semibold text-white hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSendingLinkedin ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Linkedin className="h-4 w-4" />
+            )}
+            {isSendingLinkedin ? "Apro LinkedIn" : "Continua con LinkedIn"}
           </button>
           <button
             type="button"

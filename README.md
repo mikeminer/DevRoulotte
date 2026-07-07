@@ -72,9 +72,9 @@ Nel dashboard Supabase hosted allinea anche Authentication:
 - Secure password change: enabled.
 - Email max frequency: almeno `60s`.
 
-### Login con GitHub
+### Login con GitHub e LinkedIn
 
-DevRoulotte supporta login GitHub tramite Supabase Auth OAuth. Non servono nuove variabili ambiente nel client: il browser usa `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` gia' presenti.
+DevRoulotte supporta login GitHub e LinkedIn tramite Supabase Auth OAuth. Non servono nuove variabili ambiente nel client: il browser usa `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` gia' presenti.
 
 1. In Supabase Dashboard apri Authentication > Sign In / Providers > GitHub e copia il Callback URL, nel formato `https://<project-ref>.supabase.co/auth/v1/callback`.
 2. In GitHub Developer settings > OAuth Apps crea una nuova OAuth App:
@@ -85,6 +85,16 @@ DevRoulotte supporta login GitHub tramite Supabase Auth OAuth. Non servono nuove
 4. In Supabase Authentication > URL Configuration verifica che tra i redirect consentiti ci siano `https://devroulotte.chat/chat`, `https://www.devroulotte.chat/chat`, `http://localhost:3000/chat` e `http://127.0.0.1:3000/chat`.
 
 Il pulsante "Continua con GitHub" nel pannello Accesso usa `signInWithOAuth({ provider: "github" })` e rientra su `/chat` dopo il login.
+
+Per LinkedIn usa il provider Supabase `LinkedIn (OIDC)`:
+
+1. In Supabase Dashboard apri Authentication > Sign In / Providers > LinkedIn e copia lo stesso Callback URL `https://<project-ref>.supabase.co/auth/v1/callback`.
+2. In LinkedIn Developer Portal crea o apri l'app DevRoulotte.
+3. Nella sezione Products richiedi/abilita `Sign In with LinkedIn using OpenID Connect`.
+4. Nella sezione Auth aggiungi il Callback URL Supabase tra gli Authorized Redirect URLs.
+5. Copia Client ID e Client Secret da LinkedIn dentro il provider `LinkedIn (OIDC)` di Supabase e abilitalo.
+
+Il pulsante "Continua con LinkedIn" nel pannello Accesso usa `signInWithOAuth({ provider: "linkedin_oidc" })` e rientra su `/chat` dopo il login.
 
 Con un Supabase Personal Access Token puoi applicare queste impostazioni via Management API:
 
@@ -263,7 +273,7 @@ Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulo
 - Landing page italiana su `/` con posizionamento superconnector casuale 1:1 e CTA verso `/chat`
 - Esperienza videochat mobile-first scura su `/chat` con logo DevRoulotte
 - Pannello "Giro della settimana" con heatmap settimanale: gli slot più scelti dagli utenti diventano più intensi e la visualizzazione si resetta sulla settimana successiva
-- Accesso guest o registrato via Supabase Auth con email/password o GitHub OAuth
+- Accesso guest o registrato via Supabase Auth con email/password, GitHub OAuth o LinkedIn OIDC
 - Conferma obbligatoria 18+ e regole community
 - Piano Free ospite: 3 match/giorno, chiamate da 2 minuti, rate limit Next
 - Piano Registrato: 15 match/giorno, chiamate da 5 minuti, filtro lingua
