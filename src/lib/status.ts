@@ -174,6 +174,7 @@ function getMissingConfigResult(note: string): HealthCheckResult {
 async function checkSupabaseTable(
   table: string,
   label: string,
+  column = "id",
 ): Promise<ServiceStatusCheck> {
   const startedAt = performance.now();
 
@@ -181,7 +182,7 @@ async function checkSupabaseTable(
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from(table)
-      .select("id", { count: "exact", head: true })
+      .select(column, { count: "exact", head: true })
       .limit(1);
 
     const latencyMs = getElapsedMs(startedAt);
@@ -202,13 +203,16 @@ async function checkSupabaseTable(
       status: "Errore",
       tone: "degraded",
       latencyMs: getElapsedMs(startedAt),
-      note: error instanceof Error ? error.message : "Check fallito",
+      note:
+        error instanceof Error && error.message
+          ? error.message
+          : "Check fallito",
     };
   }
 }
 
 async function checkSupabaseTables(
-  tables: Array<{ table: string; label: string }>,
+  tables: Array<{ table: string; label: string; column?: string }>,
   okNote: string,
   degradedNote: string,
 ): Promise<HealthCheckResult> {
@@ -217,7 +221,9 @@ async function checkSupabaseTables(
   }
 
   const checks = await Promise.all(
-    tables.map(({ table, label }) => checkSupabaseTable(table, label)),
+    tables.map(({ table, label, column }) =>
+      checkSupabaseTable(table, label, column),
+    ),
   );
   const tone = getServiceTone(checks);
   const ok = tone === "ok" || tone === "watch";
@@ -402,7 +408,7 @@ export async function getStatusPayload(): Promise<StatusPayload> {
       [
         { table: "match_queue", label: "Coda matchmaking" },
         { table: "webrtc_signals", label: "Signaling WebRTC" },
-        { table: "chat_presence", label: "Presenza live" },
+        { table: "chat_presence", label: "Presenza live", column: "actor_type" },
       ],
       "Coda match, signaling WebRTC e presenza live raggiungibili.",
       "Matchmaking, signaling o presenza live non risultano pienamente operativi.",
