@@ -59,6 +59,12 @@ const tierRows = [
     premium: "✓",
   },
   {
+    label: "Premium Card",
+    guest: "—",
+    registered: "—",
+    premium: "biglietto condivisibile",
+  },
+  {
     label: "Pubblicità",
     guest: "✓",
     registered: "✓",
