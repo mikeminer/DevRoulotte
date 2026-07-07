@@ -331,6 +331,17 @@ export function HomeShell() {
               <Wrench className="h-3.5 w-3.5" />
               In officina
             </a>
+            <Link
+              href="/mediakit"
+              data-analytics-event="cta_clicked"
+              data-analytics-surface="chat_footer"
+              data-analytics-cta-id="media_kit"
+              data-analytics-destination="mediakit"
+              className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Media kit
+            </Link>
             <a
               href={LINKEDIN_COMPANY_URL}
               target="_blank"
