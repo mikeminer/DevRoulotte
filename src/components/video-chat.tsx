@@ -85,6 +85,14 @@ const countries = [
 
 const MATCH_SALT_MAX_LENGTH = 48;
 
+type WebRtcRoundTripTimeStats = RTCStats & {
+  currentRoundTripTime?: number;
+  nominated?: boolean;
+  roundTripTime?: number;
+  selected?: boolean;
+  state?: string;
+};
+
 function normalizeMatchSaltInput(value: string) {
   return value
     .toLowerCase()
@@ -101,6 +109,64 @@ function formatTime(totalSeconds: number) {
     .toString()
     .padStart(2, "0");
   return `${minutes}:${seconds}`;
+}
+
+function secondsToMilliseconds(value?: number) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return null;
+  }
+
+  return Math.round(value * 1000);
+}
+
+function extractWebRtcRoundTripTimeMs(stats: RTCStatsReport) {
+  let selectedCandidateRttMs: number | null = null;
+  let fallbackRttMs: number | null = null;
+
+  stats.forEach((rawStat) => {
+    const stat = rawStat as WebRtcRoundTripTimeStats;
+
+    if (stat.type === "candidate-pair") {
+      const currentRttMs = secondsToMilliseconds(stat.currentRoundTripTime);
+
+      if (currentRttMs === null) {
+        return;
+      }
+
+      const isSelectedPair =
+        stat.selected === true ||
+        (stat.state === "succeeded" && stat.nominated === true);
+
+      if (isSelectedPair) {
+        selectedCandidateRttMs = currentRttMs;
+      }
+
+      fallbackRttMs ??= currentRttMs;
+      return;
+    }
+
+    if (stat.type === "remote-inbound-rtp") {
+      fallbackRttMs ??= secondsToMilliseconds(stat.roundTripTime);
+    }
+  });
+
+  return selectedCandidateRttMs ?? fallbackRttMs;
+}
+
+function getRoundTripTimeTone(rttMs: number | null) {
+  if (rttMs === null) {
+    return "border-white/10 bg-black/60 text-slate-200";
+  }
+
+  if (rttMs < 120) {
+    return "border-teal-300/30 bg-teal-950/70 text-teal-100";
+  }
+
+  if (rttMs < 250) {
+    return "border-amber-300/30 bg-amber-950/70 text-amber-100";
+  }
+
+  return "border-rose-300/30 bg-rose-950/70 text-rose-100";
 }
 
 async function getIceServers() {
@@ -258,6 +324,7 @@ export function VideoChat({
   const [match, setMatch] = useState<MatchPayload | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [connectedAt, setConnectedAt] = useState<number | null>(null);
+  const [networkRttMs, setNetworkRttMs] = useState<number | null>(null);
   const [preferredLanguage, setPreferredLanguage] = useState("any");
   const [preferredCountry, setPreferredCountry] = useState("any");
   const [matchSalt, setMatchSalt] = useState("");
@@ -505,6 +572,7 @@ export function VideoChat({
     setMatch(null);
     setConnectedAt(null);
     setElapsed(0);
+    setNetworkRttMs(null);
   }, [
     clearAutoNext,
     clearConnectionWatchdogs,
@@ -549,6 +617,47 @@ export function VideoChat({
 
     return () => window.clearInterval(interval);
   }, [cleanupConnection, connectedAt, match, onProfileRefresh]);
+
+  useEffect(() => {
+    if (status !== "connected" || connectedAt === null || !match) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function refreshRoundTripTime() {
+      const pc = peerConnectionRef.current;
+
+      if (!pc || pc.connectionState !== "connected") {
+        if (!cancelled) {
+          setNetworkRttMs(null);
+        }
+        return;
+      }
+
+      try {
+        const stats = await pc.getStats();
+
+        if (!cancelled) {
+          setNetworkRttMs(extractWebRtcRoundTripTimeMs(stats));
+        }
+      } catch {
+        if (!cancelled) {
+          setNetworkRttMs(null);
+        }
+      }
+    }
+
+    void refreshRoundTripTime();
+    const interval = window.setInterval(() => {
+      void refreshRoundTripTime();
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [connectedAt, match, status]);
 
   async function ensureMedia() {
     if (localStreamRef.current) {
@@ -746,6 +855,7 @@ export function VideoChat({
     setMatch(nextMatch);
     setConnectedAt(null);
     setElapsed(0);
+    setNetworkRttMs(null);
     setStatus("connecting");
     setMessage("Connessione peer-to-peer in corso.");
     trackChatEvent("webrtc_connect_started", {
@@ -1201,6 +1311,8 @@ export function VideoChat({
 
   const isStartBusy =
     status === "permissions" || status === "waiting" || status === "connecting";
+  const networkRttLabel = networkRttMs === null ? "--" : `${networkRttMs} ms`;
+  const networkRttTone = getRoundTripTimeTone(networkRttMs);
 
   return (
     <section className="grid gap-4">
@@ -1228,6 +1340,15 @@ export function VideoChat({
                 ? "In coda"
                 : "Offline"}
           </div>
+          {status === "connected" ? (
+            <div
+              className={`absolute right-3 top-3 inline-flex items-center gap-2 rounded-md border px-3 py-1 text-xs font-bold shadow-lg backdrop-blur ${networkRttTone}`}
+              title="Round-trip time stimato dalla connessione WebRTC"
+            >
+              <span className="h-2 w-2 rounded-full bg-current" />
+              <span className="font-mono">RTT {networkRttLabel}</span>
+            </div>
+          ) : null}
           <div className="absolute bottom-3 right-3 w-36 overflow-hidden rounded-lg border border-white/15 bg-black">
             <video
               ref={localVideoRef}
