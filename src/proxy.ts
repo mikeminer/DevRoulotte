@@ -18,7 +18,11 @@ export function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/maintenance" || isStaticAsset(pathname)) {
+  if (
+    pathname === "/maintenance" ||
+    pathname === "/status" ||
+    isStaticAsset(pathname)
+  ) {
     return NextResponse.next();
   }
 
