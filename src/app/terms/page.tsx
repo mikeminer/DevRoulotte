@@ -32,7 +32,7 @@ export default function TermsPage() {
           body: [
             "Il piano Free ospite include 3 match al giorno, chiamate da 2 minuti e rate limit sul tasto Next.",
             "Il piano Registrato include 15 match al giorno, chiamate da 5 minuti e filtro lingua.",
-            "Il piano Premium costa 3,99 EUR al mese, non include prova gratuita e abilita match illimitati, chiamate da 15 minuti, filtri completi e priorità in coda.",
+            "Il piano Premium costa 3,99 EUR al mese, non include prova gratuita e abilita match illimitati, chiamate da 15 minuti, filtri completi, priorità in coda e parola di sintonia 1:1.",
           ],
         },
         {
