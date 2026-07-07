@@ -4,6 +4,7 @@ import { MAINTENANCE_MESSAGE, MAINTENANCE_MODE } from "@/lib/maintenance";
 const allowedApiPaths = new Set([
   "/api/status",
   "/api/paypal/webhook",
+  "/api/github/marketplace/webhook",
   "/api/cron/cleanup",
 ]);
 

@@ -44,6 +44,7 @@ supabase/emailtemplates.txt
 resendapi.txt
 improvmxapi.txt
 ga4apisecret.txt
+GITHUB_MARKETPLACE_WEBHOOK_SECRET.txt
 .paypal-credentials.local.json
 .cloudflare-turn.local.json
 

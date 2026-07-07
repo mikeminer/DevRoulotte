@@ -322,6 +322,7 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `PAYPAL_CLIENT_SECRET`
 - `PAYPAL_PLAN_ID`
 - `PAYPAL_WEBHOOK_ID`
+- `GITHUB_MARKETPLACE_WEBHOOK_SECRET` opzionale server-only, necessario solo se pubblichi la listing GitHub Marketplace
 - `ADMIN_ACCESS_TOKEN`
 - `GUEST_SESSION_SECRET`
 - `CRON_SECRET`
@@ -373,6 +374,10 @@ PostHog Revenue e' opzionale e funziona come ponte server-side PayPal -> PostHog
 4. Nel prodotto esterno che chiede "PostHog Revenue", collega PostHog e configura l'evento revenue `purchase_completed`, proprieta' importo `revenue`, valuta `currency`, prodotto `product` e subscription `subscription_id`.
 
 Il webhook PayPal verificato invia a PostHog un evento `purchase_completed` quando riceve `BILLING.SUBSCRIPTION.ACTIVATED` e la subscription risulta `active`. L'importo viene inviato in minor unit (`399` per `3,99 EUR`) seguendo la raccomandazione PostHog, insieme a `revenue_decimal: 3.99`. `subscription_id` e `transaction_id` sono hash stabili, non gli ID PayPal leggibili. Se `POSTHOG_PROJECT_API_KEY` manca o PostHog risponde errore, Premium viene comunque attivato e l'errore resta salvato in `subscriptions.raw_json.posthog`.
+
+## GitHub Marketplace
+
+Per la pagina GitHub Marketplace usa come hook URL `https://devroulotte.chat/api/github/marketplace/webhook`, content type `application/json` e un secret salvato in Vercel come `GITHUB_MARKETPLACE_WEBHOOK_SECRET`. L'endpoint verifica `X-Hub-Signature-256`, risponde al `ping` di GitHub e registra solo metadati minimi degli eventi `marketplace_purchase`. I piani Premium reali restano gestiti da PayPal, quindi il webhook Marketplace non attiva abbonamenti DevRoulotte.
 
 ## Revisione legale
 
