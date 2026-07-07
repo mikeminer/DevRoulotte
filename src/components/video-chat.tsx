@@ -83,6 +83,16 @@ const countries = [
   { value: "US", label: "Stati Uniti" },
 ];
 
+const MATCH_SALT_MAX_LENGTH = 48;
+
+function normalizeMatchSaltInput(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, MATCH_SALT_MAX_LENGTH);
+}
+
 function formatTime(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60)
     .toString()
@@ -250,6 +260,7 @@ export function VideoChat({
   const [connectedAt, setConnectedAt] = useState<number | null>(null);
   const [preferredLanguage, setPreferredLanguage] = useState("any");
   const [preferredCountry, setPreferredCountry] = useState("any");
+  const [matchSalt, setMatchSalt] = useState("");
   const [reportReason, setReportReason] = useState("nudity");
   const [nextLockedUntil, setNextLockedUntil] = useState(0);
   const [nextLockedSeconds, setNextLockedSeconds] = useState(0);
@@ -1001,8 +1012,10 @@ export function VideoChat({
     isPollingForMatchRef.current = true;
     const headers = await buildActorHeaders(supabase, getOrCreateGuestId());
     const searchStartedAt = Date.now();
+    const privateMatchSalt = isPremium ? matchSalt : "";
 
     trackChatEvent("match_search_started", {
+      private_match_salt: Boolean(privateMatchSalt),
       preferred_country: isPremium ? preferredCountry : "any",
       preferred_language: isAuthenticated ? preferredLanguage : "any",
       search_reason: searchReason,
@@ -1024,6 +1037,7 @@ export function VideoChat({
             country: "IT",
             preferredLanguage: isAuthenticated ? preferredLanguage : "any",
             preferredCountry: isPremium ? preferredCountry : "any",
+            matchSalt: privateMatchSalt,
           }),
         });
         const data = (await response.json()) as MatchJoinResponse;
@@ -1269,36 +1283,60 @@ export function VideoChat({
           </div>
 
           {isAuthenticated ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2">
+              <div className="grid grid-cols-2 gap-2">
+                <label className="grid gap-1 text-xs text-slate-300">
+                  Lingua
+                  <select
+                    className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
+                    value={preferredLanguage}
+                    onChange={(event) => setPreferredLanguage(event.target.value)}
+                    disabled={!isAuthenticated}
+                  >
+                    {languages.map((language) => (
+                      <option key={language.value} value={language.value}>
+                        {language.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="grid gap-1 text-xs text-slate-300">
+                  Paese / regione
+                  <select
+                    className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
+                    value={preferredCountry}
+                    onChange={(event) => setPreferredCountry(event.target.value)}
+                    disabled={!isPremium}
+                  >
+                    {countries.map((country) => (
+                      <option key={country.value} value={country.value}>
+                        {country.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               <label className="grid gap-1 text-xs text-slate-300">
-                Lingua
-                <select
-                  className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
-                  value={preferredLanguage}
-                  onChange={(event) => setPreferredLanguage(event.target.value)}
-                  disabled={!isAuthenticated}
-                >
-                  {languages.map((language) => (
-                    <option key={language.value} value={language.value}>
-                      {language.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-1 text-xs text-slate-300">
-                Paese / regione
-                <select
-                  className="h-10 rounded-md border border-white/10 bg-black/30 px-2 text-sm text-white outline-none disabled:opacity-45"
-                  value={preferredCountry}
-                  onChange={(event) => setPreferredCountry(event.target.value)}
+                Parola di sintonia
+                <input
+                  className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none placeholder:text-slate-500 disabled:opacity-45"
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  maxLength={MATCH_SALT_MAX_LENGTH}
+                  value={matchSalt}
+                  onChange={(event) =>
+                    setMatchSalt(normalizeMatchSaltInput(event.target.value))
+                  }
                   disabled={!isPremium}
-                >
-                  {countries.map((country) => (
-                    <option key={country.value} value={country.value}>
-                      {country.label}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={isPremium ? "es. deploy-alle-3" : "Premium"}
+                />
+                <span className="text-[11px] text-slate-500">
+                  {isPremium
+                    ? "Chi usa la stessa parola entra nella stessa corsia 1:1."
+                    : "Disponibile con Premium."}
+                </span>
               </label>
             </div>
           ) : null}

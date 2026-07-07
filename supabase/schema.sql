@@ -97,6 +97,7 @@ create table if not exists public.match_queue (
   is_premium boolean not null default false,
   language text default 'it',
   country text default 'IT',
+  match_salt text,
   preferred_language text default 'any',
   preferred_country text default 'any',
   status text not null default 'waiting' check (status in ('waiting', 'matched')),
@@ -112,6 +113,10 @@ create table if not exists public.match_queue (
 
 create index if not exists match_queue_waiting_idx
   on public.match_queue (status, is_premium desc, queued_at, last_seen_at);
+
+create index if not exists match_queue_waiting_salt_idx
+  on public.match_queue (status, match_salt, is_premium desc, queued_at, last_seen_at)
+  where status = 'waiting';
 
 create table if not exists public.chat_presence (
   actor_type text not null check (actor_type in ('guest', 'user')),

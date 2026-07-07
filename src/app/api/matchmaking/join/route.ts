@@ -26,6 +26,7 @@ const joinSchema = z.object({
   country: z.string().max(8).optional().default("IT"),
   preferredLanguage: z.string().max(8).optional().default("any"),
   preferredCountry: z.string().max(8).optional().default("any"),
+  matchSalt: z.string().max(64).optional().default(""),
 });
 
 type QueueRow = {
@@ -35,6 +36,7 @@ type QueueRow = {
   is_premium: boolean;
   language: string | null;
   country: string | null;
+  match_salt: string | null;
   status: "waiting" | "matched";
   match_id: string | null;
   channel_name: string | null;
@@ -57,6 +59,15 @@ type ActiveMatchRow = {
 
 function hashId(id: string) {
   return createHash("sha256").update(id).digest("hex").slice(0, 10);
+}
+
+function normalizeMatchSalt(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 48);
 }
 
 function logMatchmaking(
@@ -299,6 +310,8 @@ export async function POST(request: NextRequest) {
     const dailyLimit = getDailyMatchLimit(planCode);
     const canUseLanguageFilter = planCode !== "guest";
     const canUseCountryFilter = planCode === "premium";
+    const matchSalt =
+      planCode === "premium" ? normalizeMatchSalt(body.matchSalt) : "";
     const dailyUsed = await getDailyUsage(actor);
     const activeCutoff = new Date(
       Date.now() - MATCH_QUEUE_ACTIVE_SECONDS * 1000,
@@ -313,6 +326,7 @@ export async function POST(request: NextRequest) {
       premium,
       planCode,
       dailyUsed,
+      hasPrivateMatchSalt: Boolean(matchSalt),
     });
 
     if (dailyLimit !== null && dailyUsed >= dailyLimit) {
@@ -474,13 +488,21 @@ export async function POST(request: NextRequest) {
       activeWindowSeconds: MATCH_QUEUE_ACTIVE_SECONDS,
     });
 
-    const filteredCandidates = (candidates ?? []).filter((candidate) => {
+    const hardFilteredCandidates = (candidates ?? []).filter((candidate) => {
       const peerKey = `${candidate.actor_type}:${candidate.actor_id}`;
 
       if (recentPeerKeys.has(peerKey)) {
         return false;
       }
 
+      if ((candidate.match_salt ?? "") !== matchSalt) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const filteredCandidates = hardFilteredCandidates.filter((candidate) => {
       if (
         canUseLanguageFilter &&
         body.preferredLanguage !== "any" &&
@@ -500,7 +522,9 @@ export async function POST(request: NextRequest) {
       return true;
     });
 
-    const pool = filteredCandidates.length ? filteredCandidates : candidates ?? [];
+    const pool = filteredCandidates.length
+      ? filteredCandidates
+      : hardFilteredCandidates;
     const availablePool = [];
 
     for (const candidate of pool.slice(0, 8)) {
@@ -518,8 +542,10 @@ export async function POST(request: NextRequest) {
       actorType: actor.type,
       actorHash: hashId(actor.id),
       filteredCandidates: filteredCandidates.length,
+      hardFilteredCandidates: hardFilteredCandidates.length,
       availablePool: availablePool.length,
       hasPeer: Boolean(peer),
+      hasPrivateMatchSalt: Boolean(matchSalt),
     });
 
     if (!peer) {
@@ -531,6 +557,7 @@ export async function POST(request: NextRequest) {
           is_premium: premium,
           language: body.language,
           country: body.country,
+          match_salt: matchSalt || null,
           preferred_language: canUseLanguageFilter
             ? body.preferredLanguage
             : "any",
@@ -550,12 +577,15 @@ export async function POST(request: NextRequest) {
       logMatchmaking("waiting", {
         actorType: actor.type,
         actorHash: hashId(actor.id),
+        hasPrivateMatchSalt: Boolean(matchSalt),
       });
 
       return NextResponse.json({
         status: "waiting",
         retryAfterMs: 1800,
-        message: "Sto cercando una persona disponibile.",
+        message: matchSalt
+          ? "Sto cercando una persona con la stessa parola di sintonia."
+          : "Sto cercando una persona disponibile.",
       });
     }
 
@@ -580,7 +610,7 @@ export async function POST(request: NextRequest) {
       throw new Error(matchError?.message ?? "Creazione match fallita");
     }
 
-    const peerClaim = await supabase
+    let peerClaimQuery = supabase
       .from("match_queue")
       .update({
         status: "matched",
@@ -594,7 +624,13 @@ export async function POST(request: NextRequest) {
       .eq("actor_type", peer.actor_type)
       .eq("actor_id", peer.actor_id)
       .eq("status", "waiting")
-      .gte("last_seen_at", activeCutoff)
+      .gte("last_seen_at", activeCutoff);
+
+    peerClaimQuery = matchSalt
+      ? peerClaimQuery.eq("match_salt", matchSalt)
+      : peerClaimQuery.is("match_salt", null);
+
+    const peerClaim = await peerClaimQuery
       .select("actor_type,actor_id")
       .maybeSingle();
 
@@ -623,6 +659,7 @@ export async function POST(request: NextRequest) {
           is_premium: premium,
           language: body.language,
           country: body.country,
+          match_salt: matchSalt || null,
           preferred_language: canUseLanguageFilter
             ? body.preferredLanguage
             : "any",
@@ -642,7 +679,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         status: "waiting",
         retryAfterMs: 900,
-        message: "Sto cercando una persona disponibile.",
+        message: matchSalt
+          ? "Sto cercando una persona con la stessa parola di sintonia."
+          : "Sto cercando una persona disponibile.",
       });
     }
 

@@ -28,6 +28,7 @@ export default function PrivacyPage() {
             "Se accedi con GitHub o LinkedIn tramite Supabase Auth, possiamo ricevere e conservare i dati OAuth necessari al login, come identificativo provider, email verificata se disponibile, nome utente, avatar pubblico e dati profilo essenziali restituiti dal provider scelto.",
             "Per ospiti usiamo un identificativo casuale salvato nel browser per applicare limiti, report e ban.",
             "Per il Giro della settimana trattiamo gli slot e i temi scelti dall'utente per generare una heatmap aggregata della settimana corrente. Queste preferenze non determinano il matchmaking live.",
+            "Per utenti Premium, se inserita, trattiamo una parola di sintonia temporanea per separare la coda matchmaking e collegare solo persone che hanno scritto la stessa parola.",
             "Trattiamo inoltre dati tecnici come indirizzi IP visibili ai provider, user agent, log applicativi essenziali, eventi di errore, presenza temporanea in chat, stato online/offline e informazioni necessarie a sicurezza, limiti Free e prevenzione abusi.",
           ],
         },
@@ -43,6 +44,7 @@ export default function PrivacyPage() {
           body: [
             "Salviamo log minimi dei match, report, ban, stato coda, presenza temporanea in /chat, stato premium e webhook PayPal necessari al funzionamento del servizio.",
             "Per stabilire WebRTC trattiamo temporaneamente offer/answer/ICE candidate di signaling. Questi dati non sono audio/video e vengono usati solo per collegare i due browser.",
+            "La parola di sintonia Premium, quando usata, resta nella coda matchmaking temporanea e non viene mostrata al peer o inviata ad analytics.",
             "Le preferenze del Giro della settimana vengono salvate con identificativo utente/ospite e settimana di riferimento, poi mostrate agli altri utenti solo come conteggi aggregati.",
             "PayPal gestisce i dati di pagamento. DevRoulotte riceve solo identificativi e stati subscription utili ad abilitare Premium.",
           ],

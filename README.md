@@ -114,7 +114,7 @@ Tabelle principali:
 - `reports`: segnalazioni
 - `bans`: ban manuali e shadowban
 - `match_logs`: log essenziali dei match
-- `match_queue`: coda matchmaking
+- `match_queue`: coda matchmaking, inclusa la parola di sintonia Premium temporanea quando usata
 - `webrtc_signals`: offer/answer/ICE candidate temporanei per stabilire la chiamata WebRTC
 - `weekly_opt_ins`: preferenze aggregate per la heatmap settimanale, separata dal matchmaking
 
@@ -260,6 +260,8 @@ Per provare un match tra due computer, usa due identità diverse: due account di
 
 Il matching passa da Supabase `match_queue`, quindi funziona anche su Vercel senza memoria condivisa tra funzioni. Il signaling WebRTC usa API routes e `webrtc_signals`: il caller ritenta l'offer per qualche secondo e l'altro browser legge i segnali via polling breve.
 
+Per testare la parola di sintonia Premium, usa due account Premium diversi e inserisci la stessa parola nel campo dedicato prima di entrare live. Chi non inserisce una parola resta nella roulette pubblica; chi inserisce una parola viene messo solo con utenti che hanno scritto la stessa parola.
+
 Durante il test tieni entrambe le pagine `/chat` aperte e attive dopo aver concesso webcam/microfono. Per evitare match fantasma, il backend crea match solo con peer visti negli ultimi `MATCH_QUEUE_ACTIVE_SECONDS` secondi, mentre `MATCH_QUEUE_STALE_SECONDS` resta la finestra piu' lunga usata per pulire la coda.
 
 ## Webcam e microfono su mobile
@@ -277,7 +279,7 @@ Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulo
 - Conferma obbligatoria 18+ e regole community
 - Piano Free ospite: 3 match/giorno, chiamate da 2 minuti, rate limit Next
 - Piano Registrato: 15 match/giorno, chiamate da 5 minuti, filtro lingua
-- Piano Premium: match illimitati, chiamate da 15 minuti, filtri completi, priorità in coda, badge
+- Piano Premium: match illimitati, chiamate da 15 minuti, filtri completi, priorità in coda, parola di sintonia 1:1, badge
 - WebRTC audio/video P2P
 - API signaling via Supabase `webrtc_signals`
 - Pulsanti Entra live, Next, Stop, Report, Upgrade
