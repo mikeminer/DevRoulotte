@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MAINTENANCE_MESSAGE, MAINTENANCE_MODE } from "@/lib/maintenance";
 
-const allowedApiPaths = new Set(["/api/paypal/webhook", "/api/cron/cleanup"]);
+const allowedApiPaths = new Set([
+  "/api/status",
+  "/api/paypal/webhook",
+  "/api/cron/cleanup",
+]);
 
 function isStaticAsset(pathname: string) {
   return (
