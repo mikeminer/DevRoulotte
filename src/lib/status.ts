@@ -182,7 +182,7 @@ export async function getStatusPayload(): Promise<StatusPayload> {
           status: "Operativo",
           title: "Nessun incidente critico dichiarato",
           description:
-            "I servizi principali sono disponibili. La videochat resta una funzione beta e viene monitorata durante i test pubblici.",
+            "I servizi principali sono disponibili. Il servizio di videocall e' operativo e viene monitorato insieme a matchmaking, signaling e infrastruttura WebRTC.",
           tone: "ok" as const,
         };
 
