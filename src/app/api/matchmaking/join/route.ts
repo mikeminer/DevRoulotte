@@ -488,19 +488,23 @@ export async function POST(request: NextRequest) {
       activeWindowSeconds: MATCH_QUEUE_ACTIVE_SECONDS,
     });
 
-    const hardFilteredCandidates = (candidates ?? []).filter((candidate) => {
-      const peerKey = `${candidate.actor_type}:${candidate.actor_id}`;
-
-      if (recentPeerKeys.has(peerKey)) {
-        return false;
-      }
-
+    const saltMatchedCandidates = (candidates ?? []).filter((candidate) => {
       if ((candidate.match_salt ?? "") !== matchSalt) {
         return false;
       }
 
       return true;
     });
+    const nonRecentCandidates = saltMatchedCandidates.filter((candidate) => {
+      const peerKey = `${candidate.actor_type}:${candidate.actor_id}`;
+
+      return !recentPeerKeys.has(peerKey);
+    });
+    const usedRecentFallback =
+      saltMatchedCandidates.length > 0 && nonRecentCandidates.length === 0;
+    const hardFilteredCandidates = nonRecentCandidates.length
+      ? nonRecentCandidates
+      : saltMatchedCandidates;
 
     const filteredCandidates = hardFilteredCandidates.filter((candidate) => {
       if (
@@ -543,9 +547,12 @@ export async function POST(request: NextRequest) {
       actorHash: hashId(actor.id),
       filteredCandidates: filteredCandidates.length,
       hardFilteredCandidates: hardFilteredCandidates.length,
+      saltMatchedCandidates: saltMatchedCandidates.length,
+      nonRecentCandidates: nonRecentCandidates.length,
       availablePool: availablePool.length,
       hasPeer: Boolean(peer),
       hasPrivateMatchSalt: Boolean(matchSalt),
+      recentFallback: usedRecentFallback,
     });
 
     if (!peer) {
