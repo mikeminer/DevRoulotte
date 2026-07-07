@@ -318,6 +318,25 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://devroulotte.chat/api/cron/c
 
 In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni manuali. Se vuoi automatizzarlo, configura un Vercel Cron o un monitor esterno gratuito che chiami questo endpoint.
 
+## Status page
+
+`/status` e `/api/status` mostrano uno stato applicativo, non una copia del dashboard Supabase. La pagina verifica:
+
+- database profili e subscription su Supabase
+- `match_queue`, `webrtc_signals` e `chat_presence` per matchmaking, signaling e presenza live
+- Cloudflare TURN generando credenziali temporanee short-lived
+- PayPal OAuth senza creare pagamenti o subscription
+- configurazione GA4 realtime e stato email transazionale monitorato
+
+Per dichiarare manualmente un incidente pubblico, imposta in Vercel:
+
+```env
+STATUS_INCIDENT_LEVEL=degraded
+STATUS_INCIDENT_MESSAGE=Matchmaking in osservazione durante un intervento tecnico.
+```
+
+Rimuovi `STATUS_INCIDENT_MESSAGE` quando l'incidente e' chiuso. `MAINTENANCE_MODE=true` continua ad avere priorita' e mostra la pagina manutenzione.
+
 ## TODO credenziali reali
 
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -338,6 +357,8 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - `ADMIN_ACCESS_TOKEN`
 - `GUEST_SESSION_SECRET`
 - `CRON_SECRET`
+- `STATUS_INCIDENT_LEVEL` opzionale, solo per avvisi manuali su `/status`
+- `STATUS_INCIDENT_MESSAGE` opzionale, solo per avvisi manuali su `/status`
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID` opzionale, solo se vuoi Google Analytics 4
 - `GA4_API_SECRET` opzionale server-only, necessario per revenue PayPal via Measurement Protocol
 - `GA4_MEASUREMENT_PROTOCOL_ENDPOINT` opzionale, default consigliato `https://region1.google-analytics.com/mp/collect`

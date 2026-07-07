@@ -205,6 +205,39 @@ export function StatusDashboard({
               <p className="mt-3 text-sm leading-6 text-slate-300">
                 {service.note}
               </p>
+              {typeof service.latencyMs === "number" ? (
+                <p className="mt-2 font-mono text-xs text-slate-500">
+                  Check più lento: {service.latencyMs}ms
+                </p>
+              ) : null}
+              {service.checks?.length ? (
+                <div className="mt-4 grid gap-2">
+                  {service.checks.map((check) => (
+                    <div
+                      key={check.label}
+                      className="rounded-md border border-white/10 bg-black/20 px-3 py-2"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="inline-flex min-w-0 items-center gap-2 text-xs font-semibold text-slate-200">
+                          <StatusIcon tone={check.tone} />
+                          <span className="truncate">{check.label}</span>
+                        </span>
+                        <span className="shrink-0 font-mono text-[11px] text-slate-400">
+                          {check.status}
+                          {typeof check.latencyMs === "number"
+                            ? ` · ${check.latencyMs}ms`
+                            : ""}
+                        </span>
+                      </div>
+                      {check.note ? (
+                        <p className="mt-1 break-words text-[11px] leading-5 text-slate-500">
+                          {check.note}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </article>
           ))}
         </div>
