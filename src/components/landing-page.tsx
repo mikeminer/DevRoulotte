@@ -2,8 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
+  KeyRound,
   Linkedin,
+  MonitorSmartphone,
   ShieldCheck,
+  UsersRound,
   Video,
   Wrench,
 } from "lucide-react";
@@ -62,10 +65,96 @@ const tierRows = [
   },
 ];
 
+const instantPitchItems = [
+  {
+    title: "Persone mai viste prima",
+    body: "Entri per scoprire al volo un developer, founder o builder che non avresti incrociato con una call fissata o un DM freddo.",
+    icon: UsersRound,
+  },
+  {
+    title: "Parola segreta Premium",
+    body: "Se volete ritrovarvi senza scambiarvi subito il contatto, inserite entrambi la stessa parola e il sistema matcha soltanto voi.",
+    icon: KeyRound,
+  },
+  {
+    title: "1:1 peer-to-peer",
+    body: "WebRTC, laptop, mobile o tablet: DevRoulotte è pensata come connector rapido, diretto e leggero.",
+    icon: MonitorSmartphone,
+  },
+];
+
 export function LandingPage() {
   return (
     <main className="theme-page min-h-screen w-full max-w-full overflow-hidden bg-[#080b10] text-white">
       <LandingStoryScene />
+
+      <section className="border-y border-white/10 bg-[#f7efe1] px-4 py-14 text-slate-950 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="grid gap-5">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-teal-700">
+              Perché DevRoulotte
+            </p>
+            <h2 className="max-w-3xl text-3xl font-black leading-tight tracking-normal text-slate-950 sm:text-5xl">
+              Google Meet è perfetto quando la call esiste già.
+            </h2>
+            <div className="grid gap-4 text-base font-semibold leading-8 text-slate-700 sm:text-lg">
+              <p>
+                DevRoulotte serve prima: quando vuoi scoprire persone al volo
+                mai viste prima, senza spedire link, aprire un calendario o
+                costruire l&apos;ennesima stanza vuota.
+              </p>
+              <p>
+                Entri nella roulotte e parti con una conversazione 1:1 breve,
+                diretta, umana. Con Premium puoi anche usare una parola segreta:
+                la inserite entrambi e il sistema vi sintonizza solo tra voi,
+                senza obbligarvi a scambiarvi subito un contatto.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/chat"
+                data-analytics-event="cta_clicked"
+                data-analytics-surface="landing_pitch"
+                data-analytics-cta-id="pitch_enter"
+                data-analytics-destination="chat"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-slate-950 px-5 text-sm font-black text-white hover:bg-slate-800"
+              >
+                Entra nella roulotte
+                <KeyRound className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-3">
+            {instantPitchItems.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <div
+                  key={item.title}
+                  className="grid gap-3 rounded-lg border border-slate-950/10 bg-white/70 p-5 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-teal-700 text-white">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <h3 className="text-lg font-black text-slate-950">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm font-semibold leading-7 text-slate-700">
+                    {item.body}
+                  </p>
+                </div>
+              );
+            })}
+            <p className="rounded-lg border border-slate-950/10 bg-slate-950 p-5 text-lg font-black leading-8 text-white">
+              Meet è uno strumento per riunioni. DevRoulotte è uno strato di
+              networking istantaneo.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <section className="border-y border-white/10 bg-black/20 px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-5xl gap-6">
