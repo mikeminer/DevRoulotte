@@ -28,23 +28,107 @@ type Category = {
   body: string;
 };
 
-const optionalCategories: Category[] = [
-  {
-    id: "preferences",
-    title: "Preferenze",
-    body: "Memorizzano scelte facoltative dell'interfaccia. Al momento DevRoulotte non usa strumenti opzionali di preferenza.",
+type CookieLocale = "it" | "en";
+
+const DEVROULOTTE_LOCALE_COOKIE = "devroulotte_locale";
+
+const optionalCategoriesByLocale: Record<CookieLocale, Category[]> = {
+  it: [
+    {
+      id: "preferences",
+      title: "Preferenze",
+      body: "Memorizzano scelte facoltative dell'interfaccia. Al momento DevRoulotte non usa strumenti opzionali di preferenza.",
+    },
+    {
+      id: "analytics",
+      title: "Statistiche",
+      body: "Abilitano Google Analytics 4 per misurare visite, pagine viste ed eventi tecnici aggregati. Restano spenti fino al tuo consenso.",
+    },
+    {
+      id: "marketing",
+      title: "Marketing",
+      body: "Servirebbero per pubblicità o tracciamenti promozionali. Al momento non sono attivi cookie marketing.",
+    },
+  ],
+  en: [
+    {
+      id: "preferences",
+      title: "Preferences",
+      body: "Store optional interface choices. DevRoulotte does not currently use optional preference tools.",
+    },
+    {
+      id: "analytics",
+      title: "Analytics",
+      body: "Enable Google Analytics 4 to measure visits, page views and aggregated technical events. They stay off until you consent.",
+    },
+    {
+      id: "marketing",
+      title: "Marketing",
+      body: "Would be used for ads or promotional tracking. DevRoulotte does not currently run marketing cookies.",
+    },
+  ],
+};
+
+const cookieText = {
+  it: {
+    bannerLabel: "Informativa breve cookie",
+    bannerTitle: "Privacy e cookie",
+    bannerBody:
+      "Usiamo strumenti tecnici necessari per sicurezza, login, preferenze 18+, limiti Free e consenso cookie. Le statistiche con Google Analytics e il marketing restano disattivati finché non li accetti.",
+    policyLink: "Leggi la cookie policy",
+    necessaryOnly: "Solo necessari",
+    customize: "Personalizza",
+    acceptAll: "Accetta tutto",
+    reviewLabel: "Rivedi le scelte sui cookie",
+    centerLabel: "Centro preferenze cookie",
+    centerEyebrow: "Centro preferenze",
+    centerTitle: "Scelte cookie",
+    centerBody:
+      "Puoi accettare o rifiutare le categorie non necessarie. Nessun cookie non tecnico viene usato prima del consenso.",
+    closePreferences: "Chiudi preferenze cookie",
+    necessaryTitle: "Necessari",
+    necessaryBody:
+      "Sempre attivi: login Supabase, ID ospite, limiti Free, sicurezza, report, conferma 18+/regole e salvataggio della scelta cookie.",
+    active: "Attivi",
+    accepted: "Accettati",
+    rejected: "Rifiutati",
+    rejectOptional: "Rifiuta opzionali",
+    saveChoice: "Salva scelta",
+    footerPrefix: "Dettagli e strumenti attuali sono descritti nella",
+    cookiePolicy: "cookie policy",
+    footerSuffix:
+      "Questa implementazione è una base tecnica e va comunque validata dal consulente privacy prima del lancio pubblico.",
   },
-  {
-    id: "analytics",
-    title: "Statistiche",
-    body: "Abilitano Google Analytics 4 per misurare visite, pagine viste ed eventi tecnici aggregati. Restano spenti fino al tuo consenso.",
+  en: {
+    bannerLabel: "Short cookie notice",
+    bannerTitle: "Privacy and cookies",
+    bannerBody:
+      "We use necessary technical tools for security, login, 18+ preferences, Free limits and cookie consent. Google Analytics statistics and marketing remain disabled until you accept them.",
+    policyLink: "Read the cookie policy",
+    necessaryOnly: "Necessary only",
+    customize: "Customize",
+    acceptAll: "Accept all",
+    reviewLabel: "Review cookie choices",
+    centerLabel: "Cookie preference center",
+    centerEyebrow: "Preference center",
+    centerTitle: "Cookie choices",
+    centerBody:
+      "You can accept or reject non-essential categories. No non-technical cookies are used before consent.",
+    closePreferences: "Close cookie preferences",
+    necessaryTitle: "Necessary",
+    necessaryBody:
+      "Always active: Supabase login, guest ID, Free limits, security, reports, 18+/rules confirmation and storing the cookie choice.",
+    active: "Active",
+    accepted: "Accepted",
+    rejected: "Rejected",
+    rejectOptional: "Reject optional",
+    saveChoice: "Save choice",
+    footerPrefix: "Current details and tools are described in the",
+    cookiePolicy: "cookie policy",
+    footerSuffix:
+      "This implementation is a technical baseline and should still be validated by a privacy consultant before public launch.",
   },
-  {
-    id: "marketing",
-    title: "Marketing",
-    body: "Servirebbero per pubblicita' o tracciamenti promozionali. Al momento non sono attivi cookie marketing.",
-  },
-];
+} satisfies Record<CookieLocale, Record<string, string>>;
 
 function choicesFromConsent(
   consent: CookieConsent | null,
@@ -58,8 +142,27 @@ function choicesFromConsent(
     : DEFAULT_COOKIE_CHOICES;
 }
 
+function getCookieValue(name: string) {
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${name}=`));
+
+  return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : "";
+}
+
+function detectCookieLocale(): CookieLocale {
+  const storedLocale = getCookieValue(DEVROULOTTE_LOCALE_COOKIE);
+
+  if (storedLocale === "it" || storedLocale === "en") {
+    return storedLocale;
+  }
+
+  return navigator.language.toLowerCase().startsWith("it") ? "it" : "en";
+}
+
 export function CookieConsentManager() {
   const [isReady, setIsReady] = useState(false);
+  const [locale, setLocale] = useState<CookieLocale>("it");
   const [consent, setConsent] = useState<CookieConsent | null>(null);
   const [draft, setDraft] = useState<CookieConsentChoices>(
     DEFAULT_COOKIE_CHOICES,
@@ -72,6 +175,7 @@ export function CookieConsentManager() {
         window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY),
       );
 
+      setLocale(detectCookieLocale());
       setConsent(stored);
       setDraft(choicesFromConsent(stored));
       setIsReady(true);
@@ -82,6 +186,7 @@ export function CookieConsentManager() {
 
   useEffect(() => {
     function openPreferences() {
+      setLocale(detectCookieLocale());
       setDraft(choicesFromConsent(consent));
       setIsPanelOpen(true);
     }
@@ -146,12 +251,14 @@ export function CookieConsentManager() {
   }
 
   const shouldShowBanner = !consent && !isPanelOpen;
+  const text = cookieText[locale];
+  const optionalCategories = optionalCategoriesByLocale[locale];
 
   return (
     <>
       {shouldShowBanner ? (
         <section
-          aria-label="Informativa breve cookie"
+          aria-label={text.bannerLabel}
           aria-live="polite"
           className="fixed inset-x-3 bottom-3 z-40 max-h-[calc(100svh-1.5rem)] overflow-y-auto rounded-lg border border-white/10 bg-[#0d121a]/95 p-3 text-white shadow-2xl shadow-black/40 backdrop-blur sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-[420px] sm:p-4"
         >
@@ -159,19 +266,16 @@ export function CookieConsentManager() {
             <div className="grid gap-2">
               <div className="flex items-center gap-2 text-sm font-bold">
                 <Cookie className="h-4 w-4 text-teal-200" />
-                Privacy e cookie
+                {text.bannerTitle}
               </div>
               <p className="text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
-                Usiamo strumenti tecnici necessari per sicurezza, login,
-                preferenze 18+, limiti Free e consenso cookie. Le statistiche
-                con Google Analytics e il marketing restano disattivati
-                finche&apos; non li accetti.
+                {text.bannerBody}
               </p>
               <Link
                 href="/cookies"
                 className="w-fit text-xs font-semibold text-teal-200 hover:text-teal-100"
               >
-                Leggi la cookie policy
+                {text.policyLink}
               </Link>
             </div>
             <div className="grid gap-2 sm:grid-cols-3">
@@ -180,7 +284,7 @@ export function CookieConsentManager() {
                 onClick={rejectOptional}
                 className="inline-flex h-9 items-center justify-center rounded-md border border-white/15 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
               >
-                Solo necessari
+                {text.necessaryOnly}
               </button>
               <button
                 type="button"
@@ -188,14 +292,14 @@ export function CookieConsentManager() {
                 className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-white/15 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
               >
                 <Settings2 className="h-4 w-4" />
-                Personalizza
+                {text.customize}
               </button>
               <button
                 type="button"
                 onClick={acceptAll}
                 className="inline-flex h-9 items-center justify-center rounded-md bg-teal-300 px-3 text-xs font-bold text-slate-950 hover:bg-teal-200"
               >
-                Accetta tutto
+                {text.acceptAll}
               </button>
             </div>
           </div>
@@ -207,10 +311,11 @@ export function CookieConsentManager() {
           type="button"
           onClick={() => {
             setDraft(choicesFromConsent(consent));
+            setLocale(detectCookieLocale());
             setIsPanelOpen(true);
           }}
           className="fixed bottom-3 left-3 z-40 inline-flex h-9 items-center gap-2 rounded-md border border-white/10 bg-[#0d121a]/90 px-3 text-xs font-semibold text-slate-200 shadow-lg shadow-black/30 backdrop-blur hover:bg-white/10 sm:bottom-4 sm:left-4"
-          aria-label="Rivedi le scelte sui cookie"
+          aria-label={text.reviewLabel}
         >
           <Settings2 className="h-3.5 w-3.5" />
           Cookie
@@ -224,7 +329,7 @@ export function CookieConsentManager() {
           onClick={() => setIsPanelOpen(false)}
         >
           <section
-            aria-label="Centro preferenze cookie"
+            aria-label={text.centerLabel}
             aria-modal="true"
             role="dialog"
             className="my-auto max-h-[calc(100svh-1.5rem)] w-full max-w-2xl overflow-auto rounded-lg border border-white/10 bg-[#0d121a] p-4 text-white shadow-2xl shadow-black/50 sm:max-h-[min(760px,calc(100svh-3rem))] sm:p-5"
@@ -234,21 +339,20 @@ export function CookieConsentManager() {
               <div>
                 <p className="inline-flex items-center gap-2 text-xs font-bold uppercase text-teal-200">
                   <ShieldCheck className="h-4 w-4" />
-                  Centro preferenze
+                  {text.centerEyebrow}
                 </p>
                 <h2 className="mt-2 text-xl font-black tracking-normal">
-                  Scelte cookie
+                  {text.centerTitle}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Puoi accettare o rifiutare le categorie non necessarie.
-                  Nessun cookie non tecnico viene usato prima del consenso.
+                  {text.centerBody}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPanelOpen(false)}
                 className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/10 text-slate-200 hover:bg-white/10"
-                aria-label="Chiudi preferenze cookie"
+                aria-label={text.closePreferences}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -259,17 +363,15 @@ export function CookieConsentManager() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-bold text-teal-50">
-                      Necessari
+                      {text.necessaryTitle}
                     </h3>
                     <p className="mt-1 text-xs leading-5 text-teal-50/75">
-                      Sempre attivi: login Supabase, ID ospite, limiti Free,
-                      sicurezza, report, conferma 18+/regole e salvataggio
-                      della scelta cookie.
+                      {text.necessaryBody}
                     </p>
                   </div>
                   <span className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-teal-200/20 px-2 text-xs font-semibold text-teal-50">
                     <Check className="h-3.5 w-3.5" />
-                    Attivi
+                    {text.active}
                   </span>
                 </div>
               </div>
@@ -288,7 +390,7 @@ export function CookieConsentManager() {
                     </span>
                   </span>
                   <span className="inline-flex items-center gap-3 text-xs font-semibold text-slate-300">
-                    {draft[category.id] ? "Accettati" : "Rifiutati"}
+                    {draft[category.id] ? text.accepted : text.rejected}
                     <input
                       type="checkbox"
                       checked={draft[category.id]}
@@ -307,7 +409,7 @@ export function CookieConsentManager() {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-3 text-sm font-semibold text-slate-100 hover:bg-white/10"
               >
                 <RotateCcw className="h-4 w-4" />
-                Rifiuta opzionali
+                {text.rejectOptional}
               </button>
               <button
                 type="button"
@@ -315,24 +417,23 @@ export function CookieConsentManager() {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-3 text-sm font-semibold text-slate-100 hover:bg-white/10"
               >
                 <Save className="h-4 w-4" />
-                Salva scelta
+                {text.saveChoice}
               </button>
               <button
                 type="button"
                 onClick={acceptAll}
                 className="inline-flex h-10 items-center justify-center rounded-md border border-white/15 px-3 text-sm font-semibold text-slate-100 hover:bg-white/10"
               >
-                Accetta tutto
+                {text.acceptAll}
               </button>
             </div>
 
             <p className="mt-4 text-xs leading-5 text-slate-500">
-              Dettagli e strumenti attuali sono descritti nella{" "}
+              {text.footerPrefix}{" "}
               <Link href="/cookies" className="text-teal-200 hover:text-white">
-                cookie policy
+                {text.cookiePolicy}
               </Link>
-              . Questa implementazione e&apos; una base tecnica e va comunque
-              validata dal consulente privacy prima del lancio pubblico.
+              . {text.footerSuffix}
             </p>
           </section>
         </div>

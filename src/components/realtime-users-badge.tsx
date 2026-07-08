@@ -7,6 +7,7 @@ import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type RealtimeScope = "site" | "chat";
+type RealtimeLocale = "it" | "en";
 
 type RealtimeUsersResponse = {
   activeUsers: number | null;
@@ -21,20 +22,33 @@ type RealtimeUsersResponse = {
 
 type RealtimeUsersBadgeProps = {
   className?: string;
+  locale?: RealtimeLocale;
   scope: RealtimeScope;
   surface: "landing" | "chat";
 };
 
 const REFRESH_MS = 30_000;
 
-function formatWindowLabel(data: RealtimeUsersResponse) {
+function formatWindowLabel(data: RealtimeUsersResponse, locale: RealtimeLocale) {
   if (data.windowSeconds) {
+    if (locale === "en") {
+      return data.windowSeconds <= 90
+        ? "in the last minute"
+        : `in the last ${Math.round(data.windowSeconds / 60)} min`;
+    }
+
     return data.windowSeconds <= 90
       ? "nell'ultimo minuto"
       : `negli ultimi ${Math.round(data.windowSeconds / 60)} min`;
   }
 
   const windowMinutes = data.windowMinutes ?? 1;
+
+  if (locale === "en") {
+    return windowMinutes === 1
+      ? "in the last minute"
+      : `in the last ${windowMinutes} min`;
+  }
 
   return windowMinutes === 1
     ? "nell'ultimo minuto"
@@ -43,6 +57,7 @@ function formatWindowLabel(data: RealtimeUsersResponse) {
 
 export function RealtimeUsersBadge({
   className = "",
+  locale = "it",
   scope,
   surface,
 }: RealtimeUsersBadgeProps) {
@@ -173,17 +188,25 @@ export function RealtimeUsersBadge({
       <UsersRound className="h-4 w-4 text-teal-200" />
     ) : (
       <Activity className="h-4 w-4 text-teal-200" />
-    );
+  );
   const activeUsers = data.activeUsers ?? 0;
-  const windowLabel = formatWindowLabel(data);
+  const windowLabel = formatWindowLabel(data, locale);
   const label =
-    surface === "chat"
-      ? `${activeUsers} in chat ${windowLabel}`
-      : `${activeUsers} live ${windowLabel}`;
+    locale === "en"
+      ? surface === "chat"
+        ? `${activeUsers} in chat ${windowLabel}`
+        : `${activeUsers} live ${windowLabel}`
+      : surface === "chat"
+        ? `${activeUsers} in chat ${windowLabel}`
+        : `${activeUsers} live ${windowLabel}`;
   const title =
-    surface === "chat"
-      ? `Presenza tecnica DevRoulotte, aggiornata ogni pochi secondi. Finestra: ${windowLabel}.`
-      : `Dato aggregato da Google Analytics 4 Realtime, non presenza istantanea. Finestra: ${windowLabel}.`;
+    locale === "en"
+      ? surface === "chat"
+        ? `Technical DevRoulotte presence, refreshed every few seconds. Window: ${windowLabel}.`
+        : `Aggregated Google Analytics 4 Realtime data, not instant presence. Window: ${windowLabel}.`
+      : surface === "chat"
+        ? `Presenza tecnica DevRoulotte, aggiornata ogni pochi secondi. Finestra: ${windowLabel}.`
+        : `Dato aggregato da Google Analytics 4 Realtime, non presenza istantanea. Finestra: ${windowLabel}.`;
 
   return (
     <span
@@ -191,7 +214,11 @@ export function RealtimeUsersBadge({
       className={`inline-flex h-9 items-center gap-2 rounded-md border border-teal-300/25 bg-teal-300/10 px-3 text-xs font-bold text-teal-100 ${className}`}
     >
       {icon}
-      {data.status === "unavailable" ? "Live non disponibile" : label}
+      {data.status === "unavailable"
+        ? locale === "en"
+          ? "Live unavailable"
+          : "Live non disponibile"
+        : label}
     </span>
   );
 }
