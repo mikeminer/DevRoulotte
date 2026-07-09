@@ -21,6 +21,7 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
+import { BuilderSponsorPopup } from "@/components/builder-sponsor-popup";
 import { CookiePreferencesButton } from "@/components/cookie-preferences-button";
 import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import { LandingStoryScene } from "@/components/landing-story-scene";
@@ -563,6 +564,7 @@ export function LandingPage({ locale = "it" }: { locale?: LandingLocale }) {
       lang={locale}
       className="theme-page mobile-safe-area min-h-screen w-full max-w-full overflow-hidden bg-[#070a0f] text-white"
     >
+      <BuilderSponsorPopup locale={locale} />
       <section className="relative min-h-[92svh] border-b border-white/10 px-4 pb-16 pt-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_4%,rgba(45,212,191,0.26),transparent_27%),radial-gradient(circle_at_86%_8%,rgba(252,211,77,0.18),transparent_22%),linear-gradient(180deg,#080b10_0%,#0d121a_58%,#08100f_100%)]" />
         <Image
