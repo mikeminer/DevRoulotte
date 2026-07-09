@@ -16,9 +16,9 @@ import { getAuthErrorMessage } from "@/lib/auth-error";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type OAuthLoginConfig = {
-  provider: "github" | "linkedin_oidc";
-  method: "github" | "linkedin";
-  label: "GitHub" | "LinkedIn";
+  provider: "github" | "linkedin_oidc" | "x";
+  method: "github" | "linkedin" | "x";
+  label: "GitHub" | "LinkedIn" | "X";
   setSending: (isSending: boolean) => void;
 };
 
@@ -60,7 +60,8 @@ export function AuthPanel() {
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [isSendingGithub, setIsSendingGithub] = useState(false);
   const [isSendingLinkedin, setIsSendingLinkedin] = useState(false);
-  const isSendingOAuth = isSendingGithub || isSendingLinkedin;
+  const [isSendingX, setIsSendingX] = useState(false);
+  const isSendingOAuth = isSendingGithub || isSendingLinkedin || isSendingX;
   const analyticsContext = useMemo(
     () => getAnalyticsContext(Boolean(session), false),
     [session],
@@ -296,6 +297,15 @@ export function AuthPanel() {
     });
   }
 
+  async function signInWithX() {
+    await signInWithOAuthProvider({
+      provider: "x",
+      method: "x",
+      label: "X",
+      setSending: setIsSendingX,
+    });
+  }
+
   async function handleAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await authenticate("in");
@@ -397,6 +407,21 @@ export function AuthPanel() {
               <Linkedin className="h-4 w-4" />
             )}
             {isSendingLinkedin ? "Apro LinkedIn" : "Continua con LinkedIn"}
+          </button>
+          <button
+            type="button"
+            onClick={signInWithX}
+            disabled={isSendingOAuth}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 bg-white text-sm font-semibold text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSendingX ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <span className="flex h-4 w-4 items-center justify-center text-sm font-black leading-none">
+                X
+              </span>
+            )}
+            {isSendingX ? "Apro X" : "Continua con X"}
           </button>
           <button
             type="button"

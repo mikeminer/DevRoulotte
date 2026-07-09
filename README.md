@@ -72,9 +72,9 @@ Nel dashboard Supabase hosted allinea anche Authentication:
 - Secure password change: enabled.
 - Email max frequency: almeno `60s`.
 
-### Login con GitHub e LinkedIn
+### Login con GitHub, LinkedIn e X
 
-DevRoulotte supporta login GitHub e LinkedIn tramite Supabase Auth OAuth. Non servono nuove variabili ambiente nel client: il browser usa `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` gia' presenti.
+DevRoulotte supporta login GitHub, LinkedIn e X tramite Supabase Auth OAuth. Non servono nuove variabili ambiente nel client: il browser usa `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` gia' presenti.
 
 1. In Supabase Dashboard apri Authentication > Sign In / Providers > GitHub e copia il Callback URL, nel formato `https://<project-ref>.supabase.co/auth/v1/callback`.
 2. In GitHub Developer settings > OAuth Apps crea una nuova OAuth App:
@@ -95,6 +95,16 @@ Per LinkedIn usa il provider Supabase `LinkedIn (OIDC)`:
 5. Copia Client ID e Client Secret da LinkedIn dentro il provider `LinkedIn (OIDC)` di Supabase e abilitalo.
 
 Il pulsante "Continua con LinkedIn" nel pannello Accesso usa `signInWithOAuth({ provider: "linkedin_oidc" })` e rientra su `/chat` dopo il login.
+
+Per X usa il provider Supabase `X / Twitter (OAuth 2.0)`, non il vecchio provider Twitter OAuth 1.0a:
+
+1. In Supabase Dashboard apri Authentication > Sign In / Providers > X / Twitter (OAuth 2.0) e copia il Callback URL `https://<project-ref>.supabase.co/auth/v1/callback`.
+2. In X Developer Portal crea o apri il progetto/app DevRoulotte.
+3. In User authentication settings abilita `Request email from users`, scegli `Web App`, inserisci il Callback URL Supabase, Website URL `https://devroulotte.chat`, Terms URL `https://devroulotte.chat/terms` e Privacy URL `https://devroulotte.chat/privacy`.
+4. In Keys and tokens copia Client ID e Client Secret OAuth 2.0.
+5. Incolla Client ID e Client Secret nel provider `X / Twitter (OAuth 2.0)` di Supabase e abilitalo.
+
+Il pulsante "Continua con X" nel pannello Accesso usa `signInWithOAuth({ provider: "x" })` e rientra su `/chat` dopo il login. Se Supabase risponde `provider is not enabled`, il bottone e' gia' pronto ma manca l'abilitazione del provider nella dashboard.
 
 Con un Supabase Personal Access Token puoi applicare queste impostazioni via Management API:
 
@@ -328,7 +338,7 @@ Note operative:
 - Landing page italiana su `/` con posizionamento superconnector casuale 1:1 e CTA verso `/chat`
 - Esperienza videochat mobile-first scura su `/chat` con logo DevRoulotte
 - Pannello "Giro della settimana" con heatmap settimanale: gli slot più scelti dagli utenti diventano più intensi e la visualizzazione si resetta sulla settimana successiva
-- Accesso guest o registrato via Supabase Auth con email/password, GitHub OAuth o LinkedIn OIDC
+- Accesso guest o registrato via Supabase Auth con email/password, GitHub OAuth, LinkedIn OIDC o X OAuth 2.0
 - Conferma obbligatoria 18+ e regole community
 - Piano Free ospite: 3 match/giorno, chiamate da 2 minuti, rate limit Next
 - Piano Registrato: 15 match/giorno, chiamate da 5 minuti, filtro lingua

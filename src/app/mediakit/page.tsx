@@ -59,7 +59,7 @@ const facts = [
   ["Categoria", "Networking 1:1 live per builder"],
   ["Audience", "Developer, founder, builder, maker e professionisti italiani"],
   ["Formato", "Videochiamate casuali 1:1 con webcam"],
-  ["Accesso", "Guest limitato, login email, GitHub e LinkedIn"],
+  ["Accesso", "Guest limitato, login email, GitHub, LinkedIn e X"],
   ["Premium", "3,99 EUR/mese, senza prova gratuita"],
   ["Media", "WebRTC peer-to-peer quando possibile, TURN come fallback"],
   ["Privacy", "Nessuna registrazione audio/video delle chiamate"],

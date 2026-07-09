@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           title: "Dati trattati",
           body: [
             "Per utenti registrati trattiamo email, identificativo Supabase, profilo base, preferenze lingua/Paese e stato abbonamento.",
-            "Se accedi con GitHub o LinkedIn tramite Supabase Auth, possiamo ricevere e conservare i dati OAuth necessari al login, come identificativo provider, email verificata se disponibile, nome utente, avatar pubblico e dati profilo essenziali restituiti dal provider scelto.",
+            "Se accedi con GitHub, LinkedIn o X tramite Supabase Auth, possiamo ricevere e conservare i dati OAuth necessari al login, come identificativo provider, email verificata se disponibile, nome utente, avatar pubblico e dati profilo essenziali restituiti dal provider scelto.",
             "Per ospiti usiamo un identificativo casuale salvato nel browser per applicare limiti, report e ban.",
             "Per il Giro della settimana trattiamo gli slot e i temi scelti dall'utente per generare una heatmap aggregata della settimana corrente. Queste preferenze non determinano il matchmaking live.",
             "Per utenti Premium, se inserita, trattiamo una parola di sintonia temporanea per separare la coda matchmaking e collegare solo persone che hanno scritto la stessa parola.",
@@ -66,7 +66,7 @@ export default function PrivacyPage() {
         {
           title: "Cookie e strumenti simili",
           body: [
-            "Usiamo strumenti tecnici necessari nel browser per login Supabase, incluso OAuth GitHub o LinkedIn se scelto dall'utente, ID ospite, conferma 18+, accettazione regole, limiti Free, sicurezza e preferenze cookie.",
+            "Usiamo strumenti tecnici necessari nel browser per login Supabase, incluso OAuth GitHub, LinkedIn o X se scelto dall'utente, ID ospite, conferma 18+, accettazione regole, limiti Free, sicurezza e preferenze cookie.",
             "Le categorie opzionali Preferenze, Statistiche e Marketing sono disattivate di default e modificabili dal centro preferenze.",
             "Il Google tag puo' essere caricato con Consent Mode e `analytics_storage` negato di default. La categoria Statistiche abilita Google Analytics 4 per misurare visite, pagine viste, CTA, eventi tecnici aggregati, revenue Premium confermata e contatori realtime aggregati non necessari solo dopo consenso e viene disattivata se revochi la categoria Statistiche.",
             "PostHog, se configurato, non carica cookie nel browser in questa implementazione: riceve solo eventi revenue server-side generati dal webhook PayPal verificato.",
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
         {
           title: "Fornitori",
           body: [
-            "Usiamo Vercel per hosting e API, Supabase per Auth/database/signaling temporaneo/presenza tecnica in chat, GitHub e LinkedIn come provider OAuth opzionali se scegli quei login, Cloudflare per STUN/TURN, PayPal per abbonamenti e, se accettato in Statistiche, Google Analytics 4 per metriche aggregate e contatori realtime aggregati non necessari. Se configurato, PostHog puo' ricevere eventi revenue server-side hashati dal webhook PayPal.",
+            "Usiamo Vercel per hosting e API, Supabase per Auth/database/signaling temporaneo/presenza tecnica in chat, GitHub, LinkedIn e X come provider OAuth opzionali se scegli quei login, Cloudflare per STUN/TURN, PayPal per abbonamenti e, se accettato in Statistiche, Google Analytics 4 per metriche aggregate e contatori realtime aggregati non necessari. Se configurato, PostHog puo' ricevere eventi revenue server-side hashati dal webhook PayPal.",
             "Questi fornitori possono trattare dati tecnici secondo le rispettive policy e impostazioni account.",
             "Alcuni fornitori possono trattare dati fuori dallo Spazio Economico Europeo o con sub-responsabili internazionali. La valutazione definitiva di trasferimenti, SCC e ruoli privacy va mantenuta aggiornata in base ai contratti e alle impostazioni dei singoli provider.",
           ],
