@@ -21,6 +21,7 @@ import { CookiePreferencesButton } from "@/components/cookie-preferences-button"
 import { GdprFooterBadge } from "@/components/gdpr-footer-badge";
 import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { RealtimeUsersBadge } from "@/components/realtime-users-badge";
+import { ShippingBadges } from "@/components/shipping-badges";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VideoChat } from "@/components/video-chat";
 import { WeeklyOptInPanel } from "@/components/weekly-opt-in-panel";
@@ -389,125 +390,7 @@ export function HomeShell() {
               <Scale className="h-3.5 w-3.5" />
               License
             </a>
-            <a
-              href="https://shipordie.club/ship/devroulotte"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="DevRoulotte su Ship or Die"
-              data-analytics-event="outbound_badge_clicked"
-              data-analytics-surface="chat_footer"
-              data-analytics-cta-id="ship_or_die_badge"
-              data-analytics-destination="ship_or_die"
-              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-2 py-1 transition hover:bg-slate-100"
-            >
-              <Image
-                src="https://shipordie.club/logo.webp"
-                alt="Ship or Die"
-                width={400}
-                height={225}
-                className="h-7 w-auto object-contain"
-              />
-            </a>
-            <a
-              href="https://www.producthunt.com/products/devroulotte-chat?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-devroulotte-chat"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="DevRoulotte.chat su Product Hunt"
-              data-analytics-event="outbound_badge_clicked"
-              data-analytics-surface="chat_footer"
-              data-analytics-cta-id="product_hunt_badge"
-              data-analytics-destination="product_hunt"
-              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
-            >
-              <Image
-                alt="DevRoulotte.chat - networking | Product Hunt"
-                width={250}
-                height={54}
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1183531&theme=light&t=1782720049081"
-                unoptimized
-                className="h-7 w-auto object-contain"
-              />
-            </a>
-            <a
-              href="https://peerpush.com/p/devroulottechat"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="DevRoulotte.chat su PeerPush"
-              data-analytics-event="outbound_badge_clicked"
-              data-analytics-surface="chat_footer"
-              data-analytics-cta-id="peerpush_badge"
-              data-analytics-destination="peerpush"
-              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
-            >
-              <Image
-                src="https://peerpush.com/p/devroulottechat/badge.png"
-                alt="DevRoulotte.chat on PeerPush"
-                width={230}
-                height={54}
-                unoptimized
-                className="h-7 w-auto object-contain"
-              />
-            </a>
-            <a
-              href="https://www.uneed.best/tool/devroulotte"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="DevRoulotte.chat launching soon on Uneed"
-              data-analytics-event="outbound_badge_clicked"
-              data-analytics-surface="chat_footer"
-              data-analytics-cta-id="uneed_badge"
-              data-analytics-destination="uneed"
-              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
-            >
-              <Image
-                src="https://www.uneed.best/EMBED3B.png"
-                alt="Launching Soon on Uneed"
-                width={250}
-                height={54}
-                unoptimized
-                className="h-7 w-auto object-contain"
-              />
-            </a>
-            <a
-              href="https://www.nxgntools.com/tools/devroulottechat?utm_source=devroulottechat"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="DevRoulotte.chat launching soon on NextGen Tools"
-              data-analytics-event="outbound_badge_clicked"
-              data-analytics-surface="chat_footer"
-              data-analytics-cta-id="nextgen_tools_badge"
-              data-analytics-destination="nextgen_tools"
-              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
-            >
-              <Image
-                src="https://www.nxgntools.com/api/embed/devroulottechat?type=LAUNCHING_SOON_ON"
-                alt="Launching Soon on NextGen Tools"
-                width={250}
-                height={48}
-                unoptimized
-                className="h-7 w-auto object-contain"
-              />
-            </a>
-            <a
-              href="https://devglobe.app/projects/devroulotte?utm_source=badge&utm_medium=embed"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="DevRoulotte launched on DevGlobe"
-              data-analytics-event="outbound_badge_clicked"
-              data-analytics-surface="chat_footer"
-              data-analytics-cta-id="devglobe_badge"
-              data-analytics-destination="devglobe"
-              className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white px-1.5 py-1 transition hover:bg-slate-100"
-            >
-              <Image
-                src="https://devglobe.app/badges/launched-on-devglobe-dark.svg"
-                alt="Launched on DevGlobe"
-                width={250}
-                height={54}
-                unoptimized
-                className="h-7 w-auto object-contain"
-              />
-            </a>
+            <ShippingBadges surface="chat_footer" />
           </div>
         </footer>
       </div>
