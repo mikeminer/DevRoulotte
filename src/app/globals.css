@@ -36,6 +36,7 @@ html {
   min-height: 100%;
   background: var(--background);
   color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
 }
 
 html[data-theme="sun"] {
@@ -46,6 +47,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  min-height: 100svh;
+  overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -66,9 +70,29 @@ video {
 .theme-page {
   background: var(--background);
   color: var(--foreground);
+  min-height: 100svh;
   transition:
     background-color 180ms ease,
     color 180ms ease;
+}
+
+@supports (height: 100dvh) {
+  body,
+  .theme-page {
+    min-height: 100dvh;
+  }
+}
+
+.mobile-safe-area {
+  padding-left: max(env(safe-area-inset-left), 0px);
+  padding-right: max(env(safe-area-inset-right), 0px);
+}
+
+@media (display-mode: standalone) {
+  .mobile-safe-area {
+    padding-top: max(env(safe-area-inset-top), 0px);
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
 }
 
 html[data-theme="sun"] .theme-page {

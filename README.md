@@ -270,6 +270,59 @@ Su iPhone e Android apri DevRoulotte in Safari o Chrome aggiornato, non dentro i
 
 Se hai negato il permesso una volta, apri le impostazioni del sito per `devroulotte.chat` e rimetti Camera e Microfono su "Consenti". Chiudi eventuali app che stanno gia' usando camera o microfono, poi ricarica `/chat` e premi di nuovo "Entra nella roulotte".
 
+## Mobile app, PWA e wrapper nativo
+
+DevRoulotte e' una web app realtime: WebRTC, auth, matchmaking, PayPal, Supabase e TURN restano online. La versione mobile consigliata per MVP e' quindi:
+
+1. PWA installabile da Safari iOS e Chrome Android.
+2. Wrapper nativo leggero con Capacitor per TestFlight / internal testing Android, puntato a `https://www.devroulotte.chat`.
+3. Eventuale app store release solo dopo revisione policy, soprattutto per pagamenti digitali Premium.
+
+### PWA installabile
+
+Il progetto include:
+
+- `src/app/manifest.ts`, servito da Next come `/manifest.webmanifest`
+- `public/sw.js`, service worker leggero senza cache aggressiva
+- metadata iOS/Android in `src/app/layout.tsx`
+- safe-area CSS per notch e home indicator in modalità standalone
+
+Installazione utente:
+
+- iOS: apri Safari > Condividi > Aggiungi a Home.
+- Android: apri Chrome > menu > Installa app / Aggiungi a schermata Home.
+
+La PWA non salva video/audio e continua a usare HTTPS, WebRTC, Supabase e Cloudflare TURN come la web app.
+
+### Wrapper iOS/Android con Capacitor
+
+`capacitor.config.ts` e' predisposto per caricare la produzione:
+
+```ts
+server: {
+  cleartext: false,
+  url: "https://www.devroulotte.chat"
+}
+```
+
+Comandi utili, dopo aver sistemato eventuali problemi locali di certificato npm:
+
+```bash
+npm run mobile:android:add
+npm run mobile:ios:add
+npm run mobile:sync
+npm run mobile:android:open
+npm run mobile:ios:open
+```
+
+Note operative:
+
+- Android richiede Android Studio per build, firma e Play Console.
+- iOS richiede macOS, Xcode, un Apple Developer Program e TestFlight/App Store Connect.
+- La build nativa carica la web app remota: non serve esportare staticamente Next.js, perche' le API route Vercel restano necessarie.
+- Per una pubblicazione App Store/Play Store verifica prima le policy sui pagamenti: il Premium via PayPal potrebbe dover essere nascosto o sostituito con acquisti in-app nella build nativa.
+- Aggiungi valore nativo reale prima della submission pubblica, ad esempio deep link, notifiche opt-in, schermata permessi dedicata e gestione piu' fine dello stato offline. Un semplice wrapper WebView puo' essere fragile in review.
+
 ## Funzionalità incluse
 
 - Landing page italiana su `/` con posizionamento superconnector casuale 1:1 e CTA verso `/chat`

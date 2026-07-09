@@ -99,7 +99,7 @@ export function HomeShell() {
   const isAuthenticated = Boolean(session);
 
   return (
-    <main className="theme-page min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-4 text-white sm:px-6 lg:px-8">
+    <main className="theme-page mobile-safe-area min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,#080b10_0%,#0d121a_50%,#080b10_100%)] px-4 py-4 text-white sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-5">
         <header className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
           <Link href="/" className="inline-flex min-w-0 items-center gap-3">

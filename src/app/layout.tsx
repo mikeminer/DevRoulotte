@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthRecoveryRedirect } from "@/components/auth-recovery-redirect";
 import { CookieConsentManager } from "@/components/cookie-consent-manager";
 import { GoogleAnalytics } from "@/components/google-analytics";
+import { PwaServiceWorker } from "@/components/pwa-service-worker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,10 +17,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  applicationName: "DevRoulotte",
+  manifest: "/manifest.webmanifest",
   metadataBase: new URL("https://www.devroulotte.chat"),
   title: "DevRoulotte",
   description:
     "Incontri casuali, ma non a caso. Il superconnector 1:1 per founder, builder e professionisti italiani.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "DevRoulotte",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     title: "DevRoulotte.chat | Incontri casuali, ma non a caso",
     description:
@@ -44,6 +59,13 @@ export const metadata: Metadata = {
       "Il superconnector 1:1 per conoscere casualmente founder, builder e professionisti italiani.",
     images: ["/og-image.png"],
   },
+};
+
+export const viewport: Viewport = {
+  initialScale: 1,
+  themeColor: "#070a0f",
+  viewportFit: "cover",
+  width: "device-width",
 };
 
 const themeScript = `
@@ -119,6 +141,7 @@ export default function RootLayout({
         <AuthRecoveryRedirect />
         <GoogleAnalytics />
         <CookieConsentManager />
+        <PwaServiceWorker />
       </body>
     </html>
   );

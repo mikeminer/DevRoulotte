@@ -8,6 +8,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "mobile:android:add": "npx --package @capacitor/cli cap add android",
+    "mobile:android:open": "npx --package @capacitor/cli cap open android",
+    "mobile:ios:add": "npx --package @capacitor/cli cap add ios",
+    "mobile:ios:open": "npx --package @capacitor/cli cap open ios",
+    "mobile:sync": "npx --package @capacitor/cli cap sync",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
