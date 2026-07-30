@@ -390,6 +390,14 @@ In alternativa puoi usare `x-admin-token: ADMIN_ACCESS_TOKEN` per esecuzioni man
 - Cloudflare TURN generando credenziali temporanee short-lived
 - PayPal OAuth senza creare pagamenti o subscription
 - configurazione GA4 realtime e stato email transazionale monitorato
+- pipeline opzionale Elasticsearch + Kibana + Filebeat, con storico operativo
+  delle ultime 24 ore e fallback automatico ai health check live
+
+Lo stack completo e le istruzioni Vercel sono in
+[`observability/README.md`](./observability/README.md). Filebeat non gira dentro
+Vercel: riceve gli eventi da un collector persistente esterno. Su Vercel Hobby
+gli snapshot status vengono inviati direttamente al collector; su Vercel Pro si
+puo' aggiungere anche un Log Drain firmato per tutti i runtime log.
 
 Per dichiarare manualmente un incidente pubblico, imposta in Vercel:
 
@@ -422,6 +430,15 @@ Rimuovi `STATUS_INCIDENT_MESSAGE` quando l'incidente e' chiuso. `MAINTENANCE_MOD
 - `CRON_SECRET`
 - `STATUS_INCIDENT_LEVEL` opzionale, solo per avvisi manuali su `/status`
 - `STATUS_INCIDENT_MESSAGE` opzionale, solo per avvisi manuali su `/status`
+- `OBSERVABILITY_COLLECTOR_URL` opzionale server-only, endpoint HTTPS
+  `/ingest/app` del collector Elastic
+- `OBSERVABILITY_COLLECTOR_SECRET` opzionale server-only, secret condiviso con
+  il collector
+- `ELASTICSEARCH_URL` opzionale server-only, abilita lo storico su `/status`
+- `ELASTICSEARCH_API_KEY` opzionale server-only, API key Elastic read-only
+- `ELASTICSEARCH_USERNAME` e `ELASTICSEARCH_PASSWORD` opzionali server-only,
+  alternativa basic auth alla API key
+- `ELASTICSEARCH_INDEX` opzionale, default `devroulotte-logs-*`
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID` opzionale, solo se vuoi Google Analytics 4
 - `GA4_API_SECRET` opzionale server-only, necessario per revenue PayPal via Measurement Protocol
 - `GA4_MEASUREMENT_PROTOCOL_ENDPOINT` opzionale, default consigliato `https://region1.google-analytics.com/mp/collect`

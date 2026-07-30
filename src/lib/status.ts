@@ -1,4 +1,5 @@
 import { MAINTENANCE_MESSAGE, MAINTENANCE_MODE } from "@/lib/maintenance";
+import { getElasticObservability } from "@/lib/elastic-observability";
 import { getPayPalAccessToken } from "@/lib/paypal";
 import {
   getSupabaseAdmin,
@@ -36,6 +37,14 @@ export type StatusPayload = {
   };
   refreshSeconds: number;
   services: ServiceStatus[];
+  history: StatusHistoryPoint[];
+  historyWindowHours: number;
+  historySource: "elastic" | "live";
+};
+
+export type StatusHistoryPoint = {
+  checkedAt: string;
+  tone: ServiceStatusTone;
 };
 
 const STATUS_REFRESH_SECONDS = 60;
@@ -395,7 +404,8 @@ async function checkPayPalHealth(): Promise<HealthCheckResult> {
 
 export async function getStatusPayload(): Promise<StatusPayload> {
   const checkedAt = new Date().toISOString();
-  const [database, matching, turn, payments] = await Promise.all([
+  const [database, matching, turn, payments, observability] =
+    await Promise.all([
     checkSupabaseTables(
       [
         { table: "profiles", label: "Profili" },
@@ -415,6 +425,7 @@ export async function getStatusPayload(): Promise<StatusPayload> {
     ),
     checkTurnHealth(),
     checkPayPalHealth(),
+    getElasticObservability(),
   ]);
   const ga4Configured = hasGa4RealtimeConfig();
   const manualIncident = getManualIncident();
@@ -482,6 +493,15 @@ export async function getStatusPayload(): Promise<StatusPayload> {
       checks: payments.checks,
     },
     {
+      id: "observability",
+      name: "Elastic Observability",
+      status: observability.status,
+      note: observability.note,
+      tone: observability.tone,
+      latencyMs: observability.latencyMs,
+      checks: observability.checks,
+    },
+    {
       id: "analytics",
       name: "Analytics e contatori live",
       status: ga4Configured ? "Configurato" : "Non critico",
@@ -543,5 +563,8 @@ export async function getStatusPayload(): Promise<StatusPayload> {
     overall,
     refreshSeconds: STATUS_REFRESH_SECONDS,
     services,
+    history: observability.history,
+    historyWindowHours: 24,
+    historySource: observability.configured ? "elastic" : "live",
   };
 }

@@ -1,0 +1,73 @@
+name: devroulotte-observability
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION:-9.4.2}
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: basic
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "127.0.0.1:9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --silent --fail http://localhost:9200/_cluster/health >/dev/null",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_STACK_VERSION:-9.4.2}
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      SERVER_PUBLICBASEURL: ${KIBANA_PUBLIC_BASE_URL:-http://localhost:5601}
+      TELEMETRY_ENABLED: "false"
+    ports:
+      - "127.0.0.1:5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  collector:
+    build:
+      context: ./collector
+    environment:
+      PORT: 8787
+      COLLECTOR_LOG_PATH: /var/log/devroulotte/collector.ndjson
+      COLLECTOR_SHARED_SECRET: ${COLLECTOR_SHARED_SECRET}
+      VERCEL_DRAIN_SECRET: ${VERCEL_DRAIN_SECRET:-}
+    ports:
+      - "127.0.0.1:8787:8787"
+    volumes:
+      - collector-logs:/var/log/devroulotte
+    restart: unless-stopped
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${ELASTIC_STACK_VERSION:-9.4.2}
+    user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - collector-logs:/var/log/devroulotte:ro
+      - filebeat-data:/usr/share/filebeat/data
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      collector:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  collector-logs:
+  elasticsearch-data:
+  filebeat-data:

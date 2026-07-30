@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { publishStatusSnapshot } from "@/lib/elastic-observability";
 import { getStatusPayload } from "@/lib/status";
 
 export const runtime = "nodejs";
@@ -9,7 +10,11 @@ function getNoStoreHeaders() {
 }
 
 export async function GET() {
-  return NextResponse.json(await getStatusPayload(), {
+  const payload = await getStatusPayload();
+
+  after(() => publishStatusSnapshot(payload));
+
+  return NextResponse.json(payload, {
     headers: getNoStoreHeaders(),
   });
 }

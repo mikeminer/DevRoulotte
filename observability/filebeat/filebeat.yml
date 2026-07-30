@@ -1,0 +1,36 @@
+filebeat.inputs:
+  - type: filestream
+    id: devroulotte-collector
+    enabled: true
+    paths:
+      - /var/log/devroulotte/*.ndjson
+    prospector.scanner.fingerprint.length: 64
+    parsers:
+      - ndjson:
+          target: ""
+          add_error_key: true
+          expand_keys: true
+    fields:
+      service.name: devroulotte
+      service.environment: production
+    fields_under_root: true
+
+processors:
+  - add_host_metadata: ~
+  - add_fields:
+      target: observer
+      fields:
+        type: filebeat
+        vendor: Elastic
+
+setup.ilm.enabled: false
+setup.template.enabled: true
+setup.template.name: devroulotte-logs
+setup.template.pattern: devroulotte-logs-*
+
+output.elasticsearch:
+  hosts: ["${ELASTICSEARCH_HOSTS:http://elasticsearch:9200}"]
+  index: "devroulotte-logs-%{+yyyy.MM.dd}"
+
+logging.json: true
+logging.metrics.enabled: false

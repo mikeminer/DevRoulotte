@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
   Clock,
+  Database,
   Mail,
   RefreshCw,
   ShieldCheck,
@@ -68,6 +69,22 @@ function formatCheckedAt(value: string) {
     dateStyle: "medium",
     timeStyle: "medium",
   }).format(date);
+}
+
+function getHistoryBarClass(tone: ServiceStatusTone) {
+  if (tone === "ok") {
+    return "bg-emerald-400";
+  }
+
+  if (tone === "down") {
+    return "bg-rose-400";
+  }
+
+  if (tone === "degraded") {
+    return "bg-amber-400";
+  }
+
+  return "bg-sky-400";
 }
 
 export function StatusDashboard({
@@ -185,6 +202,55 @@ export function StatusDashboard({
               automaticamente.
             </p>
           ) : null}
+        </div>
+
+        <div className="rounded-md border border-white/10 bg-white/[0.035] p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-3">
+              <Database className="mt-0.5 h-5 w-5 text-teal-300" />
+              <div>
+                <h2 className="text-sm font-bold text-white">
+                  Cronologia operativa
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-slate-400">
+                  Snapshot delle ultime {status.historyWindowHours} ore
+                  {status.historySource === "elastic"
+                    ? " indicizzati da Elasticsearch tramite Filebeat."
+                    : ". Lo storico apparira' dopo il collegamento a Elasticsearch."}
+                </p>
+              </div>
+            </div>
+            <span className="font-mono text-[11px] text-slate-500">
+              {status.history.length} eventi
+            </span>
+          </div>
+
+          {status.history.length ? (
+            <div
+              className="mt-4 grid h-12 items-end gap-1"
+              style={{
+                gridTemplateColumns: `repeat(${status.history.length}, minmax(2px, 1fr))`,
+              }}
+              aria-label={`Cronologia di ${status.history.length} controlli`}
+            >
+              {status.history.map((point, index) => (
+                <span
+                  key={`${point.checkedAt}-${index}`}
+                  className={`block h-full min-w-0 rounded-sm opacity-80 ${getHistoryBarClass(point.tone)}`}
+                  title={`${formatCheckedAt(point.checkedAt)}: ${point.tone}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 flex h-12 items-center justify-center border border-dashed border-white/10 text-xs text-slate-500">
+              Nessuno storico indicizzato
+            </div>
+          )}
+
+          <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-slate-600">
+            <span>-{status.historyWindowHours}h</span>
+            <span>adesso</span>
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
