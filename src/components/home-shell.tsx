@@ -194,7 +194,7 @@ export function HomeShell() {
                   Registrato
                 </div>
                 <p className="text-xs leading-5 text-slate-400">
-                  15 match al giorno, chiamate da 10 minuti e filtro lingua per
+                  3 match al giorno, chiamate da 10 minuti e filtro lingua per
                   dare più contesto al superconnector.
                 </p>
               </div>

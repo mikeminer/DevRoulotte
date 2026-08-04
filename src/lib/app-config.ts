@@ -17,7 +17,7 @@ export const GUEST_DAILY_MATCH_LIMIT = Number(
 );
 
 export const REGISTERED_DAILY_MATCH_LIMIT = Number(
-  process.env.REGISTERED_DAILY_MATCH_LIMIT ?? 15,
+  process.env.REGISTERED_DAILY_MATCH_LIMIT ?? 3,
 );
 
 export const GUEST_CALL_LIMIT_SECONDS = Number(

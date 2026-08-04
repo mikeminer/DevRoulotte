@@ -254,7 +254,7 @@ const tierRows = [
   {
     label: "Match / giorno",
     guest: "3",
-    registered: "15",
+    registered: "3",
     premium: "illimitati",
   },
   {
@@ -299,7 +299,7 @@ const tierRowsEn = [
   {
     label: "Matches / day",
     guest: "3",
-    registered: "15",
+    registered: "3",
     premium: "unlimited",
   },
   {
