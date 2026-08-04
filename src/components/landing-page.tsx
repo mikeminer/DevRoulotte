@@ -228,7 +228,7 @@ const audienceItemsEn = [
 
 const premiumFeatures = [
   "match illimitati",
-  "chiamate da 15 minuti",
+  "chiamate da 30 minuti",
   "filtri completi",
   "priorità nel matching",
   "parola di sintonia",
@@ -249,7 +249,7 @@ const tierRows = [
     label: "Durata chiamata",
     guest: "2 min",
     registered: "5 min",
-    premium: "15 min",
+    premium: "30 min",
   },
   {
     label: "Match / giorno",
@@ -294,7 +294,7 @@ const tierRowsEn = [
     label: "Call duration",
     guest: "2 min",
     registered: "5 min",
-    premium: "15 min",
+    premium: "30 min",
   },
   {
     label: "Matches / day",

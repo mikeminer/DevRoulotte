@@ -29,7 +29,7 @@ export const REGISTERED_CALL_LIMIT_SECONDS = Number(
 );
 
 export const PREMIUM_CALL_LIMIT_SECONDS = Number(
-  process.env.PREMIUM_TIER_CALL_LIMIT_SECONDS ?? 900,
+  process.env.PREMIUM_TIER_CALL_LIMIT_SECONDS ?? 1800,
 );
 
 export const NEXT_COOLDOWN_SECONDS = Number(

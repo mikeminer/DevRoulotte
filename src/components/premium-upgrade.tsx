@@ -99,7 +99,7 @@ export function PremiumUpgrade({ compact = false }: { compact?: boolean }) {
         <div className="mb-3">
           <h2 className="text-sm font-semibold text-amber-100">Premium</h2>
           <p className="text-xs text-amber-100/70">
-            3,99 €/mese, match illimitati, chiamate da 15 min, filtri completi,
+            3,99 €/mese, match illimitati, chiamate da 30 min, filtri completi,
             priorità, parola di sintonia e Premium Card. Nessuna prova gratuita.
           </p>
         </div>

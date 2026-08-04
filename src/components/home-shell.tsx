@@ -204,7 +204,7 @@ export function HomeShell() {
                   Premium
                 </div>
                 <p className="text-xs leading-5 text-amber-100/75">
-                  3,99 €/mese, match illimitati, chiamate da 15 minuti,
+                  3,99 €/mese, match illimitati, chiamate da 30 minuti,
                   filtri completi, priorità nel matching, parola di sintonia e
                   Premium Card condivisibile in chiamata.
                 </p>
