@@ -340,8 +340,8 @@ Note operative:
 - Pannello "Giro della settimana" con heatmap settimanale: gli slot più scelti dagli utenti diventano più intensi e la visualizzazione si resetta sulla settimana successiva
 - Accesso guest o registrato via Supabase Auth con email/password, GitHub OAuth, LinkedIn OIDC o X OAuth 2.0
 - Conferma obbligatoria 18+ e regole community
-- Piano Free ospite: 3 match/giorno, chiamate da 2 minuti, rate limit Next
-- Piano Registrato: 15 match/giorno, chiamate da 5 minuti, filtro lingua
+- Piano Free ospite: 3 match/giorno, chiamate da 5 minuti, rate limit Next
+- Piano Registrato: 15 match/giorno, chiamate da 10 minuti, filtro lingua
 - Piano Premium: match illimitati, chiamate da 30 minuti, filtri completi, priorità in coda, parola di sintonia 1:1, Premium Card condivisibile in chiamata, badge
 - WebRTC audio/video P2P
 - API signaling via Supabase `webrtc_signals`

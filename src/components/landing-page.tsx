@@ -237,7 +237,7 @@ const premiumFeatures = [
 
 const premiumFeaturesEn = [
   "unlimited matches",
-  "15-minute calls",
+  "30-minute calls",
   "full filters",
   "priority matching",
   "sync keyword",
@@ -247,8 +247,8 @@ const premiumFeaturesEn = [
 const tierRows = [
   {
     label: "Durata chiamata",
-    guest: "2 min",
-    registered: "5 min",
+    guest: "5 min",
+    registered: "10 min",
     premium: "30 min",
   },
   {
@@ -292,8 +292,8 @@ const tierRows = [
 const tierRowsEn = [
   {
     label: "Call duration",
-    guest: "2 min",
-    registered: "5 min",
+    guest: "5 min",
+    registered: "10 min",
     premium: "30 min",
   },
   {

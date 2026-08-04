@@ -184,7 +184,7 @@ export function HomeShell() {
                   Free ospite
                 </div>
                 <p className="text-xs leading-5 text-slate-400">
-                  3 match al giorno, chiamate da 2 minuti, niente filtri
+                  3 match al giorno, chiamate da 5 minuti, niente filtri
                   avanzati e accesso al giro casuale live.
                 </p>
               </div>
@@ -194,7 +194,7 @@ export function HomeShell() {
                   Registrato
                 </div>
                 <p className="text-xs leading-5 text-slate-400">
-                  15 match al giorno, chiamate da 5 minuti e filtro lingua per
+                  15 match al giorno, chiamate da 10 minuti e filtro lingua per
                   dare più contesto al superconnector.
                 </p>
               </div>

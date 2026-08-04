@@ -21,11 +21,11 @@ export const REGISTERED_DAILY_MATCH_LIMIT = Number(
 );
 
 export const GUEST_CALL_LIMIT_SECONDS = Number(
-  process.env.GUEST_CALL_LIMIT_SECONDS ?? 120,
+  process.env.GUEST_CALL_LIMIT_SECONDS ?? 300,
 );
 
 export const REGISTERED_CALL_LIMIT_SECONDS = Number(
-  process.env.REGISTERED_CALL_LIMIT_SECONDS ?? 300,
+  process.env.REGISTERED_CALL_LIMIT_SECONDS ?? 600,
 );
 
 export const PREMIUM_CALL_LIMIT_SECONDS = Number(
