@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Github, HeartHandshake, X } from "lucide-react";
+import { Check, Copy, ExternalLink, Github, HeartHandshake, X } from "lucide-react";
 import type { LandingLocale } from "@/components/landing-page";
 
 const SPONSOR_URL = "https://github.com/sponsors/mikeminer";
-const STORAGE_KEY = "devroulotte_builder_sponsor_popup_v1";
+const CAMPER_CA = "5ACT4qMcLg4atguVMd9LFnBL6bgfL7mRzgECBetWpump";
+const CAMPER_TICKER = "$CAMPER";
+const PUMPFUN_URL = `https://pump.fun/coin/${CAMPER_CA}`;
+const STORAGE_KEY = "devroulotte_builder_sponsor_popup_v2";
 const SNOOZE_DAYS = 7;
 
 const popupCopy: Record<
@@ -16,6 +19,11 @@ const popupCopy: Record<
     title: string;
     paragraphs: string[];
     highlight: string;
+    tokenEyebrow: string;
+    tokenHint: string;
+    copyCa: string;
+    copied: string;
+    openPump: string;
     sponsor: string;
     later: string;
     footer: string;
@@ -32,6 +40,11 @@ const popupCopy: Record<
     ],
     highlight:
       "Se ti piace l'idea e vuoi contribuire a sponsorizzarla, puoi passare dal mio GitHub Sponsors.",
+    tokenEyebrow: "Contract Pump.fun",
+    tokenHint: "Il token della roulotte è $CAMPER. Copia il CA o aprilo su Pump.fun.",
+    copyCa: "Copia CA",
+    copied: "Copiato",
+    openPump: "Apri su Pump.fun",
     sponsor: "Sponsor su GitHub",
     later: "Magari più tardi",
     footer: "$ costruito con passione, grazie per essere qui.",
@@ -47,6 +60,11 @@ const popupCopy: Record<
     ],
     highlight:
       "If you like the idea and want to help sponsor it, you can visit my GitHub Sponsors page.",
+    tokenEyebrow: "Pump.fun contract",
+    tokenHint: "The camper token is $CAMPER. Copy the CA or open it on Pump.fun.",
+    copyCa: "Copy CA",
+    copied: "Copied",
+    openPump: "Open on Pump.fun",
     sponsor: "Sponsor on GitHub",
     later: "Maybe later",
     footer: "$ built with passion, thank you for being here.",
@@ -84,6 +102,7 @@ function snoozePopup() {
 
 export function BuilderSponsorPopup({ locale }: { locale: LandingLocale }) {
   const [isVisible, setIsVisible] = useState(false);
+  const [copied, setCopied] = useState(false);
   const copy = popupCopy[locale];
 
   useEffect(() => {
@@ -96,9 +115,28 @@ export function BuilderSponsorPopup({ locale }: { locale: LandingLocale }) {
     return () => window.clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!copied) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
   function close() {
     snoozePopup();
     setIsVisible(false);
+  }
+
+  async function copyContract() {
+    try {
+      await navigator.clipboard.writeText(CAMPER_CA);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
   }
 
   if (!isVisible) {
@@ -106,7 +144,7 @@ export function BuilderSponsorPopup({ locale }: { locale: LandingLocale }) {
   }
 
   return (
-    <div className="fixed inset-x-3 bottom-3 z-50 sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[520px]">
+    <div className="fixed inset-x-3 bottom-3 z-50 max-h-[min(88dvh,720px)] overflow-y-auto sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[520px]">
       <section
         aria-label={copy.eyebrow}
         className="overflow-hidden rounded-lg border border-white/10 bg-[#0b1019]/95 text-white shadow-2xl shadow-black/40 ring-1 ring-teal-200/10 backdrop-blur"
@@ -148,6 +186,45 @@ export function BuilderSponsorPopup({ locale }: { locale: LandingLocale }) {
             <p className="text-sm font-bold leading-7 text-amber-100">
               {copy.highlight}
             </p>
+          </div>
+
+          <div className="grid gap-3 rounded-md border border-teal-200/20 bg-black/30 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-teal-200">
+                {copy.tokenEyebrow}
+              </p>
+              <span className="rounded-md border border-amber-200/20 bg-amber-400/10 px-2 py-0.5 font-mono text-xs font-black text-amber-200">
+                {CAMPER_TICKER}
+              </span>
+            </div>
+            <p className="text-sm font-medium leading-6 text-slate-300">{copy.tokenHint}</p>
+            <div className="flex items-center gap-2 rounded-md border border-white/10 bg-black/40 px-3 py-2">
+              <code className="min-w-0 flex-1 break-all font-mono text-[11px] leading-5 text-slate-200 sm:text-xs">
+                {CAMPER_CA}
+              </code>
+              <button
+                type="button"
+                onClick={copyContract}
+                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md px-2 font-mono text-[11px] font-bold text-teal-200 hover:bg-white/10 hover:text-white"
+                aria-label={copied ? copy.copied : copy.copyCa}
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? copy.copied : copy.copyCa}
+              </button>
+            </div>
+            <a
+              href={PUMPFUN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-analytics-event="outbound_link_clicked"
+              data-analytics-surface="builder_sponsor_popup"
+              data-analytics-cta-id="pumpfun_camper"
+              data-analytics-destination="pumpfun"
+              className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-teal-200/20 bg-teal-400/10 px-3 text-sm font-bold text-teal-100 hover:bg-teal-400/20"
+            >
+              <ExternalLink className="h-4 w-4" />
+              {copy.openPump}
+            </a>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
