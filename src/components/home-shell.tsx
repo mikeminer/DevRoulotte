@@ -23,6 +23,7 @@ import { PremiumUpgrade } from "@/components/premium-upgrade";
 import { RealtimeUsersBadge } from "@/components/realtime-users-badge";
 import { ShippingBadges } from "@/components/shipping-badges";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TrustRewardsPass } from "@/components/trust-rewards-pass";
 import { VideoChat } from "@/components/video-chat";
 import { WeeklyOptInPanel } from "@/components/weekly-opt-in-panel";
 import { buildActorHeaders, getOrCreateGuestId } from "@/lib/client-auth";
@@ -223,6 +224,7 @@ export function HomeShell() {
           </div>
 
           <aside className="grid content-start gap-4">
+            <TrustRewardsPass />
             <WeeklyOptInPanel />
             <AuthPanel />
             <section className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
